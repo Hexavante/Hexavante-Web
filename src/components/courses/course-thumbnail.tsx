@@ -1,4 +1,3 @@
-import { BookOpen } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 
@@ -26,14 +25,14 @@ export function CourseThumbnail({ url, title, className, priority }: Props) {
   }
 
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center bg-gradient-to-br from-sky-900/50 to-slate-900",
-        className,
-      )}
-      aria-hidden
-    >
-      <BookOpen className="h-10 w-10 text-sky-400/50" />
+    <div className={cn("relative overflow-hidden bg-slate-900", className)} aria-hidden>
+      <Image
+        src="/brand/icon-curso.png"
+        alt=""
+        fill
+        className="object-cover"
+        sizes="(max-width: 640px) 100vw, 400px"
+      />
     </div>
   );
 }

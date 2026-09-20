@@ -44,13 +44,12 @@ export function TutorialCard({
             className="h-full w-full object-cover transition group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="grid h-14 w-14 place-items-center rounded-full bg-cyan-500/10 text-cyan-400">
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          </div>
+          <img
+            src="/brand/icon-tutorial.png"
+            alt=""
+            aria-hidden
+            className="h-full w-full object-cover transition group-hover:scale-105"
+          />
         )}
         {duration && (
           <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white">
