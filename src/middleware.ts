@@ -87,6 +87,7 @@ async function getSessionUser(cookieHeader: string | null) {
 // via requireBearerAuth, mitigando o problema.
 
 const APP_HOST = "app.hexavante.com.br";
+const ADMIN_HOST = "painel.hexavante.com.br";
 
 function requestHost(req: NextRequest): string {
   const host = (req.headers.get("host") || "").toLowerCase();
@@ -99,6 +100,15 @@ export async function middleware(req: NextRequest) {
 
   if (pathname.startsWith("/api")) {
     return nextWithPathname(req);
+  }
+
+  // Painel de moderação mora em projeto/container próprio — redireciona
+  if (
+    (pathname === "/admin" || pathname.startsWith("/admin/")) &&
+    hostname !== ADMIN_HOST
+  ) {
+    const url = new URL(pathname + req.nextUrl.search, `https://${ADMIN_HOST}`);
+    return NextResponse.redirect(url);
   }
 
   if (hostname === APP_HOST && pathname === "/") {

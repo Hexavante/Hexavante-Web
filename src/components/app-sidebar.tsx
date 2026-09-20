@@ -95,7 +95,7 @@ const NAV_SECTIONS: NavSection[] = [
 
 const ACCOUNT_ITEMS: NavItem[] = [
   { icon: Settings, label: "Gerenciar", href: "/instructor/gerenciar", requiresInstructor: true },
-  { icon: Shield, label: "Moderação", href: "/admin", requiresModerator: true },
+  { icon: Shield, label: "Moderação", href: "https://painel.hexavante.com.br", requiresModerator: true },
 ];
 
 type Props = {
