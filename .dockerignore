@@ -42,5 +42,6 @@ postcss.config.js
 android/
 ios/
 .capacitor/
+web/
 public/uploads/
 api/

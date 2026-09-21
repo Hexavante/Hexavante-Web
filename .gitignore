@@ -42,9 +42,7 @@ Modelfile
 android/
 ios/
 .capacitor/
+web/
 
 # Public uploads
 public/uploads/
-
-# Tauri
-src-tauri/target/
