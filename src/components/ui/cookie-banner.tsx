@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Capacitor } from "@capacitor/core";
 import { cn } from "@/lib/cn";
 
 const CONSENT_COOKIE = "hx_cookie_consent";
@@ -30,7 +29,6 @@ function writeConsentCookie(value: "accepted" | "declined") {
 }
 
 function getConsentVisible(): boolean {
-  if (Capacitor.isNativePlatform()) return false;
   return !readConsentCookie();
 }
 
