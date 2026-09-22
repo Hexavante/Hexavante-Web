@@ -1,10 +1,16 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/HEXAVANTE-App_Web-0ea5e9?style=for-the-badge&labelColor=0f172a" alt="Hexavante Web" />
+  <img src="public/brand/hexavante-logo.png" width="120" alt="Hexavante" />
 </p>
+
+<h1 align="center">Hexavante Web</h1>
 
 <p align="center">
   <strong>Plataforma educacional principal da Hexavante.</strong><br/>
   <em>Main educational platform: courses, exams, gamification and moderation.</em>
+</p>
+
+<p align="center">
+  <a href="https://app.hexavante.com.br">🚀 Demo ao vivo</a>
 </p>
 
 <p align="center">
@@ -15,6 +21,10 @@
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white" alt="Prisma" />
   <img src="https://img.shields.io/badge/MariaDB-11-003545?logo=mariadb&logoColor=white" alt="MariaDB" />
   <img src="https://img.shields.io/badge/Resend-000?logo=resend&logoColor=white" alt="Resend" />
+</p>
+
+<p align="center">
+  <a href="https://app.hexavante.com.br">Demo</a> · <a href="#funcionalidades">Funcionalidades</a> · <a href="#setup">Setup</a> · <a href="#deploy">Deploy</a> · <a href="docs/visão-geral.md">Docs</a>
 </p>
 
 <p align="center">
@@ -41,6 +51,7 @@
 - [Deploy](#deploy)
 - [Solução de problemas](#solução-de-problemas)
 - [Como contribuir](#como-contribuir)
+- [Ecossistema Hexavante](#ecossistema-hexavante)
 
 ### Sobre
 
@@ -102,7 +113,11 @@ npx prisma generate
 npm run dev            # http://localhost:3000
 ```
 
-Login de teste: `teste@hexavante.com` / `teste123`.
+**Conta de teste:**
+
+| E-mail | Senha |
+|---|---|
+| `teste@hexavante.com` | `teste123` |
 
 ### Variáveis de ambiente
 
@@ -128,14 +143,16 @@ Login de teste: `teste@hexavante.com` / `teste123`.
 
 ### Funcionalidades
 
-- **Cursos**: catálogo moderado, módulos, aulas em vídeo (YouTube/Vimeo/TeraBox/mp4), progresso, materiais, capas com upload.
-- **Tutoriais**: vídeos curtos da comunidade com miniaturas, views e tags.
-- **Simulados**: objetivas + dissertativas (correção manual), cronômetro, imagens, histórico.
-- **Gamificação**: XP, níveis, moedas, boosters, loja (13 categorias), inventário, ranking por temporada (fallback all-time), conquistas.
-- **Certificados**: emissão automática com código verificável + PDF.
-- **Social/tempo real**: salas ao vivo com chat, perfis com cosméticos, presença (online/ausente/estudando/não perturbe/invisível).
-- **Segurança**: 2FA por e-mail, código em dispositivo novo, multiconta, dispositivos conectados, brute-force limitado.
-- **Moderação** (`/admin`): usuários, conteúdo, tutoriais, logs, terminal CLI, broadcast, manutenção.
+| Área | Descrição |
+|---|---|
+| 🎓 **Cursos** | Catálogo moderado, módulos, aulas em vídeo (YouTube/Vimeo/TeraBox/mp4), progresso, materiais, capas com upload. |
+| 🎬 **Tutoriais** | Vídeos curtos da comunidade com miniaturas, views e tags. |
+| 📝 **Simulados** | Objetivas + dissertativas (correção manual), cronômetro, imagens, histórico. |
+| 🎮 **Gamificação** | XP, níveis, moedas, boosters, loja (13 categorias), inventário, ranking por temporada (fallback all-time), conquistas. |
+| 🎖️ **Certificados** | Emissão automática com código verificável + PDF. |
+| 💬 **Social/tempo real** | Salas ao vivo com chat, perfis com cosméticos, presença (online/ausente/estudando/não perturbe/invisível). |
+| 🔐 **Segurança** | 2FA por e-mail, código em dispositivo novo, multiconta, dispositivos conectados, brute-force limitado. |
+| 🛡️ **Moderação** (`/admin`) | Usuários, conteúdo, tutoriais, logs, terminal CLI, broadcast, manutenção. |
 
 ### Temas e acessibilidade
 
@@ -176,6 +193,16 @@ Verificação: `curl` em `/`, `/login`, `/tutorials` + `docker logs` sem erro.
 2. `npx next build` verde antes do PR.
 3. Mudança de banco? Atualizar os dois schemas + validar `migrate diff` vazio.
 4. Nunca commitar `.env`, chaves, senhas ou `node_modules`.
+
+### Ecossistema Hexavante
+
+| Projeto | Repo | Onde roda |
+|---|---|---|
+| API | [Hexavante-Api](https://github.com/Hexavante/Hexavante-Api) | `api.hexavante.com.br` |
+| Landing | [Hexavante-landing](https://github.com/Hexavante/Hexavante-landing) | `hexavante.com.br` |
+| Admin | [Hexavante-admin](https://github.com/Hexavante/Hexavante-admin) | `painel.hexavante.com.br` |
+| Desktop | [Hexavante-Desktop](https://github.com/Hexavante/Hexavante-Desktop) | app desktop (Electron) |
+| Mobile | [Hexavante-Mobile](https://github.com/Hexavante/Hexavante-Mobile) | app mobile (Expo) |
 
 ### Documentação técnica (`docs/`)
 
