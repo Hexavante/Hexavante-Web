@@ -16,7 +16,7 @@ import { cn } from "@/lib/cn";
 import { getLayoutSessionAndCosmetics } from "@/lib/layout-cosmetics";
 import { getNavAvatarUrl } from "@/lib/nav-avatar";
 import { toNavSession } from "@/lib/nav-session";
-import { getThemeMode } from "@/lib/cosmetics";
+import { getThemeMode, themeFxClasses } from "@/lib/cosmetics";
 import { buildNativeMetadata, nativeViewport } from "@/lib/native-metadata";
 
 const grotesk = Space_Grotesk({
@@ -48,17 +48,18 @@ export default async function RootLayout({
   });
   const themeClass = cosmetics.themeClassName || "theme-default";
   const themeMode = getThemeMode(cosmetics.themeId);
+  const themeFx = themeFxClasses(cosmetics.themeId);
 
   return (
     <html
       lang="pt-BR"
-      className={themeClass}
+      className={`${themeClass} ${themeFx}`.trim()}
       data-shop-theme={cosmetics.themeId ?? undefined}
       data-theme-mode={themeMode}
       suppressHydrationWarning
     >
       <body
-        className={cn(grotesk.variable, "app-shell hx-native-safe-area antialiased font-sans", themeClass)}
+        className={cn(grotesk.variable, "app-shell hx-native-safe-area antialiased font-sans", themeClass, themeFx)}
         data-theme-mode={themeMode}
       >
         <ErrorBoundary>

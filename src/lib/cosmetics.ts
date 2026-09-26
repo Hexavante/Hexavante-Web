@@ -529,6 +529,23 @@ export function getThemeMode(themeId: string | null | undefined): "dark" | "ligh
   return resolveAppTheme(themeId).mode ?? "dark";
 }
 
+/** Efeitos especiais por tier de tema — classes aplicadas em <html>/<body>. */
+export const THEME_FX: Record<string, string[]> = {
+  cyberpunk: ["fx-glow-pulse", "fx-shimmer", "fx-aurora-bg"],
+  hacker: ["fx-glow-pulse"],
+  obsidian: ["fx-glow-pulse", "fx-shimmer"],
+  sunset: ["fx-glow-pulse"],
+  ocean: ["fx-glow-pulse", "fx-aurora-bg"],
+  sakura: ["fx-glow-pulse", "fx-shimmer", "fx-aurora-bg"],
+  midnight: ["fx-glow-pulse", "fx-shimmer"],
+  amber: ["fx-glow-pulse"],
+};
+
+export function themeFxClasses(themeId: string | null | undefined): string {
+  if (!themeId) return "";
+  return (THEME_FX[themeId] ?? []).join(" ");
+}
+
 export function buildThemeStyleBlock(themeId: string | null | undefined): string | null {
   const theme = resolveAppTheme(themeId);
   if (theme.id === "default" || Object.keys(theme.vars).length === 0) return null;
