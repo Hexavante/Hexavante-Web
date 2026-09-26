@@ -57,6 +57,7 @@ model User {
   sessions           Session[]
   trustedDevices     TrustedDevice[]
   deviceCodes        DeviceVerificationCode[]
+  pushTokens         PushToken[]
   instructedCourses  CourseInstructor[]
   enrollments        CourseEnrollment[]
   lessonProgresses   LessonProgress[]
@@ -1337,4 +1338,18 @@ model DeviceVerificationCode {
 
   @@index([userId])
   @@map("device_verification_codes")
+}
+
+model PushToken {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  expoToken  String   @unique @map("expo_token")
+  deviceName String?  @map("device_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_tokens")
 }
