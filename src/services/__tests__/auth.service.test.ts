@@ -26,6 +26,11 @@ describe("auth.service", () => {
         fullName: "Test User",
         email: "test@example.com",
         password: "password123",
+        confirmPassword: "password123",
+        phone: undefined,
+        city: undefined,
+        state: undefined,
+        terms: true,
         birthDate: new Date("2000-01-01"),
       };
 
@@ -59,6 +64,11 @@ describe("auth.service", () => {
         fullName: "Test User",
         email: "test@example.com",
         password: "password123",
+        confirmPassword: "password123",
+        phone: undefined,
+        city: undefined,
+        state: undefined,
+        terms: true,
         birthDate: new Date("2000-01-01"),
       };
 
@@ -73,6 +83,11 @@ describe("auth.service", () => {
         fullName: "Test User",
         email: "test@example.com",
         password: "password123",
+        confirmPassword: "password123",
+        phone: undefined,
+        city: undefined,
+        state: undefined,
+        terms: true,
         birthDate: new Date("2020-01-01"),
       };
 
