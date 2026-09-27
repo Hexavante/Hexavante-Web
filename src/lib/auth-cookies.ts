@@ -27,8 +27,20 @@ export function clearAllSessionCookies(
   response: NextResponse,
   cookieHeader?: string | null,
 ): NextResponse {
+  // Limpa as DUAS variantes: host-only (sem Domain) e de domínio
+  // (.hexavante.com.br). Cookies duplicados entre variantes fazem o
+  // navegador enviar o velho primeiro, sombreando a sessão válida —
+  // foi o que deslogou o app com a landing logada.
+  const isProd = process.env.NODE_ENV === "production";
   for (const name of listSessionCookieNames(cookieHeader)) {
     response.cookies.delete(name);
+    if (isProd) {
+      response.cookies.set(name, "", {
+        path: "/",
+        domain: ".hexavante.com.br",
+        maxAge: 0,
+      });
+    }
   }
   return response;
 }

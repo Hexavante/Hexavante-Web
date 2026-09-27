@@ -40,8 +40,17 @@ export async function signOutAction() {
     // best effort
   }
 
+  // Limpa as DUAS variantes (host-only e domínio) — ver auth-cookies.ts
+  const isProd = process.env.NODE_ENV === "production";
   for (const name of COOKIE_NAMES) {
     cookieStore.delete(name);
+    if (isProd) {
+      cookieStore.set(name, "", {
+        path: "/",
+        domain: ".hexavante.com.br",
+        maxAge: 0,
+      });
+    }
   }
 
   // Se restou outra conta vinculada, ativa ela em vez de deslogar tudo
