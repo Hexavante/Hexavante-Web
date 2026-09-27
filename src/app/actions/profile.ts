@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { mkdir, unlink, writeFile } from "fs/promises";
+import path from "path";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateUserWithRetry } from "@/lib/retry-update";
@@ -19,6 +21,57 @@ export type ProfileActionResult = {
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+
+// Avatares/banners viram ARQUIVOS (nunca base64 no banco — base64 de 80KB+
+// estourou o cookie multiconta e deu 502 no nginx). URLs absolutas para
+// funcionarem nos 4 clientes (web, mobile, desktop, API).
+function extForMime(mimeType: string): string | null {
+  switch (mimeType) {
+    case "image/jpeg": return "jpg";
+    case "image/png": return "png";
+    case "image/gif": return "gif";
+    case "image/webp": return "webp";
+    default: return null;
+  }
+}
+
+function appBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL || "https://app.hexavante.com.br").replace(/\/$/, "");
+}
+
+async function saveProfileFile(
+  kind: "avatars" | "banners",
+  userId: string,
+  bytes: ArrayBuffer,
+  mimeType: string,
+): Promise<string | null> {
+  const ext = extForMime(mimeType);
+  if (!ext) return null;
+  const name = `${userId}-${Date.now()}.${ext}`;
+  const dir = path.join(process.cwd(), "public", "uploads", kind);
+  await mkdir(dir, { recursive: true });
+  await writeFile(path.join(dir, name), Buffer.from(bytes));
+  return `${appBaseUrl()}/uploads/${kind}/${name}`;
+}
+
+async function deleteProfileFile(url: string | null | undefined, kind: "avatars" | "banners"): Promise<void> {
+  try {
+    if (!url) return;
+    const base = appBaseUrl();
+    const rel = url.startsWith(base)
+      ? url.slice(base.length)
+      : url.startsWith("/uploads/")
+        ? url
+        : null;
+    const prefix = `/uploads/${kind}/`;
+    if (!rel || !rel.startsWith(prefix)) return;
+    const filename = rel.slice(prefix.length);
+    if (!filename || filename.includes("/") || filename.includes("..")) return;
+    await unlink(path.join(process.cwd(), "public", "uploads", kind, filename));
+  } catch {
+    // Arquivo já removido ou externo — segue o jogo
+  }
+}
 
 function resolveImageMimeType(file: File): string | null {
   if (file.type && ALLOWED_IMAGE_TYPES.has(file.type)) {
@@ -141,13 +194,20 @@ export async function updateProfilePhotoAction(formData: FormData): Promise<Prof
 
   try {
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
-    const avatarUrl = `data:${mimeType};base64,${base64}`;
+    const avatarUrl = await saveProfileFile("avatars", session.user.id, bytes, mimeType);
+    if (!avatarUrl) {
+      return { success: false, error: "Use uma imagem PNG, JPG, GIF ou WebP." };
+    }
 
+    const previous = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { avatarUrl: true },
+    });
     await updateUserWithRetry(
       { id: session.user.id },
       { avatarUrl },
     );
+    await deleteProfileFile(previous?.avatarUrl, "avatars");
 
     revalidatePath("/perfil");
     revalidatePath(`/perfil/${session.user.username}`);
@@ -156,16 +216,9 @@ export async function updateProfilePhotoAction(formData: FormData): Promise<Prof
     return { success: true, avatarUrl };
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    const isColumnTooSmall =
-      message.includes("Data too long") ||
-      message.includes("value too long") ||
-      message.includes("1406");
-
     return {
       success: false,
-      error: isColumnTooSmall
-        ? "O banco precisa aceitar fotos maiores. Rode: npm run db:avatar"
-        : message || "Erro ao atualizar foto de perfil.",
+      error: message || "Erro ao atualizar foto de perfil.",
     };
   }
 }
@@ -194,13 +247,20 @@ export async function updateProfileBannerAction(formData: FormData): Promise<Pro
 
   try {
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
-    const bannerUrl = `data:${mimeType};base64,${base64}`;
+    const bannerUrl = await saveProfileFile("banners", session.user.id, bytes, mimeType);
+    if (!bannerUrl) {
+      return { success: false, error: "Use uma imagem PNG, JPG, GIF ou WebP." };
+    }
 
+    const previous = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { bannerUrl: true },
+    });
     await updateUserWithRetry(
       { id: session.user.id },
       { bannerUrl },
     );
+    await deleteProfileFile(previous?.bannerUrl, "banners");
 
     revalidatePath("/perfil");
     revalidatePath(`/perfil/${session.user.username}`);
@@ -209,16 +269,9 @@ export async function updateProfileBannerAction(formData: FormData): Promise<Pro
     return { success: true, avatarUrl: bannerUrl };
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    const isColumnTooSmall =
-      message.includes("Data too long") ||
-      message.includes("value too long") ||
-      message.includes("1406");
-
     return {
       success: false,
-      error: isColumnTooSmall
-        ? "O banco precisa aceitar banners maiores."
-        : message || "Erro ao atualizar banner.",
+      error: message || "Erro ao atualizar banner.",
     };
   }
 }
