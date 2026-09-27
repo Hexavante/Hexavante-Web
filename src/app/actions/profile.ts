@@ -216,9 +216,13 @@ export async function updateProfilePhotoAction(formData: FormData): Promise<Prof
     return { success: true, avatarUrl };
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    const isFsError =
+      message.includes("EACCES") || message.includes("ENOSPC") || message.includes("EPERM");
     return {
       success: false,
-      error: message || "Erro ao atualizar foto de perfil.",
+      error: isFsError
+        ? "Não foi possível salvar a imagem. Tente novamente."
+        : message || "Erro ao atualizar foto de perfil.",
     };
   }
 }

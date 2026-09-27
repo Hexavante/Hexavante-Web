@@ -126,7 +126,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const publicPaths = ["/", "/hexa", "/ajuda", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/cursos", "/admin-login", "/admin-verificar"];
+  const publicPaths = ["/", "/hexa", "/ajuda", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/cursos", "/certificados/c", "/admin-login", "/admin-verificar"];
 
   // O painel admin usa sessão própria (cookie hx_admin_session). O layout
   // /admin valida de verdade; aqui só deixamos passar quem tem o cookie
