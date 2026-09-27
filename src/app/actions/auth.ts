@@ -189,6 +189,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
   const email = formData.get("email");
   const password = formData.get("password");
   const callbackUrl = (formData.get("callbackUrl") as string) || "/";
+  const rememberMe = formData.get("rememberMe") === "on";
   if (!isSafeRedirect(callbackUrl)) {
     return { success: false, error: "URL de redirecionamento inválida." };
   }
@@ -232,7 +233,15 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
     }
 
     if (!res.ok) {
-      return { success: false, error: "E-mail ou senha incorretos." };
+      const body = await res.json().catch(() => ({}));
+      const message =
+        (body as { message?: string }).message ||
+        (body as { error?: string }).error;
+      // 401 = credenciais; demais erros mostram a mensagem real da API
+      return {
+        success: false,
+        error: res.status === 401 || !message ? "E-mail ou senha incorretos." : message,
+      };
     }
 
     const data = await res.json() as {
@@ -247,7 +256,8 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
+        // Sem "Lembrar-me": cookie de sessão (morre ao fechar o navegador)
+        ...(rememberMe ? { maxAge: 7 * 24 * 60 * 60 } : {}),
         domain: process.env.NODE_ENV === "production" ? ".hexavante.com.br" : undefined,
       });
       try {
@@ -258,7 +268,16 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
     }
 
     return { success: true, redirectTo: callbackUrl };
-  } catch {
-    return { success: false, error: "E-mail ou senha incorretos." };
+  } catch (error) {
+    // fetch falhou = API fora do ar ou sem internet (não necessariamente credencial errada)
+    const offline =
+      error instanceof TypeError ||
+      (error instanceof Error && /fetch|network|ECONN|ENOTFOUND|Failed/i.test(error.message));
+    return {
+      success: false,
+      error: offline
+        ? "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente."
+        : "E-mail ou senha incorretos.",
+    };
   }
 }
