@@ -37,7 +37,12 @@ export async function getAccounts(): Promise<LinkedAccount[]> {
 
 async function saveAccounts(accounts: LinkedAccount[]) {
   const cookieStore = await cookies();
-  cookieStore.set(ACCOUNTS_COOKIE, JSON.stringify(accounts.slice(0, MAX_ACCOUNTS)), cookieOpts());
+  // Avatares base64 (data:) estouram o header Set-Cookie (nginx 502) — nunca vão para cookie.
+  const slim = accounts.slice(0, MAX_ACCOUNTS).map((a) => ({
+    ...a,
+    avatarUrl: a.avatarUrl?.startsWith("data:") ? null : a.avatarUrl,
+  }));
+  cookieStore.set(ACCOUNTS_COOKIE, JSON.stringify(slim), cookieOpts());
 }
 
 async function fetchUserForToken(token: string) {
