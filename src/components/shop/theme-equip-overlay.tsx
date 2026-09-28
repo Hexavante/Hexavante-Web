@@ -61,7 +61,7 @@ export function ThemeEquipOverlay() {
       aria-live="polite"
     >
       <div
-        className="animate-scale-in relative overflow-hidden rounded-2xl border border-white/15 bg-[#0b0e1a] px-10 py-8 text-center shadow-2xl"
+        className="hx-dark-surface animate-scale-in relative overflow-hidden rounded-2xl border border-white/15 bg-[#0b0e1a] px-10 py-8 text-center shadow-2xl"
         style={{ boxShadow: `0 0 80px ${c1}55, 0 25px 60px rgb(0 0 0 / 0.6)` }}
       >
         <div

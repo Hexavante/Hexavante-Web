@@ -301,7 +301,7 @@ function OnboardingTourActive({ onDismiss }: { onDismiss: () => void }) {
 
       <div
         className={cn(
-          "absolute z-[101] w-[min(92vw,22rem)] overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#0b1018] shadow-2xl shadow-black/50",
+          "hx-dark-surface absolute z-[101] w-[min(92vw,22rem)] overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#0b1018] shadow-2xl shadow-black/50",
           isCenter && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
           anchorBottom &&
             "bottom-[max(1rem,env(safe-area-inset-bottom,1rem))] left-1/2 top-auto -translate-x-1/2 translate-y-0",

@@ -129,7 +129,16 @@ function SidebarBrand() {
           alt=""
           width={36}
           height={36}
-          className="h-9 w-9 object-contain"
+          className="hx-logo-dark h-9 w-9 object-contain"
+          priority
+          aria-hidden
+        />
+        <Image
+          src="/brand/hexavante-logo-light.webp"
+          alt=""
+          width={36}
+          height={36}
+          className="hx-logo-light h-9 w-9 object-contain"
           priority
           aria-hidden
         />

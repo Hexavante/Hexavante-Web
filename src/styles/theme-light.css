@@ -138,8 +138,8 @@
   scrollbar-color: rgb(15 23 42 / 0.25) transparent;
 }
 
-/* botões primários mantêm texto branco sobre cor sólida */
-[data-theme-mode="light"] .hx-btn-primary { color: #fff; }
+/* botões primários mantêm texto legível sobre cor sólida */
+[data-theme-mode="light"] .hx-btn-primary { color: var(--primary-fg, #fff); }
 
 /* gráficos (recharts) */
 [data-theme-mode="light"] .recharts-default-tooltip {
@@ -181,3 +181,289 @@
 [data-theme-mode="light"] .hx-modal .hover\:text-white:hover { color: #fff; }
 [data-theme-mode="light"] .hx-dark-surface .hover\:bg-white\/10:hover { background-color: rgb(255 255 255 / 0.1); }
 [data-theme-mode="light"] .hx-dark-surface .hover\:bg-white\/5:hover { background-color: rgb(255 255 255 / 0.05); }
+
+/* ============================================================
+   Cores "baked" em @layer components (o @apply inlina o valor dentro
+   da regra, então os remaps de utilitários acima não alcançam).
+   Escopo: superfícies claras normais. Superfícies escuras
+   intencionais (.hx-dark-surface / .hx-modal / .hx-dropdown / .hx-toast)
+   são restauradas no bloco final.
+   ============================================================ */
+
+/* ---------- botões ---------- */
+[data-theme-mode="light"] .hx-btn-secondary {
+  color: var(--foreground, #0f172a);
+  background-color: rgb(15 23 42 / 0.04);
+  border-color: rgb(15 23 42 / 0.18);
+}
+[data-theme-mode="light"] .hx-btn-secondary:hover {
+  background-color: rgb(15 23 42 / 0.08);
+}
+[data-theme-mode="light"] .hx-btn-ghost {
+  color: var(--foreground, #0f172a);
+}
+[data-theme-mode="light"] .hx-btn-ghost:hover {
+  color: var(--foreground, #0f172a);
+}
+
+/* ---------- formulários ---------- */
+[data-theme-mode="light"] .hx-input,
+[data-theme-mode="light"] .hx-select,
+[data-theme-mode="light"] .hx-textarea,
+[data-theme-mode="light"] .hx-live-chat-input {
+  color: #0f172a;
+  background-color: rgb(255 255 255 / 0.7);
+}
+/* :not(:focus) — o border-color do :focus fica livre para valer */
+[data-theme-mode="light"] .hx-input:not(:focus),
+[data-theme-mode="light"] .hx-select:not(:focus),
+[data-theme-mode="light"] .hx-textarea:not(:focus),
+[data-theme-mode="light"] .hx-live-chat-input:not(:focus) {
+  border-color: rgb(15 23 42 / 0.15);
+}
+[data-theme-mode="light"] .hx-input::placeholder,
+[data-theme-mode="light"] .hx-select::placeholder,
+[data-theme-mode="light"] .hx-textarea::placeholder,
+[data-theme-mode="light"] .hx-live-chat-input::placeholder {
+  color: rgb(15 23 42 / 0.45);
+}
+[data-theme-mode="light"] .hx-label {
+  color: #0f172a;
+}
+
+/* ---------- badges ---------- */
+[data-theme-mode="light"] .hx-badge-accent {
+  color: #0f766e;
+  background-color: rgb(13 148 136 / 0.15);
+}
+[data-theme-mode="light"] .hx-badge-muted {
+  color: rgb(15 23 42 / 0.7);
+  background-color: rgb(15 23 42 / 0.1);
+}
+[data-theme-mode="light"] .hx-badge-offline {
+  color: rgb(15 23 42 / 0.62);
+  background-color: rgb(15 23 42 / 0.1);
+}
+[data-theme-mode="light"] .hx-badge-online {
+  color: #15803d;
+  background-color: rgb(34 197 94 / 0.18);
+}
+[data-theme-mode="light"] .hx-badge-busy {
+  color: #b91c1c;
+  background-color: rgb(239 68 68 / 0.18);
+}
+
+/* ---------- skeleton / barras ---------- */
+[data-theme-mode="light"] .hx-skeleton,
+[data-theme-mode="light"] .hx-skeleton-text,
+[data-theme-mode="light"] .hx-skeleton-title,
+[data-theme-mode="light"] .hx-skeleton-avatar,
+[data-theme-mode="light"] .hx-skeleton-image,
+[data-theme-mode="light"] .hx-xp-bar,
+[data-theme-mode="light"] .hx-progress {
+  background-color: rgb(15 23 42 / 0.08);
+}
+
+/* ---------- tone chips (estatísticas / central de estudos) ---------- */
+[data-theme-mode="light"] .hx-tone-sky {
+  color: #0369a1;
+  background-color: rgb(14 165 233 / 0.12);
+  border-color: rgb(14 165 233 / 0.35);
+}
+[data-theme-mode="light"] .hx-tone-violet {
+  color: #6d28d9;
+  background-color: rgb(139 92 246 / 0.12);
+  border-color: rgb(139 92 246 / 0.32);
+}
+[data-theme-mode="light"] .hx-tone-amber {
+  color: #a16207;
+  background-color: rgb(245 158 11 / 0.14);
+  border-color: rgb(245 158 11 / 0.38);
+}
+[data-theme-mode="light"] .hx-tone-orange {
+  color: #c2410c;
+  background-color: rgb(249 115 22 / 0.12);
+  border-color: rgb(249 115 22 / 0.35);
+}
+[data-theme-mode="light"] .hx-tone-emerald {
+  color: #047857;
+  background-color: rgb(16 185 129 / 0.12);
+  border-color: rgb(16 185 129 / 0.35);
+}
+
+/* ---------- HUD de XP (estado de erro) ---------- */
+[data-theme-mode="light"] .hx-header-hud-xp--error {
+  color: #b91c1c;
+  background-color: rgb(239 68 68 / 0.12);
+  border-color: rgb(239 68 68 / 0.35);
+}
+
+/* ---------- hover que só existia em utilitário ---------- */
+[data-theme-mode="light"] .hover\:bg-white\/20:hover {
+  background-color: rgb(15 23 42 / 0.2);
+}
+
+/* ============================================================
+   Restaura o esquema dark nas superfícies intencionais escuras
+   (desfaz tudo que foi remapeado acima dentro delas)
+   ============================================================ */
+[data-theme-mode="light"] .hx-dark-surface .hx-btn-secondary,
+[data-theme-mode="light"] .hx-modal .hx-btn-secondary,
+[data-theme-mode="light"] .hx-dropdown .hx-btn-secondary,
+[data-theme-mode="light"] .hx-toast .hx-btn-secondary,
+[data-theme-mode="light"] .hx-toast-success .hx-btn-secondary,
+[data-theme-mode="light"] .hx-toast-error .hx-btn-secondary,
+[data-theme-mode="light"] .hx-toast-warning .hx-btn-secondary {
+  color: #fff;
+  background-color: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.14);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-btn-ghost,
+[data-theme-mode="light"] .hx-modal .hx-btn-ghost,
+[data-theme-mode="light"] .hx-dropdown .hx-btn-ghost,
+[data-theme-mode="light"] .hx-toast .hx-btn-ghost {
+  color: rgb(255 255 255 / 0.75);
+}
+
+[data-theme-mode="light"] .hx-dark-surface .hx-input,
+[data-theme-mode="light"] .hx-dark-surface .hx-select,
+[data-theme-mode="light"] .hx-dark-surface .hx-textarea,
+[data-theme-mode="light"] .hx-dark-surface .hx-live-chat-input,
+[data-theme-mode="light"] .hx-modal .hx-input,
+[data-theme-mode="light"] .hx-modal .hx-select,
+[data-theme-mode="light"] .hx-modal .hx-textarea,
+[data-theme-mode="light"] .hx-dropdown .hx-input,
+[data-theme-mode="light"] .hx-dropdown .hx-select,
+[data-theme-mode="light"] .hx-dropdown .hx-textarea {
+  color: #fff;
+  background-color: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.14);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-live-chat-input::placeholder,
+[data-theme-mode="light"] .hx-dark-surface .hx-input::placeholder,
+[data-theme-mode="light"] .hx-dark-surface .hx-select::placeholder,
+[data-theme-mode="light"] .hx-dark-surface .hx-textarea::placeholder,
+[data-theme-mode="light"] .hx-modal .hx-input::placeholder,
+[data-theme-mode="light"] .hx-modal .hx-select::placeholder,
+[data-theme-mode="light"] .hx-modal .hx-textarea::placeholder {
+  color: rgb(255 255 255 / 0.45);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-label,
+[data-theme-mode="light"] .hx-modal .hx-label,
+[data-theme-mode="light"] .hx-dropdown .hx-label {
+  color: rgb(255 255 255 / 0.85);
+}
+
+[data-theme-mode="light"] .hx-dark-surface .hx-badge-accent,
+[data-theme-mode="light"] .hx-modal .hx-badge-accent,
+[data-theme-mode="light"] .hx-dropdown .hx-badge-accent,
+[data-theme-mode="light"] .hx-toast .hx-badge-accent {
+  color: var(--accent);
+  background-color: color-mix(in oklab, var(--accent) 20%, transparent);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-badge-muted,
+[data-theme-mode="light"] .hx-modal .hx-badge-muted,
+[data-theme-mode="light"] .hx-dropdown .hx-badge-muted,
+[data-theme-mode="light"] .hx-dark-surface .hx-badge-offline,
+[data-theme-mode="light"] .hx-modal .hx-badge-offline {
+  color: rgb(255 255 255 / 0.65);
+  background-color: rgb(255 255 255 / 0.1);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-badge-online,
+[data-theme-mode="light"] .hx-modal .hx-badge-online {
+  color: #4ade80;
+  background-color: rgb(34 197 94 / 0.2);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-badge-busy,
+[data-theme-mode="light"] .hx-modal .hx-badge-busy {
+  color: #f87171;
+  background-color: rgb(239 68 68 / 0.2);
+}
+
+[data-theme-mode="light"] .hx-dark-surface .hx-skeleton,
+[data-theme-mode="light"] .hx-dark-surface .hx-skeleton-text,
+[data-theme-mode="light"] .hx-dark-surface .hx-skeleton-title,
+[data-theme-mode="light"] .hx-dark-surface .hx-skeleton-avatar,
+[data-theme-mode="light"] .hx-dark-surface .hx-skeleton-image,
+[data-theme-mode="light"] .hx-dark-surface .hx-xp-bar,
+[data-theme-mode="light"] .hx-dark-surface .hx-progress,
+[data-theme-mode="light"] .hx-modal .hx-skeleton,
+[data-theme-mode="light"] .hx-modal .hx-progress {
+  background-color: rgb(255 255 255 / 0.1);
+}
+
+[data-theme-mode="light"] .hx-dark-surface .hx-tone-sky,
+[data-theme-mode="light"] .hx-modal .hx-tone-sky { color: rgb(56 189 248); }
+[data-theme-mode="light"] .hx-dark-surface .hx-tone-violet,
+[data-theme-mode="light"] .hx-modal .hx-tone-violet { color: rgb(167 139 250); }
+[data-theme-mode="light"] .hx-dark-surface .hx-tone-amber,
+[data-theme-mode="light"] .hx-modal .hx-tone-amber { color: rgb(251 191 36); }
+[data-theme-mode="light"] .hx-dark-surface .hx-tone-orange,
+[data-theme-mode="light"] .hx-modal .hx-tone-orange { color: rgb(251 146 60); }
+[data-theme-mode="light"] .hx-dark-surface .hx-tone-emerald,
+[data-theme-mode="light"] .hx-modal .hx-tone-emerald { color: rgb(52 211 153); }
+[data-theme-mode="light"] .hx-dark-surface .hx-header-hud-xp--error,
+[data-theme-mode="light"] .hx-modal .hx-header-hud-xp--error {
+  color: rgb(254 202 202);
+}
+
+/* utilitários remapeados usados dentro de superfícies escuras */
+[data-theme-mode="light"] .hx-dark-surface .text-emerald-300,
+[data-theme-mode="light"] .hx-modal .text-emerald-300,
+[data-theme-mode="light"] .hx-dropdown .text-emerald-300,
+[data-theme-mode="light"] .hx-toast .text-emerald-300 { color: #6ee7b7; }
+[data-theme-mode="light"] .hx-dark-surface .text-sky-300,
+[data-theme-mode="light"] .hx-modal .text-sky-300,
+[data-theme-mode="light"] .hx-dropdown .text-sky-300 { color: #7dd3fc; }
+
+/* filtros brightness() aplicados nos tons -200 */
+[data-theme-mode="light"] .hx-dark-surface .text-teal-200,
+[data-theme-mode="light"] .hx-dark-surface .text-amber-200,
+[data-theme-mode="light"] .hx-dark-surface .text-emerald-200,
+[data-theme-mode="light"] .hx-dark-surface .text-violet-200,
+[data-theme-mode="light"] .hx-dark-surface .text-blue-200,
+[data-theme-mode="light"] .hx-dark-surface .text-red-200,
+[data-theme-mode="light"] .hx-dark-surface .text-cyan-200,
+[data-theme-mode="light"] .hx-dark-surface .text-rose-200,
+[data-theme-mode="light"] .hx-dark-surface .text-sky-200,
+[data-theme-mode="light"] .hx-dark-surface .text-orange-200,
+[data-theme-mode="light"] .hx-modal .text-cyan-200,
+[data-theme-mode="light"] .hx-modal .text-sky-200 { filter: none; }
+
+/* bordas/fundos remapeados usados dentro de superfícies escuras */
+[data-theme-mode="light"] .hx-dark-surface .border-white\/10,
+[data-theme-mode="light"] .hx-modal .border-white\/10,
+[data-theme-mode="light"] .hx-dropdown .border-white\/10,
+[data-theme-mode="light"] .hx-toast .border-white\/10 { border-color: rgb(255 255 255 / 0.1); }
+[data-theme-mode="light"] .hx-dark-surface .border-white\/15,
+[data-theme-mode="light"] .hx-modal .border-white\/15 { border-color: rgb(255 255 255 / 0.15); }
+[data-theme-mode="light"] .hx-dark-surface .bg-white\/10,
+[data-theme-mode="light"] .hx-modal .bg-white\/10,
+[data-theme-mode="light"] .hx-dropdown .bg-white\/10,
+[data-theme-mode="light"] .hx-toast .bg-white\/10 { background-color: rgb(255 255 255 / 0.1); }
+
+/* ---------- botão de perigo (texto baked claro) ---------- */
+[data-theme-mode="light"] .hx-btn-danger { color: #b91c1c; }
+
+/* ---------- HUD: estados de erro e ícones âmbar ---------- */
+[data-theme-mode="light"] .hx-header-hud-coins--error {
+  color: #b91c1c;
+  background-color: rgb(239 68 68 / 0.12);
+  border-color: rgb(239 68 68 / 0.35);
+}
+[data-theme-mode="light"] .hx-header-hud-coins-icon,
+[data-theme-mode="light"] .hx-header-wallet-icon { color: #b45309; }
+
+/* restores (superfícies escuras) */
+[data-theme-mode="light"] .hx-dark-surface .hx-btn-danger,
+[data-theme-mode="light"] .hx-modal .hx-btn-danger,
+[data-theme-mode="light"] .hx-dropdown .hx-btn-danger { color: rgb(248 113 113); }
+[data-theme-mode="light"] .hx-dark-surface .hx-header-hud-coins--error,
+[data-theme-mode="light"] .hx-modal .hx-header-hud-coins--error {
+  color: rgb(254 202 202);
+  background-color: rgb(239 68 68 / 0.1);
+  border-color: rgb(248 113 113 / 0.35);
+}
+[data-theme-mode="light"] .hx-dark-surface .hx-header-hud-coins-icon,
+[data-theme-mode="light"] .hx-dark-surface .hx-header-wallet-icon,
+[data-theme-mode="light"] .hx-modal .hx-header-hud-coins-icon { color: #fcd34d; }
