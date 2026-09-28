@@ -478,6 +478,17 @@
     filter: drop-shadow(0 0 14px hsl(var(--sidebar-highlight) / 0.5));
   }
 
+  /* Logo clara nos temas claros (snow/daylight/cream/pearl) */
+  .hx-logo-light {
+    display: none;
+  }
+  [data-theme-mode="light"] .hx-logo-dark {
+    display: none;
+  }
+  [data-theme-mode="light"] .hx-logo-light {
+    display: block;
+  }
+
   .hx-header-avatar-ring {
     border: 1px solid hsl(var(--sidebar-highlight) / 0.25);
     background: hsl(var(--sidebar-highlight) / 0.08);

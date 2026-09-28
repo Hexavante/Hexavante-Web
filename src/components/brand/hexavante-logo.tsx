@@ -33,7 +33,19 @@ export function HexavanteLogo({
         width={dimensions.image}
         height={dimensions.image}
         className={cn(
-          "hx-header-logo-glow shrink-0 object-contain",
+          "hx-header-logo-glow hx-logo-dark shrink-0 object-contain",
+          imageClassName,
+        )}
+        priority
+      />
+      <Image
+        src="/brand/hexavante-logo-light.webp"
+        alt=""
+        aria-hidden="true"
+        width={dimensions.image}
+        height={dimensions.image}
+        className={cn(
+          "hx-header-logo-glow hx-logo-light shrink-0 object-contain",
           imageClassName,
         )}
         priority
