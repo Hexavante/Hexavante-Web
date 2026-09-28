@@ -186,3 +186,9 @@ html.theme-pearl ::selection {
 html.theme-pearl .hx-btn-primary {
   box-shadow: 0 6px 18px rgb(124 58 237 / 0.3);
 }
+html.theme-hexavante-reverso ::selection {
+  background: rgb(193 18 31 / 0.2);
+}
+html.theme-hexavante-reverso .hx-btn-primary {
+  box-shadow: 0 6px 18px rgb(193 18 31 / 0.3);
+}

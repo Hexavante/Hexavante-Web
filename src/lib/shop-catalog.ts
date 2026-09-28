@@ -79,6 +79,15 @@ export const SHOP_CATALOG: ShopCatalogItem[] = [
     metadata: { themeId: "default" },
   },
   {
+    slug: "theme-hexavante-reverso",
+    name: "Tema Hexavante Reverso",
+    description: "Vermelho e branco — a identidade Hexavante invertida.",
+    cost: 0,
+    category: "THEME",
+    isPermanent: true,
+    metadata: { themeId: "hexavante-reverso" },
+  },
+  {
     slug: "theme-cyberpunk",
     name: "Tema Dark Cyberpunk",
     description: "Neon fuchsia, violeta e ciano em toda a interface.",
