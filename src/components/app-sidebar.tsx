@@ -125,7 +125,7 @@ function SidebarBrand() {
     <Link href="/app" className="hx-sidebar-brand group" aria-label="Hexavante - Página inicial">
       <span className="hx-sidebar-brand-mark">
         <Image
-          src="/brand/hexavante-logo.png"
+          src="/brand/hexavante-logo.webp"
           alt=""
           width={36}
           height={36}

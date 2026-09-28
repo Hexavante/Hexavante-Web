@@ -28,7 +28,7 @@ export function HexavanteLogo({
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <Image
-        src="/brand/hexavante-logo.png"
+        src="/brand/hexavante-logo.webp"
         alt="Hexavante"
         width={dimensions.image}
         height={dimensions.image}

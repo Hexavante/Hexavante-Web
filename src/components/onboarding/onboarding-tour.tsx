@@ -314,7 +314,7 @@ function OnboardingTourActive({ onDismiss }: { onDismiss: () => void }) {
               {isCenter ? (
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan-400/25 bg-black/40 p-1.5 sm:h-11 sm:w-11">
                   <Image
-                    src="/brand/hexavante-logo.png"
+                    src="/brand/hexavante-logo.webp"
                     alt=""
                     width={32}
                     height={32}

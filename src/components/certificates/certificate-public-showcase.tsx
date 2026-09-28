@@ -46,7 +46,7 @@ export async function CertificatePublicShowcase({
           <div className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-xl border border-sky-400/30 bg-black/40 p-1.5">
               <Image
-                src="/brand/hexavante-logo.png"
+                src="/brand/hexavante-logo.webp"
                 alt="Hexavante"
                 width={32}
                 height={32}
