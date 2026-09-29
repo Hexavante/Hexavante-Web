@@ -4,7 +4,7 @@ import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { loginAction } from "@/app/actions/auth";
 import { getSafeCallbackUrl } from "@/lib/auth-routes";
-import { oauthErrorMessages } from "@/lib/oauth";
+import { fetchOAuthProviders, oauthErrorMessages } from "@/lib/oauth";
 import { Alert } from "@/components/ui/alert";
 
 type Props = {
@@ -14,6 +14,7 @@ type Props = {
 export default async function LoginPage({ searchParams }: Props) {
   const { callbackUrl, error } = await searchParams;
   const safeCallback = getSafeCallbackUrl(callbackUrl);
+  const providers = await fetchOAuthProviders();
 
   const oauthError = error
     ? oauthErrorMessages[error] ?? "Não foi possível entrar com a conta social."
@@ -21,7 +22,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <AuthPageShell>
-      <OAuthButtons callbackUrl={safeCallback} />
+      <OAuthButtons callbackUrl={safeCallback} providers={providers} />
 
       {oauthError && (
         <Alert variant="danger" className="mt-4">

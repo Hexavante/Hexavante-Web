@@ -4,7 +4,7 @@ import { getApiUrl } from "@/lib/api-url";
 import { cn } from "@/lib/cn";
 
 type Props = {
-  provider: "google" | "github";
+  provider: "google" | "github" | "microsoft" | "discord";
   callbackUrl: string;
   children: React.ReactNode;
   className?: string;
