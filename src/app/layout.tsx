@@ -8,11 +8,13 @@ import { NativeAppBootstrap } from "@/components/native/native-app-bootstrap";
 import { GlobalThemeLayer } from "@/components/shop/global-theme-layer";
 import { ThemeEquipOverlay } from "@/components/shop/theme-equip-overlay";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
+import { AccountSyncTracker } from "@/components/auth/account-sync-tracker";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ToastProvider } from "@/components/ui/toast";
 import { Providers } from "@/providers/query-provider";
 import { cn } from "@/lib/cn";
+import { isAccountSyncPending } from "@/lib/account-switcher";
 import { getLayoutSessionAndCosmetics } from "@/lib/layout-cosmetics";
 import { getNavAvatarUrl } from "@/lib/nav-avatar";
 import { toNavSession } from "@/lib/nav-session";
@@ -49,6 +51,10 @@ export default async function RootLayout({
   const themeClass = cosmetics.themeClassName || "theme-default";
   const themeMode = getThemeMode(cosmetics.themeId);
   const themeFx = themeFxClasses(cosmetics.themeId);
+  // Multiconta: monta o tracker só quando a sessão atual ainda não está em
+  // `hx_accounts` (login OAuth — a API seta o cookie sem passar pelas Server
+  // Actions). Sessão inválida nem entra: sem sessão não há o que sincronizar.
+  const accountSyncPending = Boolean(session?.user?.id) && (await isAccountSyncPending());
 
   return (
     <html
@@ -72,6 +78,7 @@ export default async function RootLayout({
               />
               <ThemeEquipOverlay />
               {navSession && <PresenceHeartbeat />}
+              {accountSyncPending && <AccountSyncTracker />}
               <AppShell session={navSession} header={<HeaderBar session={navSession} />}>
                 {children}
               </AppShell>

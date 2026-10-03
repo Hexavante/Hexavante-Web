@@ -4,7 +4,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getApiUrl } from "@/lib/auth-session";
-import { getAccounts, removeAccount, switchAccount } from "@/lib/account-switcher";
+import {
+  addAccount,
+  getAccounts,
+  needsAccountSync,
+  readSessionToken,
+  removeAccount,
+  switchAccount,
+} from "@/lib/account-switcher";
 
 const API_URL = getApiUrl();
 
@@ -151,4 +158,31 @@ export async function removeAccountAction(userId: string) {
 
 export async function getLinkedAccounts() {
   return getAccounts();
+}
+
+/**
+ * Sincroniza a sessão atual com a lista multiconta `hx_accounts`.
+ *
+ * Chamada pelo `<AccountSyncTracker />` (montado no root layout) quando o token
+ * de sessão atual ainda não está na lista: é o caso do login OAuth, onde a API
+ * seta o cookie sozinha e ninguém passa por `loginAction`/`registerAction`/
+ * `verifyDeviceAction`. Não-bloqueante: só loga erro e devolve `{ ok }`.
+ */
+export async function syncCurrentAccountAction(): Promise<{ ok: boolean }> {
+  try {
+    const token = await readSessionToken();
+    if (!token) return { ok: true };
+    if (!needsAccountSync(token, await getAccounts())) return { ok: true };
+
+    const added = await addAccount(token);
+    if (!added) {
+      // Sessão inválida/expirada ou API fora do ar — nada a sincronizar
+      console.error("[account-sync] addAccount não confirmou a sessão atual (não bloqueante).");
+      return { ok: false };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.error("[account-sync] addAccount falhou (não bloqueante):", e);
+    return { ok: false };
+  }
 }

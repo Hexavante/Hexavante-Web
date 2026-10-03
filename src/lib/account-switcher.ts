@@ -4,6 +4,9 @@ import { getApiUrl } from "@/lib/auth-session";
 const ACCOUNTS_COOKIE = "hx_accounts";
 const MAX_ACCOUNTS = 5;
 
+/** Mesmas variantes usadas em sign-out/auth: __Secure- (domínio) e host-only. */
+const SESSION_COOKIE_NAMES = ["__Secure-hexavante.session_token", "hexavante.session_token"];
+
 export type LinkedAccount = {
   userId: string;
   username: string | null;
@@ -43,6 +46,49 @@ async function saveAccounts(accounts: LinkedAccount[]) {
     avatarUrl: a.avatarUrl?.startsWith("data:") ? null : a.avatarUrl,
   }));
   cookieStore.set(ACCOUNTS_COOKIE, JSON.stringify(slim), cookieOpts());
+}
+
+/** Token de sessão atual (variante __Secure- primeiro; fallback host-only). */
+export async function readSessionToken(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    for (const name of SESSION_COOKIE_NAMES) {
+      const value = cookieStore.get(name)?.value;
+      if (value) return value;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Decide se a lista multiconta precisa ser sincronizada com a sessão atual.
+ * Puro (sem I/O) para ser testável:
+ * - sem token de sessão → nunca;
+ * - token já presente na lista → nunca (login/senha e device-auth já sincronizam);
+ * - token novo (login OAuth — a API seta o cookie sozinha) ou rotacionado → sim.
+ */
+export function needsAccountSync(
+  sessionToken: string | null | undefined,
+  accounts: LinkedAccount[],
+): boolean {
+  if (!sessionToken) return false;
+  return !accounts.some((a) => a?.token === sessionToken);
+}
+
+/**
+ * `needsAccountSync` lendo os cookies do request atual (leitura permitida em RSC).
+ * Usado no root layout para decidir se monta o `<AccountSyncTracker />`.
+ */
+export async function isAccountSyncPending(): Promise<boolean> {
+  try {
+    const token = await readSessionToken();
+    if (!token) return false;
+    return needsAccountSync(token, await getAccounts());
+  } catch {
+    return false;
+  }
 }
 
 async function fetchUserForToken(token: string) {
