@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { ShopCoinHistory } from "@/components/shop/shop-coin-history";
 import { ShopEarnCoinsPanel } from "@/components/shop/shop-earn-coins-panel";
 import { ShopFairPlayNotice } from "@/components/shop/shop-fair-play-notice";
+import { ShopBuyCoinsPanel } from "@/components/shop/shop-buy-coins-panel";
 import { ShopProfilePreview } from "@/components/shop/shop-profile-preview";
 import { ShopTabs } from "@/components/shop/shop-tabs";
 import { PageHeader } from "@/components/ui/page-header";
@@ -51,6 +52,10 @@ export default async function ShopPage() {
           <ShopEarnCoinsPanel />
           <ShopCoinHistory transactions={state.coinHistory} />
         </aside>
+      </div>
+
+      <div className="mt-6 anim-enter anim-d4">
+        <ShopBuyCoinsPanel />
       </div>
     </PageShell>
   );

@@ -11,6 +11,46 @@ export async function getPremiumStatus(userId: string) {
   return buildPremiumStatus(user);
 }
 
+/** Campos de premium que podem vir na sessão (contrato da API). */
+export type PremiumSessionSnapshot = {
+  isPremium?: boolean;
+  premiumExpiresAt?: string | Date | null;
+};
+
+/**
+ * Estado premium mais atual para UI (loja /hexa, retorno de pagamento).
+ * Usa os campos da sessão quando a API os expõe; caso contrário cai no banco
+ * (mesma fonte usada pela loja), garantindo a data de expiração.
+ */
+export async function resolvePremiumState(
+  userId: string,
+  sessionUser?: PremiumSessionSnapshot | null,
+): Promise<{ isActive: boolean; expiresAt: Date | null }> {
+  if (
+    sessionUser &&
+    typeof sessionUser.isPremium === "boolean" &&
+    "premiumExpiresAt" in sessionUser
+  ) {
+    const raw = sessionUser.premiumExpiresAt;
+    const expiresAt = raw ? new Date(raw) : null;
+    if (!expiresAt || !Number.isNaN(expiresAt.getTime())) {
+      return {
+        isActive: isPremiumActive({
+          isPremium: sessionUser.isPremium,
+          premiumExpiresAt: expiresAt,
+        }),
+        expiresAt,
+      };
+    }
+  }
+
+  const status = await getPremiumStatus(userId);
+  return {
+    isActive: status?.isActive ?? false,
+    expiresAt: status?.expiresAt ?? null,
+  };
+}
+
 export async function canAccessPremiumExam(
   userId: string,
   exam: { slug: string; isPremiumOnly: boolean },

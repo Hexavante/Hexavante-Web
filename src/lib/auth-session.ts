@@ -9,6 +9,10 @@ interface ApiSessionResponse {
     username: string | null;
     avatarUrl: string | null;
     roles: string[];
+    /** Retornados pela API conforme contrato de pagamentos/sessão. */
+    isPremium?: boolean;
+    premiumExpiresAt?: string | null;
+    coins?: number;
   } | null;
   session?: {
     expiresAt: string;
@@ -23,6 +27,9 @@ export interface AuthSession {
     image: string | null;
     username: string | null;
     roles: string[];
+    isPremium?: boolean;
+    premiumExpiresAt?: string | null;
+    coins?: number;
   } | null;
   session?: {
     expiresAt: string;
@@ -55,6 +62,9 @@ export async function getApiSession(): Promise<AuthSession | null> {
         image: null,
         username: data.user.username,
         roles: data.user.roles,
+        isPremium: data.user.isPremium,
+        premiumExpiresAt: data.user.premiumExpiresAt ?? null,
+        coins: data.user.coins,
       },
       session: data.session,
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),

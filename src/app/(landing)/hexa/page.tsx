@@ -7,7 +7,10 @@ import {
 } from "lucide-react";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingFooter } from "@/components/landing/landing-footer";
+import { HexaCheckoutCta } from "@/components/landing/hexa-checkout-cta";
 import { Badge } from "@/components/ui/badge";
+import { fetchPaymentsCatalog, formatBrl } from "@/lib/payments";
+import { resolvePremiumState } from "@/services/premium.service";
 
 const freeFeatures = [
   "Acesso a todos os cursos gratuitos",
@@ -31,6 +34,15 @@ const hexaFeatures = [
 export default async function HexaPage() {
   const session = await auth();
   const user = session?.user ?? null;
+
+  // Preços vêm sempre do catálogo da API — nunca hardcoded.
+  // Catálogo (público) e estado premium rodam em paralelo: /hexa é página
+  // pública e não deve esperar duas chamadas em série.
+  const [catalogResult, premium] = await Promise.all([
+    fetchPaymentsCatalog(),
+    user?.id ? resolvePremiumState(user.id, user) : Promise.resolve(null),
+  ]);
+  const premiumPlan = catalogResult.ok ? catalogResult.data.premium : null;
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -103,8 +115,20 @@ export default async function HexaPage() {
                 </p>
               </div>
               <div className="relative mb-6">
-                <span className="text-4xl font-black text-[hsl(var(--sidebar-foreground))]">R$ 29</span>
-                <span className="text-sm text-[hsl(var(--sidebar-foreground)/0.36)]">/mês</span>
+                {premiumPlan ? (
+                  <>
+                    <span className="text-4xl font-black text-[hsl(var(--sidebar-foreground))]">
+                      {formatBrl(premiumPlan.priceBrl)}
+                    </span>
+                    <span className="text-sm text-[hsl(var(--sidebar-foreground)/0.36)]">
+                      {premiumPlan.days === 30 ? "/mês" : `/${premiumPlan.days} dias`}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-[hsl(var(--sidebar-foreground)/0.48)]">
+                    Valor temporariamente indisponível.
+                  </span>
+                )}
               </div>
               <ul className="relative mb-8 space-y-3">
                 {hexaFeatures.map((f) => (
@@ -114,13 +138,13 @@ export default async function HexaPage() {
                   </li>
                 ))}
               </ul>
-              <a
-                href={user ? "/configuracoes" : "/register"}
-                className="hx-hero-btn relative block w-full rounded-lg bg-amber-500 py-3 text-center text-sm font-bold text-black transition hover:brightness-110"
-                style={{ boxShadow: "0 8px 24px rgb(245 158 11 / 0.3)" }}
-              >
-                {user ? "Assinar Hexa" : "Começar com Hexa"}
-              </a>
+              <HexaCheckoutCta
+                isLoggedIn={Boolean(user)}
+                isPremiumActive={premium?.isActive ?? false}
+                premiumExpiresAt={
+                  premium?.expiresAt ? premium.expiresAt.toISOString() : null
+                }
+              />
             </div>
           </div>
         </div>
