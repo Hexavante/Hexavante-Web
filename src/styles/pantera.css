@@ -1,0 +1,203 @@
+/* ═══ Pantera mascote (pantera-mascote.tsx) ═══════════════════════════
+   Importar em globals.css:  @import "../styles/pantera.css";
+   Cores: realce = --accent do tema. Para trocar o corpo/realce num lugar
+   específico, defina --pantera-corpo / --pantera-realce no elemento pai.
+   Coordenadas dos pivôs estão no viewBox 0 0 1024 1024 do SVG.        */
+
+.hx-pantera {
+  --p-corpo: var(--pantera-corpo, #05070c);
+  --p-realce: var(--pantera-realce, var(--accent, #3dc6db));
+  display: block;
+  overflow: visible;
+}
+
+.hx-pantera g {
+  transform-box: view-box;
+}
+
+/* Silhuetas: borda da mesma cor tapa frestas entre as partes em movimento */
+.hx-pantera .k {
+  fill: var(--p-corpo);
+  stroke: var(--p-corpo);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.hx-pantera .kt {
+  fill: var(--p-corpo);
+  stroke: var(--p-corpo);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+.hx-pantera .c {
+  fill: var(--p-realce);
+}
+.hx-pantera .c2 {
+  fill: var(--p-realce);
+  opacity: 0.8;
+}
+.hx-pantera .c3 {
+  fill: var(--p-realce);
+  opacity: 0.55;
+}
+
+/* ── Pivôs ── */
+.hx-pantera .p-animal {
+  transform-origin: 600px 800px; /* pés */
+}
+.hx-pantera .p-cabeca {
+  transform-origin: 905px 390px; /* base do pescoço */
+  transition: transform 0.5s ease;
+}
+.hx-pantera .p-mandibula {
+  transform-origin: 840px 330px; /* dobradiça da mandíbula */
+  transform: rotate(var(--jaw, 0deg));
+  transition: transform 0.25s ease-out;
+}
+.hx-pantera .p-borla {
+  transform-origin: 989px 196px; /* botão do capelo */
+}
+.hx-pantera .p-cauda-1 {
+  transform-origin: 540px 515px; /* encaixe no corpo */
+  --a: 1.6deg;
+  --t: 3.6s;
+  --d: 0s;
+}
+.hx-pantera .p-cauda-2 {
+  transform-origin: 300px 623px;
+  --a: 3deg;
+  --d: -0.45s;
+}
+.hx-pantera .p-cauda-3 {
+  transform-origin: 100px 540px;
+  --a: 5deg;
+  --d: -0.9s;
+}
+.hx-pantera .p-cauda-1,
+.hx-pantera .p-cauda-2,
+.hx-pantera .p-cauda-3 {
+  transition: transform 0.5s ease;
+}
+
+/* ── Idle (também base de rugir/triste) ── */
+.hx-pantera .p-animal {
+  animation: hx-pantera-respira 3.4s ease-in-out infinite;
+}
+.hx-pantera .p-cabeca {
+  animation: hx-pantera-nod 5s ease-in-out infinite;
+}
+.hx-pantera .p-borla {
+  animation: hx-pantera-borla 2.6s ease-in-out infinite alternate;
+}
+.hx-pantera .p-cauda-1,
+.hx-pantera .p-cauda-2,
+.hx-pantera .p-cauda-3 {
+  animation: hx-pantera-cauda var(--t, 3.6s) ease-in-out var(--d, 0s) infinite;
+}
+.hx-pantera .p-cauda-2,
+.hx-pantera .p-cauda-3 {
+  --t: 3.6s;
+}
+
+@keyframes hx-pantera-respira {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.012);
+  }
+}
+@keyframes hx-pantera-nod {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-1.2deg);
+  }
+}
+@keyframes hx-pantera-borla {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+@keyframes hx-pantera-cauda {
+  0%,
+  100% {
+    transform: rotate(calc(var(--a) * -1));
+  }
+  50% {
+    transform: rotate(var(--a));
+  }
+}
+
+/* ── Rugir: boca aberta, cabeça levantada ── */
+.hx-pantera[data-estado="rugir"] {
+  --jaw: -15deg;
+}
+.hx-pantera[data-estado="rugir"] .p-cabeca {
+  animation: none;
+  transform: rotate(2.5deg);
+}
+
+/* ── Feliz: dois pulos, boca entreaberta, rabo e borla agitados ── */
+.hx-pantera[data-estado="feliz"] {
+  --jaw: -7deg;
+}
+.hx-pantera[data-estado="feliz"] .p-animal {
+  animation: hx-pantera-pulo 0.9s ease-in-out 2;
+}
+.hx-pantera[data-estado="feliz"] .p-borla {
+  animation-duration: 0.45s;
+}
+.hx-pantera[data-estado="feliz"] .p-cauda-1,
+.hx-pantera[data-estado="feliz"] .p-cauda-2,
+.hx-pantera[data-estado="feliz"] .p-cauda-3 {
+  --t: 0.9s;
+}
+@keyframes hx-pantera-pulo {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(0) scale(1.04, 0.94);
+  }
+  45% {
+    transform: translateY(-70px) scale(0.97, 1.05);
+  }
+  75% {
+    transform: translateY(0) scale(1.04, 0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+/* ── Triste: cabeça baixa, rabo caído, respiração lenta ── */
+.hx-pantera[data-estado="triste"] .p-animal {
+  animation-duration: 5s;
+}
+.hx-pantera[data-estado="triste"] .p-cabeca {
+  animation: none;
+  transform: rotate(-7deg) translateY(4px);
+}
+.hx-pantera[data-estado="triste"] .p-cauda-1,
+.hx-pantera[data-estado="triste"] .p-cauda-2,
+.hx-pantera[data-estado="triste"] .p-cauda-3 {
+  animation: none;
+  transform: rotate(-5deg);
+}
+.hx-pantera[data-estado="triste"] .p-borla {
+  animation-duration: 5s;
+}
+
+/* Quem pede menos movimento: pantera parada */
+@media (prefers-reduced-motion: reduce) {
+  .hx-pantera *,
+  .hx-pantera .p-animal {
+    animation: none !important;
+  }
+}

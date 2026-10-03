@@ -4,6 +4,7 @@
 @import "../styles/animations.css";
 @import "../styles/theme-flavors.css";
 @import "../styles/theme-light.css";
+@import "../styles/pantera.css";
 
 @theme inline {
   --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;

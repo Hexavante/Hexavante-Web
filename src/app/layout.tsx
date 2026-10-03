@@ -11,6 +11,7 @@ import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { AccountSyncTracker } from "@/components/auth/account-sync-tracker";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { BrandIntro } from "@/components/brand-intro";
 import { ToastProvider } from "@/components/ui/toast";
 import { Providers } from "@/providers/query-provider";
 import { cn } from "@/lib/cn";
@@ -64,11 +65,22 @@ export default async function RootLayout({
       data-theme-mode={themeMode}
       suppressHydrationWarning
     >
+      <head>
+        {/* Decide a abertura da marca ANTES da primeira pintura: sem este
+            script (rodando sincronamente no <head>), o overlay .hx-intro
+            ficaria oculto por padrão e piscaria depois da hidratação. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{document.documentElement.dataset.intro=sessionStorage.getItem("hx-intro-seen")?"done":"play"}catch(e){document.documentElement.dataset.intro="done"}`,
+          }}
+        />
+      </head>
       <body
         className={cn(grotesk.variable, "app-shell hx-native-safe-area antialiased font-sans", themeClass, themeFx)}
         data-theme-mode={themeMode}
       >
         <ErrorBoundary>
+          <BrandIntro />
           <Providers>
             <NativeAppBootstrap />
             <ToastProvider>

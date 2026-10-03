@@ -29,6 +29,11 @@ export const prismaMock = {
     create: vi.fn(),
     groupBy: vi.fn(),
   },
+  coinTransaction: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+  },
   storeItem: {
     updateMany: vi.fn().mockResolvedValue({ count: 0 }),
     upsert: vi.fn().mockResolvedValue({}),

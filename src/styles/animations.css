@@ -984,3 +984,110 @@ body.fx-aurora-bg::before,
     animation: none !important;
   }
 }
+
+/* ═══ Abertura da marca (brand-intro.tsx) ═══════════════════════════════ */
+
+.hx-intro {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background-color: var(--background);
+  background-image: radial-gradient(
+    circle at 50% 40%,
+    var(--theme-glow-1, rgba(37, 99, 235, 0.12)),
+    transparent 28rem
+  );
+}
+
+/* O script inline do layout define data-intro="play" antes da 1ª pintura */
+html[data-intro="play"] .hx-intro {
+  display: flex;
+}
+
+.hx-intro[data-leaving="true"] {
+  animation: hx-intro-out 0.45s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes hx-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.hx-intro-mascot {
+  animation: hx-intro-mascot 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes hx-intro-mascot {
+  from {
+    opacity: 0;
+    transform: translateX(48px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reaproveita o keyframe welcome-letter-pop que já existe */
+.hx-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: welcome-letter-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(0.55s + var(--i, 0) * 70ms);
+}
+
+.hx-intro-line {
+  height: 2px;
+  width: 0;
+  border-radius: 9999px;
+  background: hsl(var(--sidebar-highlight));
+  animation: hx-intro-line 0.6s ease 0.5s forwards;
+}
+
+@keyframes hx-intro-line {
+  to {
+    width: min(16rem, 60vw);
+  }
+}
+
+/* Quem pede menos movimento não vê a abertura */
+@media (prefers-reduced-motion: reduce) {
+  .hx-intro {
+    display: none !important;
+  }
+}
+
+/* ═══ Recompensa do tutorial em vídeo (tutorial-video-modal.tsx) ════════ */
+
+.hx-tutorial-reward {
+  animation: hx-tutorial-reward 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes hx-tutorial-reward {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-tutorial-reward {
+    animation: none;
+  }
+}

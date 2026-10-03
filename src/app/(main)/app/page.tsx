@@ -9,7 +9,7 @@ import { StudyContinueHero } from "@/components/home/study-continue-hero";
 import { CourseRecommendations } from "@/components/home/course-recommendations";
 import { DashboardCommandCenter } from "@/components/home/dashboard-command-center";
 import { DashboardHighlightsPanel } from "@/components/home/dashboard-highlights-panel";
-import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
+import { TutorialVideoModal } from "@/components/onboarding/tutorial-video-modal";
 import { AchievementGrid } from "@/components/achievements/achievement-grid";
 import { ScrollReveal } from "@/components/landing/scroll-reveal";
 import { CertificateVortex } from "@/components/home/certificate-vortex";
@@ -51,7 +51,7 @@ export default async function HomePage() {
 
   return (
     <PageShell>
-      {homeData?.showOnboardingTour && <OnboardingTour show />}
+      {homeData?.showOnboardingTour && <TutorialVideoModal show />}
 
       {homeData && session?.user ? (
         <>
