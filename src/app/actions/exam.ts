@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export type ActionResult = { success: boolean; error?: string };
+const MARATHON_ACHIEVEMENT_KEY = "maratona_100";
 
 function parseExamSubmission(formData: FormData) {
   const answers: Record<string, string> = {};
@@ -68,11 +69,13 @@ export async function submitExamAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   }
 
+  let unlockedMarathon = false;
   try {
-    await submitAttempt(session.user.id, parsed.data.attemptId, {
+    const result = await submitAttempt(session.user.id, parsed.data.attemptId, {
       answers: parsed.data.answers,
       essays: parsed.data.essays,
     });
+    unlockedMarathon = result.newAchievements.includes(MARATHON_ACHIEVEMENT_KEY);
   } catch (error) {
     return {
       success: false,
@@ -84,7 +87,8 @@ export async function submitExamAction(
   revalidatePath("/simulados/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  redirect(`/simulados/${slug}/resultado/${parsed.data.attemptId}`);
+  const celebration = unlockedMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
+  redirect(`/simulados/${slug}/resultado/${parsed.data.attemptId}${celebration}`);
 }
 
 export async function submitExamTimeoutAction(
@@ -100,8 +104,15 @@ export async function submitExamTimeoutAction(
   const slug = formData.get("slug") as string;
   const { answers, essays } = parseExamSubmission(formData);
 
+  let unlockedMarathon = false;
   try {
-    await submitAttempt(session.user.id, attemptId, { answers, essays }, { allowPartial: true });
+    const result = await submitAttempt(
+      session.user.id,
+      attemptId,
+      { answers, essays },
+      { allowPartial: true },
+    );
+    unlockedMarathon = result.newAchievements.includes(MARATHON_ACHIEVEMENT_KEY);
   } catch (error) {
     return {
       success: false,
@@ -113,5 +124,6 @@ export async function submitExamTimeoutAction(
   revalidatePath("/simulados/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  redirect(`/simulados/${slug}/resultado/${attemptId}`);
+  const celebration = unlockedMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
+  redirect(`/simulados/${slug}/resultado/${attemptId}${celebration}`);
 }

@@ -1,4 +1,4 @@
-import { Clock3, ClipboardList, Crown, Target } from "lucide-react";
+import { Clock3, ClipboardList, Crown, Target, Trophy } from "lucide-react";
 import { ExamThumbnail } from "@/components/exams/exam-thumbnail";
 import { Badge } from "@/components/ui/badge";
 import { CardFooter, CardHeader, CardTitle, InteractiveCard } from "@/components/ui/card";
@@ -55,6 +55,12 @@ export function ExamCard({
               <Badge variant="violet">
                 <Crown className="h-3.5 w-3.5" />
                 Premium
+              </Badge>
+            )}
+            {questionCount >= 100 && (
+              <Badge variant="amber">
+                <Trophy className="h-3.5 w-3.5" />
+                Conquista especial
               </Badge>
             )}
           </div>

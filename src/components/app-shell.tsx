@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { NavSession } from "@/lib/nav-session";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { ConquistaPanteraHost } from "@/components/pantera-conquista";
 
 const BARE_LAYOUT_PREFIXES = [
   "/login",
@@ -39,6 +40,7 @@ export function AppShell({ session, header, children }: Props) {
 
   return (
     <SidebarProvider defaultOpen>
+      {session && <ConquistaPanteraHost />}
       <AppSidebar session={session} />
       <SidebarInset>
         {header}

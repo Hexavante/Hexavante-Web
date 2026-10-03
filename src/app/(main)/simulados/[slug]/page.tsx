@@ -126,6 +126,22 @@ export default async function ExamDetailPage({ params, searchParams }: Props) {
         </div>
       </div>
 
+      {exam.questions.length >= 100 && (
+        <Card padding="md" className="mt-6 border-amber-400/25 bg-amber-400/[0.06]">
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/10 text-amber-200">
+              <Trophy className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="font-bold text-amber-100">Conquista especial: Maratona Hexavante</h2>
+              <p className="mt-1 text-sm text-amber-100/75">
+                Finalize este simulado de 100 questões ou mais para desbloquear a conquista no seu perfil.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {performance && performance.attemptCount > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Card padding="sm">

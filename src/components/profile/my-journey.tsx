@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, BookOpen, Target } from "lucide-react";
+import { Award, BookOpen, Clock3, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AppLink } from "@/components/ui/app-link";
@@ -20,6 +20,10 @@ export function MyJourney({ enrollments }: Props) {
           <p className="mt-1 text-sm text-slate-400">Cursos matriculados e progresso.</p>
         </div>
         <div className="flex gap-3 text-sm">
+          <AppLink href="/courses/history" muted className="inline-flex items-center gap-1">
+            <Clock3 className="h-4 w-4" />
+            Histórico de cursos
+          </AppLink>
           <AppLink href="/certificados" muted className="inline-flex items-center gap-1">
             <Award className="h-4 w-4" />
             Certificados

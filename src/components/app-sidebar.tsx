@@ -69,6 +69,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Estudos",
     items: [
       { icon: BookOpen, label: "Cursos", href: "/courses" },
+      { icon: History, label: "Histórico de cursos", href: "/courses/history", requiresAuth: true },
       { icon: Video, label: "Tutoriais", href: "/tutorials" },
       { icon: Target, label: "Simulados", href: "/simulados" },
       { icon: BarChart3, label: "Estatísticas", href: "/estatisticas", requiresAuth: true },

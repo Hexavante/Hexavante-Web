@@ -5,6 +5,7 @@
 @import "../styles/theme-flavors.css";
 @import "../styles/theme-light.css";
 @import "../styles/pantera.css";
+@import "../styles/pantera-conquista.css";
 
 @theme inline {
   --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;

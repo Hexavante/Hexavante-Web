@@ -429,7 +429,7 @@ export async function submitAttempt(
   }
 
   const { syncUserAchievements } = await import("@/services/achievement.service");
-  await syncUserAchievements(userId);
+  const newAchievements = await syncUserAchievements(userId);
 
   return {
     attemptId,
@@ -442,6 +442,7 @@ export async function submitAttempt(
     coinsEarned,
     dailyAttemptIndex,
     dailyRewardMultiplier,
+    newAchievements,
   };
 }
 

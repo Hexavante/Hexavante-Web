@@ -46,6 +46,31 @@ export async function listUserEnrollments(userId: string) {
   });
 }
 
+/** Histórico de cursos do estudante, com matrícula, conclusão e progresso. */
+export async function listUserCourseHistory(userId: string) {
+  return prisma.courseEnrollment.findMany({
+    where: { userId },
+    orderBy: [{ completedAt: "desc" }, { enrolledAt: "desc" }],
+    include: {
+      course: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          thumbnailUrl: true,
+          level: true,
+          category: { select: { name: true } },
+          modules: { select: { _count: { select: { lessons: true } } } },
+        },
+      },
+      lessonProgresses: {
+        where: { completed: true },
+        select: { id: true },
+      },
+    },
+  });
+}
+
 export async function getStudentDashboard(userId: string) {
   const [xpProfile, enrollments, recentXp, examAttempts] = await Promise.all([
     getUserXpProfile(userId),

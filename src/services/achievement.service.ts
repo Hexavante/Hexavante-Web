@@ -15,6 +15,7 @@ export async function collectAchievementStats(userId: string): Promise<Achieveme
     coursesCompleted,
     examsFinished,
     examsPassed,
+    longExamAttempts,
     shopPurchases,
     followingCount,
   ] = await Promise.all([
@@ -26,6 +27,15 @@ export async function collectAchievementStats(userId: string): Promise<Achieveme
     prisma.examAttempt.count({
       where: { userId, finishedAt: { not: null }, score: { gte: EXAM_PASS_SCORE } },
     }),
+    prisma.examAttempt.findMany({
+      where: {
+        userId,
+        finishedAt: { not: null },
+        studyMode: "FULL",
+        totalQuestions: { gte: 100 },
+      },
+      select: { totalQuestions: true, _count: { select: { answers: true } } },
+    }),
     prisma.userInventory.count({ where: { userId } }),
     prisma.userFollow.count({ where: { followerId: userId } }),
   ]);
@@ -36,6 +46,9 @@ export async function collectAchievementStats(userId: string): Promise<Achieveme
     level: xp?.level ?? 1,
     examsFinished,
     examsPassed,
+    completedLongExam: longExamAttempts.some(
+      (attempt) => attempt._count.answers >= attempt.totalQuestions,
+    ),
     coins: user?.coins ?? 0,
     shopPurchases,
     followingCount,

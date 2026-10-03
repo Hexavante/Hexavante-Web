@@ -26,6 +26,7 @@ export type AchievementStats = {
   level: number;
   examsFinished: number;
   examsPassed: number;
+  completedLongExam: boolean;
   coins: number;
   shopPurchases: number;
   followingCount: number;
@@ -112,6 +113,14 @@ export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
     icon: "target",
     tier: "gold",
     check: (s) => s.examsFinished >= 5,
+  },
+  {
+    key: "maratona_100",
+    title: "Maratona Hexavante",
+    description: "Concluiu um simulado com 100 questões ou mais.",
+    icon: "trophy",
+    tier: "gold",
+    check: (s) => s.completedLongExam,
   },
   {
     key: "coins_500",

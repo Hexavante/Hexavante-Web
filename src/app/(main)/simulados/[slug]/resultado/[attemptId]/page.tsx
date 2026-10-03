@@ -16,6 +16,7 @@ import { ExamQuestionImage } from "@/components/exams/exam-question-image";
 import { ExamQuestionFavoriteButton } from "@/components/exams/exam-question-favorite-button";
 import { ExamSubjectStatsPanel } from "@/components/exams/exam-subject-stats-panel";
 import { ExamAttemptComparisonPanel } from "@/components/exams/exam-attempt-comparison-panel";
+import { AchievementCelebrationTrigger } from "@/components/achievements/achievement-celebration-trigger";
 import { EXAM_PASS_SCORE } from "@/lib/gamification";
 import {
   EXAM_STUDY_MODE_LABELS,
@@ -24,6 +25,7 @@ import {
   type ExamStudyMode,
 } from "@/lib/exam-learning";
 import { getDailyRewardTierLabel } from "@/lib/exam-daily-rewards";
+import { getUserAchievements } from "@/services/achievement.service";
 import { notFound, redirect } from "next/navigation";
 
 const ESSAY_STATUS_LABELS: Record<string, string> = {
@@ -35,24 +37,31 @@ const ESSAY_STATUS_LABELS: Record<string, string> = {
 
 type Props = {
   params: Promise<{ slug: string; attemptId: string }>;
+  searchParams: Promise<{ conquista?: string }>;
 };
 
-export default async function ExamResultPage({ params }: Props) {
-  const { slug, attemptId } = await params;
+export default async function ExamResultPage({ params, searchParams }: Props) {
+  const [{ slug, attemptId }, query] = await Promise.all([params, searchParams]);
   const session = await auth();
   if (!session?.user?.id) redirect(`/login?callbackUrl=/simulados/${slug}`);
 
   const attempt = await getAttemptResult(session.user.id, attemptId);
   if (!attempt || !attempt.finishedAt || attempt.exam.slug !== slug) notFound();
 
-  const [comparison, subjectStats, favoriteIds] = await Promise.all([
+  const [comparison, subjectStats, favoriteIds, achievements] = await Promise.all([
     compareWithPreviousAttempt(session.user.id, attempt.examId, attemptId),
     getUserSubjectStats(session.user.id, attempt.examId),
     getExamQuestionFavoriteIds(
       session.user.id,
       attempt.answers.map((a) => a.questionId),
     ),
+    query.conquista === "maratona_100"
+      ? getUserAchievements(session.user.id)
+      : Promise.resolve([]),
   ]);
+  const shouldCelebrateMarathon = achievements.some(
+    (achievement) => achievement.key === "maratona_100" && achievement.unlocked,
+  );
 
   const pendingEssays = attempt.answers.filter((a) => a.essayStatus === "PENDING").length;
   const mcAnswers = attempt.answers.filter((a) => a.alternativeId);
@@ -82,6 +91,12 @@ export default async function ExamResultPage({ params }: Props) {
 
   return (
     <PageShell size="md">
+      {shouldCelebrateMarathon && (
+        <AchievementCelebrationTrigger
+          achievementKey="maratona_100"
+          attemptId={attemptId}
+        />
+      )}
       <AppLink href="/simulados/historico" muted className="mb-4 inline-flex items-center gap-1">
         ← Meu histórico
       </AppLink>
