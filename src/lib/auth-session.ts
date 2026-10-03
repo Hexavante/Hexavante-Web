@@ -59,7 +59,7 @@ export async function getApiSession(): Promise<AuthSession | null> {
         id: data.user.id,
         name: data.user.name,
         email: data.user.email,
-        image: null,
+        image: data.user.avatarUrl,
         username: data.user.username,
         roles: data.user.roles,
         isPremium: data.user.isPremium,

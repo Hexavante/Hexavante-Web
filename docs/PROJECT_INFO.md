@@ -233,7 +233,7 @@ docker builder prune -af
 
 ### Nginx CSP Relevante
 ```
-img-src 'self' data: blob: https://assets.hexavante.com.br
+img-src 'self' data: blob: https://assets.hexavante.com.br https://cdn.discordapp.com https://media.discordapp.net https://avatars.githubusercontent.com https://lh3.googleusercontent.com
 connect-src 'self' https://api.hexavante.com.br wss://api.hexavante.com.br
 ```
 
