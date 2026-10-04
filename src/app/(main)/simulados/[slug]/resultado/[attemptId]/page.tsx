@@ -25,7 +25,6 @@ import {
   type ExamStudyMode,
 } from "@/lib/exam-learning";
 import { getDailyRewardTierLabel } from "@/lib/exam-daily-rewards";
-import { getUserAchievements } from "@/services/achievement.service";
 import { notFound, redirect } from "next/navigation";
 
 const ESSAY_STATUS_LABELS: Record<string, string> = {
@@ -48,20 +47,19 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
   const attempt = await getAttemptResult(session.user.id, attemptId);
   if (!attempt || !attempt.finishedAt || attempt.exam.slug !== slug) notFound();
 
-  const [comparison, subjectStats, favoriteIds, achievements] = await Promise.all([
+  const [comparison, subjectStats, favoriteIds] = await Promise.all([
     compareWithPreviousAttempt(session.user.id, attempt.examId, attemptId),
     getUserSubjectStats(session.user.id, attempt.examId),
     getExamQuestionFavoriteIds(
       session.user.id,
       attempt.answers.map((a) => a.questionId),
     ),
-    query.conquista === "maratona_100"
-      ? getUserAchievements(session.user.id)
-      : Promise.resolve([]),
   ]);
-  const shouldCelebrateMarathon = achievements.some(
-    (achievement) => achievement.key === "maratona_100" && achievement.unlocked,
-  );
+  const shouldCelebrateMarathon =
+    query.conquista === "maratona_100" &&
+    attempt.studyMode === "FULL" &&
+    attempt.totalQuestions >= 100 &&
+    attempt.answers.length >= attempt.totalQuestions;
 
   const pendingEssays = attempt.answers.filter((a) => a.essayStatus === "PENDING").length;
   const mcAnswers = attempt.answers.filter((a) => a.alternativeId);

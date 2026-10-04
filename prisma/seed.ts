@@ -4,6 +4,7 @@ import { SHOP_CATALOG } from "../src/lib/shop-catalog";
 import {
   DEPRECATED_PARTIAL_ENEM_SLUGS,
   FULL_ENEM_EXAMS,
+  SUBJECT_MARATHON_EXAMS,
   type SeedExamQuestion,
   type SeedFullEnemExam,
 } from "./seed-enem-full";
@@ -670,7 +671,7 @@ async function main() {
     });
   }
 
-  for (const exam of FULL_ENEM_EXAMS) {
+  for (const exam of [...FULL_ENEM_EXAMS, ...SUBJECT_MARATHON_EXAMS]) {
     await upsertEnemExam(exam);
   }
 
@@ -896,6 +897,10 @@ async function main() {
   console.log(`- Cursos ENEM de teste: ${ENEM_TEST_COURSES.length}`);
   console.log(`- Simulados ENEM completos: ${FULL_ENEM_EXAMS.length} (100 questões + Redação cada)`);
   for (const exam of FULL_ENEM_EXAMS) {
+    console.log(`  • /simulados/${exam.slug}`);
+  }
+  console.log(`- Simulados de disciplina: ${SUBJECT_MARATHON_EXAMS.length} (100 questões cada)`);
+  for (const exam of SUBJECT_MARATHON_EXAMS) {
     console.log(`  • /simulados/${exam.slug}`);
   }
 }

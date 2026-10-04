@@ -69,13 +69,13 @@ export async function submitExamAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   }
 
-  let unlockedMarathon = false;
+  let celebrateMarathon = false;
   try {
     const result = await submitAttempt(session.user.id, parsed.data.attemptId, {
       answers: parsed.data.answers,
       essays: parsed.data.essays,
     });
-    unlockedMarathon = result.newAchievements.includes(MARATHON_ACHIEVEMENT_KEY);
+    celebrateMarathon = result.celebrateMarathon;
   } catch (error) {
     return {
       success: false,
@@ -87,7 +87,7 @@ export async function submitExamAction(
   revalidatePath("/simulados/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  const celebration = unlockedMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
+  const celebration = celebrateMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
   redirect(`/simulados/${slug}/resultado/${parsed.data.attemptId}${celebration}`);
 }
 
@@ -104,7 +104,7 @@ export async function submitExamTimeoutAction(
   const slug = formData.get("slug") as string;
   const { answers, essays } = parseExamSubmission(formData);
 
-  let unlockedMarathon = false;
+  let celebrateMarathon = false;
   try {
     const result = await submitAttempt(
       session.user.id,
@@ -112,7 +112,7 @@ export async function submitExamTimeoutAction(
       { answers, essays },
       { allowPartial: true },
     );
-    unlockedMarathon = result.newAchievements.includes(MARATHON_ACHIEVEMENT_KEY);
+    celebrateMarathon = result.celebrateMarathon;
   } catch (error) {
     return {
       success: false,
@@ -124,6 +124,6 @@ export async function submitExamTimeoutAction(
   revalidatePath("/simulados/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  const celebration = unlockedMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
+  const celebration = celebrateMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
   redirect(`/simulados/${slug}/resultado/${attemptId}${celebration}`);
 }

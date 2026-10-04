@@ -30,7 +30,9 @@ export default async function SimuladosPage({ searchParams }: Props) {
   const attemptCounts = session?.user?.id
     ? await getUserFinishedAttemptCounts(session.user.id)
     : {};
-  const longExam = exams.find((exam) => exam._count.questions >= 100);
+  const longExam =
+    exams.find((exam) => exam.slug === "maratona-matematica-100") ??
+    exams.find((exam) => exam._count.questions >= 100);
 
   return (
     <PageShell>

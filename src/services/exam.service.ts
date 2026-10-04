@@ -328,6 +328,8 @@ export async function submitAttempt(
   }
 
   const total = questions.length;
+  const celebrateMarathon =
+    attempt.studyMode === "FULL" && total >= 100 && answerRecords.length === total;
   const mcTotal = mcQuestions.length;
   const score = mcTotal > 0 ? Math.round((correct / mcTotal) * 100) : 0;
 
@@ -443,6 +445,7 @@ export async function submitAttempt(
     dailyAttemptIndex,
     dailyRewardMultiplier,
     newAchievements,
+    celebrateMarathon,
   };
 }
 

@@ -164,7 +164,7 @@ Container `hexavante-app` na VPS (`/opt/hexavante`):
 
 ```bash
 git fetch origin && git reset --hard origin/main
-docker build --no-cache -t hexavante-web .
+docker build --no-cache --build-arg NEXT_PUBLIC_APP_URL=https://app.hexavante.com.br -t hexavante-web .
 docker stop hexavante-app && docker rm hexavante-app
 docker run -d --name hexavante-app --network hexavante_default -p 3000:3000 \
   -v hexavante_uploads:/app/public/uploads \
@@ -175,7 +175,13 @@ docker run -d --name hexavante-app --network hexavante_default -p 3000:3000 \
   --restart unless-stopped hexavante-web
 ```
 
-Verificação: `curl` em `/`, `/login`, `/tutorials` + `docker logs` sem erro.
+Após reiniciar, ajuste o dono do volume de uploads se necessário:
+
+```bash
+docker exec hexavante-app chown -R nextjs:nodejs /app/public/uploads
+```
+
+Verificação: `curl` em `/`, `/login`, `/simulados` e `/tutorials` + `docker logs hexavante-app` sem erro.
 
 ### Solução de problemas
 
