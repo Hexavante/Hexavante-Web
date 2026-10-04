@@ -20,6 +20,7 @@ import { getLayoutSessionAndCosmetics } from "@/lib/layout-cosmetics";
 import { getNavAvatarUrl } from "@/lib/nav-avatar";
 import { toNavSession } from "@/lib/nav-session";
 import { getThemeMode, themeFxClasses } from "@/lib/cosmetics";
+import { INTRO_SCRIPT } from "@/lib/intro-decision";
 import { buildNativeMetadata, nativeViewport } from "@/lib/native-metadata";
 
 const grotesk = Space_Grotesk({
@@ -68,12 +69,10 @@ export default async function RootLayout({
       <head>
         {/* Decide a abertura da marca ANTES da primeira pintura: sem este
             script (rodando sincronamente no <head>), o overlay .hx-intro
-            ficaria oculto por padrão e piscaria depois da hidratação. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{document.documentElement.dataset.intro=sessionStorage.getItem("hx-intro-seen")?"done":"play"}catch(e){document.documentElement.dataset.intro="done"}`,
-          }}
-        />
+            ficaria oculto por padrão e piscaria depois da hidratação.
+            Regras em `src/lib/intro-decision.ts` (abre na 1ª visita da sessão
+            e a cada transição nova vinda do site de landing). */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
       </head>
       <body
         className={cn(grotesk.variable, "app-shell hx-native-safe-area antialiased font-sans", themeClass, themeFx)}

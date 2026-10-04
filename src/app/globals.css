@@ -6,6 +6,7 @@
 @import "../styles/theme-light.css";
 @import "../styles/pantera.css";
 @import "../styles/pantera-conquista.css";
+@import "../styles/logo-animada.css";
 
 @theme inline {
   --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
