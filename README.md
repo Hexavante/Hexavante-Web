@@ -133,7 +133,7 @@ npm run dev            # http://localhost:3000
 | Variável | Obrigatória | Para que |
 |---|---|---|
 | `DATABASE_URL` | Sim (`mysql://...` com `%2F` no lugar da `/` da senha) | Banco MySQL/MariaDB |
-| `AUTH_SECRET` | Sim (produção lança erro sem ela) | Assinatura dos tokens internos das rotas `/api/v1/*` (no `.env.example` ainda aparece como `NEXTAUTH_SECRET`, nome que o código não lê) |
+| `AUTH_SECRET` | Sim (produção lança erro sem ela) | Assinatura dos tokens internos das rotas `/api/v1/*` (mesmo nome no `.env.example`) |
 | `NEXT_PUBLIC_API_URL` | Sim | `https://api.hexavante.com.br` |
 | `NEXT_PUBLIC_APP_URL` | Sim | `https://app.hexavante.com.br` |
 | `RESEND_API_KEY` | Sim (e-mails) | Envio via Resend |

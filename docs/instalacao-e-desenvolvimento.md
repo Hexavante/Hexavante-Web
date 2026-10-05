@@ -41,7 +41,7 @@ copy .env.example .env      # Windows (CMD)
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
 | `DATABASE_URL` | Conexão MariaDB/MySQL (provider Prisma: `mysql`) | `mysql://root:senha@127.0.0.1:3306/hexavante` |
-| `AUTH_SECRET` | Assinatura dos tokens internos das rotas `/api/v1/*` — gere com o comando abaixo (o `.env.example` ainda usa o nome antigo `NEXTAUTH_SECRET`, que o código não lê) | string base64 de 32 bytes |
+| `AUTH_SECRET` | Assinatura dos tokens internos das rotas `/api/v1/*` — gere com o comando abaixo (mesmo nome no `.env.example`) | string base64 de 32 bytes |
 | `NEXT_PUBLIC_API_URL` | API pública (server + browser) | `http://localhost:3045` (dev) |
 | `NEXT_PUBLIC_APP_URL` | URL do app | `http://localhost:3000` (dev) |
 

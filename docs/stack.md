@@ -179,7 +179,7 @@ Exemplo — questões de múltipla escolha aceitam **2 a 6 alternativas** dinâm
 ```env
 # Obrigatórias
 DATABASE_URL="mysql://user:pass@host:3306/hexavante"
-AUTH_SECRET="..."          # usada pelo código; o .env.example ainda chama de NEXTAUTH_SECRET
+AUTH_SECRET="..."          # usada pelo código (mesmo nome no .env.example)
 NEXT_PUBLIC_API_URL="https://api.hexavante.com.br"
 NEXT_PUBLIC_APP_URL="https://app.hexavante.com.br"
 
