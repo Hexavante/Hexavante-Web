@@ -4,8 +4,8 @@
  * Duas camadas, mesmos casos:
  *  1. `shouldPlayIntro` (função pura, usada como especificação);
  *  2. `INTRO_SCRIPT` (o script real que roda no `<head>`), executado aqui com
- *     document/sessionStorage/location falsos para garantir que o inline
- *     continua em sincronia com a função pura.
+ *     document/sessionStorage/location/performance falsos para garantir que o
+ *     inline continua em sincronia com a função pura.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -17,28 +17,55 @@ import {
 const WEB_HOST = "app.hexavante.com.br";
 const LANDING = "hexavante.com.br";
 
+/** Executa o `INTRO_SCRIPT` real com argumentos falsos arbitrários. */
+function execScript(
+  documentFake: unknown,
+  storageFake: unknown,
+  locationFake: unknown,
+  performanceFake: unknown,
+) {
+  const run = new Function(
+    "document",
+    "sessionStorage",
+    "location",
+    "performance",
+    INTRO_SCRIPT,
+  );
+  run(documentFake, storageFake, locationFake, performanceFake);
+}
+
 /** Roda o script real com entradas controladas e devolve o resultado. */
 function runScript({
   referrer = "",
   currentHost = WEB_HOST,
   storage = {} as Record<string, string>,
+  navType = "navigate" as string | null,
 }: {
   referrer?: string;
   currentHost?: string;
   storage?: Record<string, string>;
+  /** `null` simula `performance` sem entradas de navegação (indisponível). */
+  navType?: string | null;
 }) {
   const store = new Map(Object.entries(storage));
   const dataset: Record<string, string> = {};
-  const run = new Function("document", "sessionStorage", "location", INTRO_SCRIPT);
-  run(
+  const performanceFake = {
+    getEntriesByType: (type: string) =>
+      type === "navigation" && navType !== null ? [{ type: navType }] : [],
+  };
+  execScript(
     { referrer, documentElement: { dataset } },
     {
       getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
       setItem: (k: string, v: string) => void store.set(k, String(v)),
     },
     { hostname: currentHost },
+    performanceFake,
   );
-  return { intro: dataset.intro as string | undefined, storage: { ...Object.fromEntries(store) } };
+  return {
+    intro: dataset.intro as string | undefined,
+    storage: { ...Object.fromEntries(store) },
+  };
 }
 
 describe("isLandingReferrer", () => {
@@ -59,7 +86,12 @@ describe("isLandingReferrer", () => {
 describe("shouldPlayIntro", () => {
   it("1) sem sessão prévia → play", () => {
     expect(
-      shouldPlayIntro({ seen: false, referrerHost: "", currentHost: WEB_HOST, replayKey: null }),
+      shouldPlayIntro({
+        seen: false,
+        referrerHost: "",
+        currentHost: WEB_HOST,
+        navType: "navigate",
+      }),
     ).toBe(true);
   });
 
@@ -69,42 +101,81 @@ describe("shouldPlayIntro", () => {
         seen: true,
         referrerHost: WEB_HOST,
         currentHost: WEB_HOST,
-        replayKey: null,
+        navType: "navigate",
       }),
     ).toBe(false);
   });
 
-  it("3) visto + referrer hexavante.com.br → play (1ª transição)", () => {
-    expect(
-      shouldPlayIntro({ seen: true, referrerHost: LANDING, currentHost: WEB_HOST, replayKey: null }),
-    ).toBe(true);
-  });
-
-  it("4) mesmo referrer-host já consumido na sessão (replayKey) → done", () => {
+  it("3) visto + referrer da landing em navegação nova → play", () => {
     expect(
       shouldPlayIntro({
         seen: true,
         referrerHost: LANDING,
         currentHost: WEB_HOST,
-        replayKey: LANDING,
+        navType: "navigate",
+      }),
+    ).toBe(true);
+  });
+
+  it("4) visto + referrer da landing em reload (F5) → done", () => {
+    expect(
+      shouldPlayIntro({
+        seen: true,
+        referrerHost: LANDING,
+        currentHost: WEB_HOST,
+        navType: "reload",
       }),
     ).toBe(false);
   });
 
-  it("5) referrer painel.hexavante.com.br → play (outro host de origem)", () => {
+  it("5) visto + referrer da landing em back_forward → play", () => {
+    expect(
+      shouldPlayIntro({
+        seen: true,
+        referrerHost: LANDING,
+        currentHost: WEB_HOST,
+        navType: "back_forward",
+      }),
+    ).toBe(true);
+  });
+
+  it("6) visto + referrer da landing sem navType (indisponível) → play", () => {
+    expect(
+      shouldPlayIntro({
+        seen: true,
+        referrerHost: LANDING,
+        currentHost: WEB_HOST,
+      }),
+    ).toBe(true);
+    expect(
+      shouldPlayIntro({
+        seen: true,
+        referrerHost: LANDING,
+        currentHost: WEB_HOST,
+        navType: "",
+      }),
+    ).toBe(true);
+  });
+
+  it("7) referrer painel.hexavante.com.br → play (nav nova)", () => {
     expect(
       shouldPlayIntro({
         seen: true,
         referrerHost: "painel.hexavante.com.br",
         currentHost: WEB_HOST,
-        replayKey: LANDING,
+        navType: "navigate",
       }),
     ).toBe(true);
   });
 
   it("sem referrer e já visto → done", () => {
     expect(
-      shouldPlayIntro({ seen: true, referrerHost: "", currentHost: WEB_HOST, replayKey: null }),
+      shouldPlayIntro({
+        seen: true,
+        referrerHost: "",
+        currentHost: WEB_HOST,
+        navType: "navigate",
+      }),
     ).toBe(false);
   });
 });
@@ -123,33 +194,45 @@ describe("INTRO_SCRIPT (script inline do layout)", () => {
     ).toMatchObject({ intro: "done" });
   });
 
-  it("3) visto + referrer da landing → play e registra o replay", () => {
+  it("3) visto + referrer da landing em navegação nova → play, sem gravar replay", () => {
     const { intro, storage } = runScript({
       referrer: `https://${LANDING}/precos`,
       storage: { "hx-intro-seen": "1" },
+      navType: "navigate",
     });
 
     expect(intro).toBe("play");
-    expect(storage["hx-intro-replay"]).toBe(LANDING);
+    expect(storage).not.toHaveProperty("hx-intro-replay");
   });
 
-  it("4) reload com o mesmo referrer-host já consumido → done", () => {
+  it("4) visto + referrer da landing em reload → done", () => {
     expect(
       runScript({
         referrer: `https://${LANDING}/precos`,
-        storage: { "hx-intro-seen": "1", "hx-intro-replay": LANDING },
+        storage: { "hx-intro-seen": "1" },
+        navType: "reload",
       }),
     ).toMatchObject({ intro: "done" });
   });
 
-  it("5) referrer painel.hexavante.com.br com replay da landing → play", () => {
-    const { intro, storage } = runScript({
-      referrer: "https://painel.hexavante.com.br/",
-      storage: { "hx-intro-seen": "1", "hx-intro-replay": LANDING },
-    });
+  it("5) visto + referrer da landing em back_forward → play", () => {
+    expect(
+      runScript({
+        referrer: `https://${LANDING}/precos`,
+        storage: { "hx-intro-seen": "1" },
+        navType: "back_forward",
+      }),
+    ).toMatchObject({ intro: "play" });
+  });
 
-    expect(intro).toBe("play");
-    expect(storage["hx-intro-replay"]).toBe("painel.hexavante.com.br");
+  it("6) referrer painel.hexavante.com.br em navegação nova → play", () => {
+    expect(
+      runScript({
+        referrer: "https://painel.hexavante.com.br/",
+        storage: { "hx-intro-seen": "1" },
+        navType: "navigate",
+      }),
+    ).toMatchObject({ intro: "play" });
   });
 
   it("referrer de outro domínio com sessão já vista → done", () => {
@@ -165,11 +248,33 @@ describe("INTRO_SCRIPT (script inline do layout)", () => {
     expect(runScript({ referrer: "" })).toMatchObject({ intro: "play" });
   });
 
+  it("performance sem entrada de navegação → conta como nav nova e play", () => {
+    expect(
+      runScript({
+        referrer: `https://${LANDING}/`,
+        storage: { "hx-intro-seen": "1" },
+        navType: null,
+      }),
+    ).toMatchObject({ intro: "play" });
+  });
+
+  it("performance indisponível (lança) → conta como nav nova e play", () => {
+    const dataset: Record<string, string> = {};
+    expect(() =>
+      execScript(
+        { referrer: `https://${LANDING}/`, documentElement: { dataset } },
+        { getItem: () => "1", setItem: () => {} },
+        { hostname: WEB_HOST },
+        undefined,
+      ),
+    ).not.toThrow();
+    expect(dataset.intro).toBe("play");
+  });
+
   it("storage indisponível → done (nunca lança)", () => {
     const dataset: Record<string, string> = {};
-    const run = new Function("document", "sessionStorage", "location", INTRO_SCRIPT);
     expect(() =>
-      run(
+      execScript(
         { referrer: `https://${LANDING}/`, documentElement: { dataset } },
         {
           getItem: () => {
@@ -178,6 +283,10 @@ describe("INTRO_SCRIPT (script inline do layout)", () => {
           setItem: () => {},
         },
         { hostname: WEB_HOST },
+        {
+          getEntriesByType: (type: string) =>
+            type === "navigation" ? [{ type: "navigate" }] : [],
+        },
       ),
     ).not.toThrow();
     expect(dataset.intro).toBe("done");

@@ -7,11 +7,17 @@
  * Comportamento:
  *  - primeira visita da sessão (sem `hx-intro-seen`) → abre;
  *  - vindo do site de landing (`hexavante.com.br` ou subdomínio, e host
- *    diferente do atual) → reabre, mesmo já tendo visto na sessão;
- *  - reload da mesma página com referrer externo já consumido → não repete
- *    (host de origem guardado em `hx-intro-replay`);
- *  - navegação interna (referrer = próprio host) ou referrer de outro domínio
- *    com sessão já vista → não abre.
+ *    diferente do atual) numa navegação NOVA (`navType !== "reload"`) →
+ *    reabre, mesmo já tendo visto na sessão: toda transição landing→web
+ *    toca a marca, 1ª, 2ª, 3ª… vez;
+ *  - reload com referrer de landing persistente (`navType === "reload"`) →
+ *    não repete (F5 não reabre a intro);
+ *  - navegação interna (referrer = próprio host), referrer de outro domínio
+ *    com sessão já vista, ou sem referrer já visto → não abre.
+ *
+ * `navType` vem de `performance.getEntriesByType("navigation")[0]?.type`
+ * (`"navigate" | "reload" | "back_forward"`); vazio/indisponível é tratado
+ * como não-reload (ou seja, pode tocar).
  *
  * Mantenha `INTRO_SCRIPT` e `shouldPlayIntro` em sincronia (o teste de
  * comportamento do script cobre exatamente os casos da função pura).
@@ -22,9 +28,6 @@ export const LANDING_HOST = "hexavante.com.br";
 
 /** `sessionStorage` — abertura já vista nesta sessão (gravada pelo BrandIntro). */
 export const INTRO_SEEN_KEY = "hx-intro-seen";
-
-/** `sessionStorage` — host de origem de landing cuja transição já foi consumida. */
-export const INTRO_REPLAY_KEY = "hx-intro-replay";
 
 /** Hostname do referrer veio do site de landing (e não é navegação interna)? */
 export function isLandingReferrer(
@@ -48,26 +51,30 @@ export function shouldPlayIntro(input: {
   referrerHost: string | null;
   /** Hostname atual (`location.hostname`). */
   currentHost: string;
-  /** Valor salvo em `hx-intro-replay` (host de origem já consumido). */
-  replayKey: string | null;
+  /**
+   * `performance.getEntriesByType("navigation")[0]?.type`
+   * (`"navigate" | "reload" | "back_forward"`). `""`/indisponível conta como
+   * não-reload.
+   */
+  navType?: string | null;
 }): boolean {
   if (!input.seen) return true;
   const fromLanding = isLandingReferrer(input.referrerHost, input.currentHost);
-  return fromLanding && input.referrerHost !== input.replayKey;
+  return fromLanding && input.navType !== "reload";
 }
 
 /**
  * Script bloqueante do `<head>` (roda antes do paint → sem flash).
- * Ele também grava `hx-intro-replay` quando decide `play` por origem de
- * landing, para que o reload seguinte caia em `done`.
+ * Lê `performance` para distinguir reload (não repete) de navegação nova
+ * (toda transição landing→web repete). Não grava nada no `sessionStorage`.
  */
 export const INTRO_SCRIPT = `
 try{
   var seen=sessionStorage.getItem("hx-intro-seen")==="1";
   var ref=document.referrer?new URL(document.referrer).hostname:"";
   var land=!!ref&&(ref==="hexavante.com.br"||ref.endsWith(".hexavante.com.br"))&&ref!==location.hostname;
-  var play=!seen||(land&&sessionStorage.getItem("hx-intro-replay")!==ref);
-  if(play&&land)sessionStorage.setItem("hx-intro-replay",ref);
+  var nav="";try{nav=(performance.getEntriesByType("navigation")[0]||{}).type||""}catch(n){}
+  var play=!seen||(land&&nav!=="reload");
   document.documentElement.dataset.intro=play?"play":"done";
 }catch(e){document.documentElement.dataset.intro="done"}
 `;
