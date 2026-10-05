@@ -6,7 +6,7 @@ A Hexavante é uma plataforma educacional voltada a estudantes do ensino médio 
 
 A plataforma integra cursos com vídeo externo, simulados (objetivos e dissertativos), gamificação (XP e moedas), certificados, loja virtual, comunidade social com mensagens privadas, aulas ao vivo e moderação de conteúdo.
 
-**Stack atual:** Next.js 16, TypeScript, Prisma, MariaDB, Auth.js, Tailwind. Ver [stack.md](stack.md) e [instalacao-e-desenvolvimento.md](instalacao-e-desenvolvimento.md).
+**Stack atual:** Next.js 16, TypeScript, Prisma, MariaDB, sessão validada na API (cookie + `AUTH_SECRET`), Tailwind. Ver [stack.md](stack.md) e [instalacao-e-desenvolvimento.md](instalacao-e-desenvolvimento.md).
 
 ---
 
@@ -14,18 +14,20 @@ A plataforma integra cursos com vídeo externo, simulados (objetivos e dissertat
 
 | Área | Funcionalidades |
 |------|-----------------|
-| **Autenticação** | Cadastro, login e-mail/senha, OAuth Google/GitHub, perfil editável, visibilidade pública/privada |
-| **Cursos** | Catálogo moderado, módulos, aulas (vídeo externo), capa, progresso, matrícula |
-| **Simulados** | MC (2–6 alternativas), dissertativas, cronômetro, imagens, capa, histórico, recompensas diárias de XP |
-| **Gamificação** | XP, níveis, moedas, ranking, boosters temporários |
+| **Autenticação** | Cadastro, login e-mail/senha, login social (Google, Microsoft, GitHub e Discord — fluxo de OAuth na API), perfil editável, visibilidade pública/privada |
+| **Cursos** | Catálogo moderado, módulos, aulas (vídeo externo), capa, progresso, matrícula, histórico de cursos |
+| **Simulados** | MC (2–6 alternativas), dissertativas, cronômetro, imagens, capa, histórico, recompensas diárias de XP, maratona de disciplina |
+| **Gamificação** | XP, níveis, moedas, ranking, boosters temporários, conquistas com celebração (ex.: Maratona Hexavante) |
 | **Loja** | Títulos, molduras, temas, cosméticos, boosters, passes, pacotes de revisão; premium trial |
-| **Social** | Seguidores, feed de atividades, curtidas |
+| **Pagamentos** | Compra de moedas e assinatura Hexa via Mercado Pago (checkout + retorno em `/pagamento/retorno`) |
+| **Onboarding** | Abertura animada da marca e tutorial em vídeo com 100 moedas |
+| **Social** | Seguidores, feed de atividades, curtidas, player de música flutuante |
 | **Mensagens** | DMs privadas 1:1 com inbox e notificações |
 | **Ao vivo** | Salas agendadas com chat público |
-| **Certificados** | Emissão ao concluir curso, verificação por código |
+| **Certificados** | Emissão ao concluir curso, verificação por código (página pública sem login) |
 | **Moderação** | Aprovação instrutor/curso, correção dissertativas, ban/mute, painel admin |
 
-Itens ainda **planejados** (não completos): planner de estudos, pagamentos reais, WebSocket em tempo real, avaliações de curso com nota.
+Itens ainda **planejados** (não completos): planner de estudos, WebSocket em tempo real, avaliações de curso com nota.
 
 ---
 

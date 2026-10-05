@@ -1,7 +1,8 @@
 # Hexavante — Informações Cruciais do Projeto
 
-> Última atualização: 2026-08-28
-> Repositório principal: `Hexavante/Hexavante` (Web) + `Hexavante/Hexavante-api` (API)
+> Última atualização: 2026-08-28 — **revisão pontual 2026-10-04** nos pontos marcados.
+> Este documento é um snapshot operacional. Fonte atual: `README.md` do repo e `AGENTS.md` da raiz.
+> Repositórios: `Hexavante` (Web) + `Hexavante-Api` (API) + `Hexavante-landing` + `Hexavante-admin`
 
 ---
 
@@ -10,12 +11,13 @@
 Plataforma educacional com:
 - **Web** Next.js 16 (Turbopack) — `https://app.hexavante.com.br`
 - **API** Fastify — `https://api.hexavante.com.br` (local `http://187.127.54.55:3045`)
-- **Desktop** Tauri (migração de Electron)
-- **Mobile** Capacitor (migração de React Native) — WebView compartilhando mesma UI web
+- **Desktop** Electron 33 + React/Vite (`Hexavante-Desktop`, releases GitHub)
+- **Mobile** Expo + React Native (`Hexavante-Mobile`, releases GitHub)
+- **Landing** `hexavante.com.br` (`Hexavante-landing`) e **Painel** `painel.hexavante.com.br` (`Hexavante-admin`)
 
-Auth é **sessão pura** (Prisma + bcryptjs, sem framework). OAuth (Google/GitHub) re-implementado manualmente, atualmente **desabilitado** até configurar credenciais no Google Cloud/GitHub.
+Auth é **sessão pura** (Prisma + bcryptjs, sem framework). OAuth manual na API com 4 providers (Google, GitHub, Microsoft, Discord) — botões no web.
 
-Comunidade (`/social`, discussões, reações) **completamente removida** de API e Web.
+Comunidade com discussões/reações foi removida; resta `/social` (feed de atividades) **sem link na sidebar**.
 
 ---
 
@@ -27,7 +29,7 @@ Comunidade (`/social`, discussões, reações) **completamente removida** de API
 | API | Fastify, Prisma, MySQL, Redis, bcryptjs |
 | DB | MySQL 8 (container `hexavante-mysql`), Redis |
 | Auth | Sessão custom `src/lib/session.ts` + `src/lib/password.ts` (bcryptjs) |
-| Upload | base64 em `LONGTEXT` (`avatar_url`, `banner_url`), Server Actions |
+| Upload | arquivos em disco (`/uploads/...`, rota runtime), Server Actions — base64 no banco encerrado |
 | Deploy | Docker Compose, Nginx, VPS Ubuntu |
 
 ---
@@ -35,10 +37,10 @@ Comunidade (`/social`, discussões, reações) **completamente removida** de API
 ## 3. Repositórios
 
 - Org GitHub: `Hexavante`
-  - `Hexavante` (Web) — `/home/kirsch/Programação/Hexavante-varias-versoes/Hexavante`
-  - `Hexavante-api` — `/home/kirsch/Programação/Hexavante-varias-versoes/Hexavante-api`
-  - `Hexavante-Desktop` (público, Tauri)
-  - `Hexavante-Mobile` (privado, Capacitor)
+  - `Hexavante-web` (Web) — `/home/kirsch/Programação/Hexavante-varias-versoes/Hexavante`
+  - `Hexavante-Api` — `/home/kirsch/Programação/Hexavante-varias-versoes/Hexavante-api`
+  - `Hexavante-landing` (público) / `Hexavante-admin` (público)
+  - `Hexavante-Desktop` (Electron) / `Hexavante-Mobile` (Expo)
 
 ---
 
@@ -46,29 +48,29 @@ Comunidade (`/social`, discussões, reações) **completamente removida** de API
 
 ### VPS
 - **IP:** `187.127.54.55` — user `root`, senha `<REDACTED — ver cofre>`
-- **Compose:** `/opt/hexavante/docker-compose.yml` — services `web`, `api`, `mysql`, `redis`
-- **Repos no VPS:** `/opt/hexavante/web`, `/opt/hexavante/api`
-- **Containers:** `hexavante-web` (3000), `hexavante-api` (3045), `hexavante-mysql`, `hexavante-redis`
+- **Checkouts:** `/opt/hexavante` (web), `/opt/hexavante-api`, `/opt/hexavante-landing`, `/opt/hexavante-admin`
+- **Containers:** `hexavante-app` (3000), `hexavante-api` (3045), `hexavante-landing` (3001), `hexavante-admin` (3002)
 - **Nginx:** `proxy_buffer_size 128k; proxy_buffers 4 256k;` (fix 502)
 
-### Deploy Manual
+### Deploy (fluxo atual — detalhes no README §Deploy)
 ```bash
-# Web
-cd /opt/hexavante/web && git fetch origin && git reset --hard origin/main
-cd /opt/hexavante && docker compose build web && docker compose up -d web
-
-# API
-cd /opt/hexavante/api && git pull origin main
-cd /opt/hexavante && docker compose build --no-cache api && docker compose up -d api
+cd /opt/hexavante && git fetch && git reset --hard origin/main
+docker build --no-cache -t hexavante-app .
+docker stop hexavante-app && docker rm hexavante-app
+docker run -d --name hexavante-app --network hexavante_default -p 3000:3000 \
+  -v hexavante_uploads:/app/public/uploads -e AUTH_SECRET=... <envs inline> hexavante-app
 
 # Limpeza se faltar espaço
 docker builder prune -af
 ```
 
+> O `docker-compose.yml` antigo (services `web`/`api` em `/opt/hexavante`) é legado — deploy
+> hoje é `docker build` + `docker run` por repo (ver `AGENTS.md` e `README.md`).
+
 ### Domínios
 - Web prod: `https://app.hexavante.com.br`
 - API prod: `https://api.hexavante.com.br`
-- Legado (301 → app): `hexavante.com.br`, `www.hexavante.com.br` (`src/middleware.ts:90`)
+- Landing: `https://hexavante.com.br` (repo `Hexavante-landing`, `:3001`)
 - Local: `http://localhost:3000` (web), `http://localhost:3045` (api)
 
 ---
@@ -120,15 +122,11 @@ docker builder prune -af
 - Opções: `httpOnly: true, secure: prod=true, sameSite: lax, path: /, maxAge: 7d, domain: .hexavante.com.br` (prod)
 - `AUTH_SECRET=<REDACTED — ver cofre>`
 
-### OAuth (Desabilitado)
-- Config: `Hexavante-api/src/config/oauth.ts` — Google + GitHub, Microsoft placeholder
-- Rotas API: `GET /oauth/:provider`, `GET /oauth/callback/:provider`
-- Web: `src/lib/oauth.ts` — providers comentados, `src/components/auth/oauth-buttons.tsx` oculto
-- **Para habilitar:** descomentar em `src/lib/oauth.ts` + configurar no VPS `docker-compose.yml`
-- **Credenciais no VPS:**
-  - `GOOGLE_CLIENT_ID=<REDACTED — ver Google Cloud Console>`
-  - `GOOGLE_CLIENT_SECRET=<REDACTED — ver Google Cloud Console>`
-- **Pendente:** adicionar `https://api.hexavante.com.br/oauth/callback/google` em Google Cloud Console → OAuth 2.0 Client → Authorized redirect URIs (erro `redirect_uri_mismatch` atual)
+### OAuth (ativo)
+- Config: `Hexavante-api/src/config/oauth.ts` — Google, GitHub, Microsoft, Discord (credenciais no `.env` da API)
+- Rotas API: `GET /oauth/providers`, `GET /oauth/:provider`, `GET /oauth/callback/:provider`, `POST /oauth/exchange`
+- Web: `src/components/auth/oauth-buttons.tsx` (4 providers)
+- Credenciais de produção só na VPS (nunca commitadas); redirect URI = `${API_URL}/oauth/callback/:provider`
 
 ---
 
@@ -167,7 +165,7 @@ docker builder prune -af
 - Rota: `src/app/(main)/perfil/[username]/page.tsx:13` — `auth()` + `getPublicProfile(username, viewer)` + `listUserEnrollments`
 - Service: `src/services/public-profile.service.ts:13` — `getUserByUsername` (select `avatarUrl, bannerUrl`), `getPublicProfile` (xp, rank, followCounts, etc.)
 - View: `src/components/profile/public-profile-view.tsx:60` — `hx-profile-card` + `hx-profile-banner` (180px, `background-size: cover` se `bannerUrl`)
-- Banner: upload em `src/components/profile/profile-banner-upload.tsx` — 8MB max, base64 `LONGTEXT`
+- Banner: upload em `src/components/profile/profile-banner-upload.tsx` — 8MB max, salvo como arquivo
 - Foto: `src/components/profile/profile-photo-upload.tsx` — resize client 512px JPEG 0.85, 5MB max, `updateProfilePhotoAction` (`src/app/actions/profile.ts:121`)
 
 ### Configurações
@@ -227,8 +225,7 @@ docker builder prune -af
 ### API (`/opt/hexavante/api/.env`)
 - `DATABASE_URL`
 - `AUTH_SECRET`
-- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (se habilitado)
-- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+- `GOOGLE_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET`
 - `NODE_ENV=production`, `PORT=3045`
 
 ### Nginx CSP Relevante
@@ -266,9 +263,7 @@ Commits relevantes: `855854b` (terminal), `8ba0df2` (banner), `ae36f94` (birthDa
 
 ## 14. Pendências e Próximos Passos
 
-- [ ] **OAuth:** configurar `https://api.hexavante.com.br/oauth/callback/google` no Google Cloud + habilitar em `src/lib/oauth.ts`
-- [ ] **GitHub OAuth:** callback `https://api.hexavante.com.br/oauth/callback/github`
-- [ ] **Tauri:** instalar deps sistema (`sudo apt ...`) pra compilar desktop
+- [x] **OAuth:** 4 providers ativos (2026-09), callbacks `/oauth/callback/:provider`
 - [ ] **Impersonation:** dead code em `user-table.tsx` / `moderation-admin.service.ts` ainda referencia endpoints removidos (falha silenciosa)
 - [ ] **Testes:** `cd Hexavante-api && npx vitest run`
 - [ ] **Limpeza:** `avatar_url` já `longtext` (ok), verificar `banner_url` em seed

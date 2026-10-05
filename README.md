@@ -75,18 +75,24 @@ Renderização híbrida: páginas de catálogo e painel são dinâmicas (`force-
 src/
 ├── app/
 │   ├── (main)/        # App com sidebar: app, courses, tutorials, simulados,
-│   │                  # perfil, ranking, shop, estatisticas, instructor/*,
-│   │                  # admin/*, configuracoes/*, live-rooms, certificados...
+│   │                  # perfil, ranking, shop, inventario, estatisticas, mensagens,
+│   │                  # instructor/*, configuracoes/*, live-rooms,
+│   │                  # certificados, notificacoes, social...
 │   ├── (landing)/     # Páginas públicas sem sidebar: home, cursos, ajuda, hexa
-│   └── (auth)/        # login, register, verificar-dispositivo, recuperar-senha
-├── app/api/upload/   # Upload de capas (course/exam/tutorial/question)
+│   └── (auth)/        # login, register, verificar-dispositivo, recuperar/redefinir-senha
+├── app/api/           # Rotas próprias /api/v1/* (login/session com token interno
+│                      # assinado em AUTH_SECRET), upload de capas, moderação,
+│                      # presença, busca, notificações, certificados
+├── app/pagamento/retorno/  # Retorno do Mercado Pago (rota pública)
+├── app/uploads/[...path]/  # Serve uploads do disco em runtime (standalone)
 ├── components/        # ui, courses, exams, tutorials, shop, gamification,
-│                      # moderation, profile, home, landing, presence, settings
+│                      # moderation, profile, home, landing, presence, settings,
+│                      # payments, onboarding (tutorial em vídeo), brand
 ├── services/          # Acesso a dados via Prisma
 ├── app/actions/       # Server Actions (CRUD, moderação, uploads, segurança)
 ├── lib/               # auth-session, permissions, cosmetics (temas), rate-limit,
 │                      # email (Resend), upload-client, account-switcher, client-device
-├── middleware.ts      # Sessão, manutenção, rotas públicas, /admin* (cookie admin)
+├── middleware.ts      # Sessão, manutenção, rotas públicas, /admin* → painel
 └── styles/            # themes, components (hx-*), animations, flavors, light-mode
 prisma/
 ├── schema.prisma      # Espelha a API em cobertura (ver docs/der-logico.md)
@@ -100,8 +106,11 @@ prisma/
 | `/app` | Logado | Painel do estudante |
 | `/courses`, `/tutorials`, `/simulados` | Mista | Catálogos internos (mesmo estilo) |
 | `/instructor/gerenciar` | Instrutor | Criar/editar/excluir conteúdo |
-| `/admin/*` | Moderador | Moderação (sessão `hx_admin_session` + código e-mail) |
+| `/admin/*` | — | **Redireciona** para o painel independente (`painel.hexavante.com.br`, repo `Hexavante-admin`) |
 | `/configuracoes/*` | Logado | Perfil, segurança/2FA, dispositivos, contas, notificações |
+| `/inventario`, `/mensagens`, `/notificacoes` | Logado | Cosméticos equipados, DMs, central de notificações |
+| `/pagamento/retorno` | Pública | Retorno do Mercado Pago (compra de moedas / assinatura Hexa) |
+| `/certificados/[código]` | Pública | Certificado verificável sem login |
 | `/login`, `/register`, `/verificar-dispositivo` | Pública | Auth com olhinho, cadastro completo, código de dispositivo |
 
 ### Setup
@@ -124,12 +133,13 @@ npm run dev            # http://localhost:3000
 | Variável | Obrigatória | Para que |
 |---|---|---|
 | `DATABASE_URL` | Sim (`mysql://...` com `%2F` no lugar da `/` da senha) | Banco MySQL/MariaDB |
-| `NEXTAUTH_SECRET` | Sim | Assinatura de sessão |
+| `AUTH_SECRET` | Sim (produção lança erro sem ela) | Assinatura dos tokens internos das rotas `/api/v1/*` (no `.env.example` ainda aparece como `NEXTAUTH_SECRET`, nome que o código não lê) |
 | `NEXT_PUBLIC_API_URL` | Sim | `https://api.hexavante.com.br` |
 | `NEXT_PUBLIC_APP_URL` | Sim | `https://app.hexavante.com.br` |
-| `NEXT_PUBLIC_LANDING_URL` | Não | `https://hexavante.com.br` |
 | `RESEND_API_KEY` | Sim (e-mails) | Envio via Resend |
 | `RESEND_FROM` | Sim | Remetente verificado (ex. `Hexavante <seguranca@hexavante.com.br>`) |
+| `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` | Não | Vídeo do tutorial de boas-vindas (padrão `/videos/tutorial.mp4`) |
+| `AUTH_API_URL` / `AUTH_URL` | Não | Sobrescrevem API/app usados no server-side |
 
 ### Scripts
 
@@ -138,6 +148,8 @@ npm run dev            # http://localhost:3000
 | `npm run dev` | Desenvolvimento |
 | `npm run build` | Build de produção (**obrigatório** antes de commitar UI) |
 | `npm start` | Roda o standalone |
+| `npm test` | Vitest (unit + componentes) |
+| `npm run lint` | ESLint |
 | `npx prisma migrate dev` | Nova migration (depois espelhar na API) |
 | `npx prisma studio` | Visualizar o banco |
 
@@ -145,18 +157,20 @@ npm run dev            # http://localhost:3000
 
 | Área | Descrição |
 |---|---|
-| 🎓 **Cursos** | Catálogo moderado, módulos, aulas em vídeo (YouTube/Vimeo/TeraBox/mp4), progresso, materiais, capas com upload. |
+| 🎓 **Cursos** | Catálogo moderado, módulos, aulas em vídeo (YouTube/Vimeo/TeraBox/mp4), progresso, materiais, capas com upload, histórico de cursos. |
 | 🎬 **Tutoriais** | Vídeos curtos da comunidade com miniaturas, views e tags. |
-| 📝 **Simulados** | Objetivas + dissertativas (correção manual), cronômetro, imagens, histórico. |
-| 🎮 **Gamificação** | XP, níveis, moedas, boosters, loja (13 categorias), inventário, ranking por temporada (fallback all-time), conquistas. |
-| 🎖️ **Certificados** | Emissão automática com código verificável + PDF. |
-| 💬 **Social/tempo real** | Salas ao vivo com chat, perfis com cosméticos, presença (online/ausente/estudando/não perturbe/invisível). |
-| 🔐 **Segurança** | 2FA por e-mail, código em dispositivo novo, multiconta, dispositivos conectados, brute-force limitado. |
-| 🛡️ **Moderação** (`/admin`) | Usuários, conteúdo, tutoriais, logs, terminal CLI, broadcast, manutenção. |
+| 📝 **Simulados** | Objetivas + dissertativas (correção manual), cronômetro, imagens, histórico, maratona de disciplina. |
+| 🎮 **Gamificação** | XP, níveis, moedas, boosters, loja (13 categorias), inventário, ranking por temporada (fallback all-time), conquistas (ex.: Maratona Hexavante) com celebração a cada conclusão. |
+| 🚀 **Marca e onboarding** | Abertura animada da marca (também na transição da landing), tutorial em vídeo com 100 moedas de recompensa. |
+| 💳 **Pagamentos** | Compra de moedas e assinatura Hexa via Mercado Pago (checkout + retorno em `/pagamento/retorno`). |
+| 🎖️ **Certificados** | Emissão automática com código verificável + PDF (página pública sem login). |
+| 💬 **Social/tempo real** | Salas ao vivo com chat, perfis com cosméticos, presença (online/ausente/estudando/não perturbe/invisível), player de música flutuante. |
+| 🔐 **Segurança** | 2FA por e-mail, código em dispositivo novo, multiconta, dispositivos conectados, brute-force limitado, login social (Google, Microsoft, GitHub, Discord). |
+| 🛡️ **Moderação** | Em repo próprio (`Hexavante-admin`, `painel.hexavante.com.br`): usuários, conteúdo, tutoriais, logs, terminal CLI, broadcast, manutenção. |
 
 ### Temas e acessibilidade
 
-16 temas (`src/lib/cosmetics.ts`): 12 escuros com assinatura visual própria + 4 claros (Neve, Luz do Dia, Creme, Pérola) com remap de legibilidade (`theme-light.css`). Fonte Space Grotesk global. Respeite `[data-theme-mode="light"]` em qualquer classe nova com cor hardcoded.
+13 temas (`src/lib/cosmetics.ts`): 9 escuros com assinatura visual própria + 4 claros (Neve, Luz do Dia, Creme, Pérola) com remap de legibilidade (`theme-light.css`). Fonte Space Grotesk global. Respeite `[data-theme-mode="light"]` em qualquer classe nova com cor hardcoded.
 
 ### Deploy
 
@@ -168,7 +182,7 @@ docker build --no-cache --build-arg NEXT_PUBLIC_APP_URL=https://app.hexavante.co
 docker stop hexavante-app && docker rm hexavante-app
 docker run -d --name hexavante-app --network hexavante_default -p 3000:3000 \
   -v hexavante_uploads:/app/public/uploads \
-  -e DATABASE_URL='...' -e NEXTAUTH_SECRET='...' \
+  -e DATABASE_URL='...' -e AUTH_SECRET='...' \
   -e NEXT_PUBLIC_API_URL='https://api.hexavante.com.br' \
   -e NEXT_PUBLIC_APP_URL='https://app.hexavante.com.br' \
   -e RESEND_API_KEY='...' -e RESEND_FROM='...' \
@@ -189,7 +203,7 @@ Verificação: `curl` em `/`, `/login`, `/simulados` e `/tutorials` + `docker lo
 |---|---|---|
 | `Unexpected token ... is not valid JSON` no upload | Rota retornou texto (500) | Ver `docker logs`; rotas de upload sempre retornam JSON |
 | Login volta para `/login` | Sessão sem cookie / `Response.ok` true para 202 | Checar `status === 202` antes de `!res.ok`; validar cookie |
-| `/admin` volta ao login | `getAdminSession` nulo ou middleware sem cookie admin | Ver sessão `hx_admin_session` e papéis |
+| Painel volta ao login | `getAdminSession` nulo ou cookie admin ausente | Ver sessão `hx_admin_session` e papéis no repo `Hexavante-admin` |
 | `db push` quer derrubar tabela | Schema divergente | Alinhar com o outro repo, nunca `--accept-data-loss` |
 | `Failed to find Server Action` | JS antigo no navegador após deploy | `Ctrl+Shift+R` |
 
@@ -212,7 +226,7 @@ Verificação: `curl` em `/`, `/login`, `/simulados` e `/tutorials` + `docker lo
 
 ### Documentação técnica (`docs/`)
 
-`visão-geral`, `requisitos-funcionais`, `regras-de-negocio`, `casos-de-uso`, `der-conceitual`, `der-logico`, `glossario`, `stack`, `permissoes`, `instalacao-e-desenvolvimento`, `deploy-producao`, `escopo-mvp` (+ `publicacao-cursos`, `PROJECT_INFO`).
+`visão-geral`, `requisitos-funcionais`, `regras-de-negocio`, `casos-de-uso`, `der-conceitual`, `der-logico`, `glossario`, `stack`, `permissoes`, `instalacao-e-desenvolvimento`, `deploy-producao`, `escopo-mvp` (+ `publicacao-cursos`, `monetizacao`, `PROJECT_INFO`).
 
 ---
 
@@ -220,4 +234,4 @@ Verificação: `curl` em `/`, `/login`, `/simulados` e `/tutorials` + `docker lo
 
 ## English (summary)
 
-Main Hexavante web app: Next.js 16 App Router + Tailwind v4 + Prisma/MariaDB, session auth via the API cookie, standalone Docker on `:3000` (`app.hexavante.com.br`). Courses, tutorials, exams, gamification, shop, live rooms, certificates, moderation (`/admin`) and full account security (2FA, devices, multi-account, presence). Build with `npm run build`; see `docs/` (in Portuguese) for the full technical documentation.
+Main Hexavante web app: Next.js 16 App Router + Tailwind v4 + Prisma/MariaDB, session auth via the API cookie, standalone Docker on `:3000` (`app.hexavante.com.br`). Courses, tutorials, exams, gamification, shop, live rooms, certificates, moderation (separate panel) and full account security (2FA, devices, multi-account, presence). Build with `npm run build`; see `docs/` (in Portuguese) for the full technical documentation.

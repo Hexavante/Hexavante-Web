@@ -13,11 +13,13 @@ Comercializados individualmente (marketplace na Fase 2).
 - Cursos oficiais Hexavante: **100%** para a plataforma
 - Cursos de instrutores: **85%** instrutor / **15%** Hexavante
 
-### Assinatura Premium
+### Premium (Hexa)
 
-**Implementado (demonstração TCC):** trial de 30 dias sem cobrança real, simulados premium, itens exclusivos na loja, multiplicador de moedas.
+**Implementado:** trial de 30 dias (demonstração TCC) **e assinatura paga via Mercado Pago**
+(`hexa_premium`, 30 dias com extensão acumulativa), simulados premium, itens exclusivos na
+loja, multiplicador de moedas.
 
-**Planejado (Fase 2):** cobrança recorrente (Stripe), download offline, benefícios completos abaixo.
+**Planejado (Fase 2):** auto-renovação recorrente, download offline, benefícios completos abaixo.
 
 Benefícios planejados:
 
@@ -40,9 +42,11 @@ Benefícios planejados:
 | Simulados | Apenas alguns |
 | Planner | Sim |
 | Gamificação | Sim |
-| Loja (moedas virtuais) | Sim (sem pagamento real) |
+| Loja (moedas virtuais) | Sim (pacotes pagos via Mercado Pago) |
 
-> Pagamentos reais (Stripe) ficam na Fase 2. Loja e premium trial são demonstrativos. Ver [escopo-mvp.md](escopo-mvp.md).
+> Hoje há pagamentos reais via Mercado Pago (pacotes de moedas e premium 30d), sem
+> recorrência. Marketplace de cursos (Stripe, split 85/15) continua na Fase 2.
+> Ver [escopo-mvp.md](escopo-mvp.md).
 
 ## HexaSchools (B2B)
 

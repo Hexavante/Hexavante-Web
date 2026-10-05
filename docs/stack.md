@@ -14,7 +14,7 @@ Documento de referência da arquitetura **implementada** no repositório.
 | Estilização | Tailwind CSS | 4.x |
 | Banco relacional | MariaDB / MySQL | 10.6+ / 8+ |
 | ORM | Prisma | 6.x |
-| Autenticação | Auth.js (NextAuth v5) | beta |
+| Autenticação | Sessão validada na API (cookie) + token interno (`jose`) | `AUTH_SECRET` |
 | Validação | Zod | 4.x |
 | Testes | Vitest + Testing Library | 2.x |
 | Processamento de imagem | sharp | uploads locais |
@@ -64,7 +64,7 @@ Documento de referência da arquitetura **implementada** no repositório.
 
 - **App Router** com Route Groups: `(main)`, `(auth)`, etc.
 - **Server Actions** para formulários (cursos, simulados, moderação).
-- **Route Handlers** para uploads (`/api/upload/*`), auth (`/api/auth/*`), PDF de certificados.
+- **Route Handlers** para uploads (`/api/upload/*`), auth interna (`/api/v1/auth/*`), PDF de certificados.
 - **React Server Components** nas páginas de listagem; componentes `"use client"` onde há estado (formulários, cronômetro).
 
 ---
@@ -73,24 +73,29 @@ Documento de referência da arquitetura **implementada** no repositório.
 
 - Provider: `mysql` (compatível com MariaDB).
 - Schema oficial: `prisma/schema.prisma` — espelha [der-logico.md](der-logico.md).
-- Migrations incrementais em `prisma/sql/` + scripts npm (`db:features`, `db:exam-cover`, etc.).
+- Migrations versionadas em `prisma/migrations/` + scripts SQL avulsos em `prisma/sql/` (`db:features`, `db:exam-cover`, etc.).
 - Client gerado em `node_modules/.prisma/client` — requer `npx prisma generate` após mudanças no schema.
 
 > Guia completo de setup: [instalacao-e-desenvolvimento.md](instalacao-e-desenvolvimento.md)
 
 ---
 
-## Autenticação (Auth.js v5)
+## Autenticação
+
+Login/senha e OAuth acontecem **na API** (`api.hexavante.com.br`); o web só consome resultado.
 
 | Método | Status |
 |--------|--------|
-| E-mail + senha (credenciais) | Implementado |
-| OAuth Google | Implementado |
-| OAuth GitHub | Implementado |
-| OAuth Microsoft | Planejado (Fase 2) |
+| E-mail + senha | Implementado (na API) |
+| OAuth Google | Implementado (na API) |
+| OAuth GitHub | Implementado (na API) |
+| OAuth Microsoft | Implementado (na API) |
+| OAuth Discord | Implementado (na API) |
 
-- Adapter Prisma customizado: `src/lib/auth-adapter.ts`
-- Sessões e papéis RBAC via tabelas `users`, `roles`, `user_roles`
+- Botões sociais em `src/components/auth/oauth-buttons.tsx` → `${API_URL}/oauth/{provider}`; lista de providers vem de `GET {API_URL}/oauth/providers` (`src/lib/oauth.ts`).
+- Sessão lida da API: `GET {API_URL}/api/v1/auth/session` (`src/lib/auth-session.ts`) no cookie `__Secure-hexavante.session_token`.
+- Rotas próprias `/api/v1/*` assinam/verificam token interno com `AUTH_SECRET` (`src/lib/api-auth.ts`, `src/lib/auth-env.ts`).
+- Sessões e papéis RBAC via tabelas `users`, `roles`, `user_roles`.
 - Helpers: `isInstructor()`, `canModerate()`, `isAdmin()` em `src/lib/permissions.ts`
 
 ---
@@ -174,17 +179,20 @@ Exemplo — questões de múltipla escolha aceitam **2 a 6 alternativas** dinâm
 ```env
 # Obrigatórias
 DATABASE_URL="mysql://user:pass@host:3306/hexavante"
-AUTH_SECRET="..."
-AUTH_URL="http://localhost:3000"
+AUTH_SECRET="..."          # usada pelo código; o .env.example ainda chama de NEXTAUTH_SECRET
+NEXT_PUBLIC_API_URL="https://api.hexavante.com.br"
+NEXT_PUBLIC_APP_URL="https://app.hexavante.com.br"
 
-# OAuth (opcional em dev)
-AUTH_GOOGLE_ID=""
-AUTH_GOOGLE_SECRET=""
-AUTH_GITHUB_ID=""
-AUTH_GITHUB_SECRET=""
+# E-mails (Resend)
+RESEND_API_KEY=""
+RESEND_FROM=""
+
+# Opcional
+NEXT_PUBLIC_TUTORIAL_VIDEO_URL="/videos/tutorial.mp4"
+AUTH_URL="http://localhost:3000"
 ```
 
-Template completo: `.env.example` na raiz do projeto.
+> O OAuth (Google/Microsoft/GitHub/Discord) é configurado **na API**, não neste repo.
 
 ---
 
@@ -195,7 +203,7 @@ Template completo: `.env.example` na raiz do projeto.
 | Redis / filas | Fase 2 |
 | WebSocket (chat/DMs em tempo real) | Fase 2 — hoje usa polling |
 | Upload de vídeo próprio | — (vídeos externos: YouTube/Vimeo) |
-| Pagamentos (Stripe) | Fase 2 |
-| App mobile nativo | Fase 3 |
+| Marketplace de cursos e cobrança recorrente | Fase 2 (compra de moedas e assinatura Hexa já usam Mercado Pago) |
+| App mobile/desktop nativos | Feito — `Hexavante-Mobile` e `Hexavante-Desktop` são repos separados |
 
 Escopo do TCC: [escopo-mvp.md](escopo-mvp.md).

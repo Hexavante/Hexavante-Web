@@ -102,7 +102,7 @@ Cada caso de uso segue o padrão:
 
 1. Usuário acessa `/login`.
 2. Informa e-mail e senha.
-3. Sistema valida credenciais via Auth.js.
+3. Sistema valida credenciais na API (`POST /api/v1/auth/login`).
 4. Sessão é criada; usuário acessa área logada.
 
 **Fluxos alternativos:**
@@ -129,12 +129,14 @@ Cada caso de uso segue o padrão:
 
 1. Usuário escolhe “Entrar com Google” em `/login`.
 2. Sistema redireciona para o provedor Google.
-3. Após consentimento, Auth.js cria ou vincula a conta.
+3. Após consentimento, a API cria ou vincula a conta (OAuth Google).
 4. Usuário retorna autenticado à plataforma.
 
 **Pós-condições:** sessão ativa; conta criada na primeira autenticação, se necessário.
 
-**Rotas:** `/login`, callback OAuth Auth.js
+**Rotas:** `/login`, callback OAuth na API (`/oauth/callback/google`)
+
+> Mesmo fluxo para Microsoft, GitHub e Discord — botões em `/login`, providers em `GET {API_URL}/oauth/providers`.
 
 ---
 

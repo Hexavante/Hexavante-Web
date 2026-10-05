@@ -82,23 +82,23 @@ Documentação técnica: [stack.md](stack.md), [glossario.md](glossario.md).
 
 ## Fora do MVP (Fase 2 — pós-TCC)
 
+> **Revisão 2026-10-04:** saíram desta lista (hoje implementados) — loja com catálogo e inventário,
+> pagamentos reais via Mercado Pago (pacotes de moedas + premium 30d), aulas ao vivo com chat,
+> notificações in-app/push/e-mail, login Microsoft e Discord, apps desktop e mobile.
+
 | Funcionalidade | Motivo |
 |----------------|--------|
-| Marketplace e pagamentos reais | Integração financeira (Stripe, split 85/15) |
-| Assinatura Premium funcional | Cobrança recorrente |
-| Loja Hexavante completa | Catálogo de itens, compras |
-| Aulas ao vivo | WebRTC/infraestrutura |
+| Marketplace de cursos pagos | Compra individual de curso, split 85/15 (código ainda não existe) |
+| Renovação recorrente da assinatura | Premium hoje é recarga de 30d via Mercado Pago, sem auto-renovação |
+| WebRTC nas aulas ao vivo | Salas com chat existem; falta transmissão de vídeo |
 | Chat em tempo real (WebSocket) | Polling usado em chat ao vivo e DMs |
 | Download offline | App mobile + sync |
 | Planner (metas e tarefas) | RF021–RF026 |
-| Notificações push/e-mail | RF034 |
-| Login Microsoft | RF004 |
 | Redação e IA | Escopo futuro |
 | Correção automática de código | Escopo futuro |
 
 ## Fora do MVP (Fase 3 — visão longo prazo)
 
-- Aplicativos mobile e desktop nativos
 - IA para redação e correção de código
 - Analytics avançado
 - Sistema financeiro completo (HexaSchools + marketplace)

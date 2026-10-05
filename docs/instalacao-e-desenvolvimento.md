@@ -41,8 +41,9 @@ copy .env.example .env      # Windows (CMD)
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
 | `DATABASE_URL` | Conexão MariaDB/MySQL (provider Prisma: `mysql`) | `mysql://root:senha@127.0.0.1:3306/hexavante` |
-| `AUTH_SECRET` | Segredo do Auth.js — gere com o comando abaixo | string base64 de 32 bytes |
-| `AUTH_URL` | URL pública da aplicação | `http://localhost:3000` (dev) |
+| `AUTH_SECRET` | Assinatura dos tokens internos das rotas `/api/v1/*` — gere com o comando abaixo (o `.env.example` ainda usa o nome antigo `NEXTAUTH_SECRET`, que o código não lê) | string base64 de 32 bytes |
+| `NEXT_PUBLIC_API_URL` | API pública (server + browser) | `http://localhost:3045` (dev) |
+| `NEXT_PUBLIC_APP_URL` | URL do app | `http://localhost:3000` (dev) |
 
 Gerar `AUTH_SECRET`:
 
@@ -50,17 +51,12 @@ Gerar `AUTH_SECRET`:
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-### OAuth (opcional em dev, recomendado em produção)
+### OAuth — configurado na API
 
-| Variável | Descrição |
-|----------|-----------|
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Login Google |
-| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | Login GitHub |
-
-Callbacks de desenvolvimento:
-
-- Google: `http://localhost:3000/api/auth/callback/google`
-- GitHub: `http://localhost:3000/api/auth/callback/github`
+Login social (Google, Microsoft, GitHub e Discord) roda inteiro na API
+(`Hexavante-api`): credenciais `GOOGLE_*`, `GITHUB_*`, `MICROSOFT_*`, `DISCORD_*`
+e redirect `http://localhost:3045/oauth/callback/{provider}` em dev.
+Este repo apenas redireciona para `${API_URL}/oauth/{provider}`.
 
 ---
 
