@@ -1091,3 +1091,39 @@ html[data-intro="play"] .hx-intro {
     animation: none;
   }
 }
+
+/* ═══ Logo de conclusão de curso/simulado (conclusion-brand-logo.tsx) ═══ */
+
+/* Entrada discreta: scale + fade, sem chamar atenção demais. */
+.hx-conclusao-logo {
+  display: block;
+  animation: hx-logo-conclusao 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes hx-logo-conclusao {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Gate por tema: o SVG tem fundo #1B1B1C embutido, então em temas claros
+   (Neve, Luz do Dia, Creme, Pérola) ele não pode aparecer. O atributo vem
+   do SSR (src/app/layout.tsx → data-theme-mode) — CSS puro, sem JS. */
+html[data-theme-mode="light"] .hx-conclusao-logo {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-conclusao-logo {
+    animation: none;
+  }
+}

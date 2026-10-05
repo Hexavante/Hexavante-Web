@@ -12,6 +12,8 @@ export type ActionResult = {
   xpMessages?: string[];
   leveledUp?: boolean;
   newLevel?: number;
+  /** true quando esta conclusão completou o curso (100%) — vira selo na UI. */
+  courseCompleted?: boolean;
 };
 
 export async function enrollAction(courseId: string, courseSlug: string) {
@@ -56,6 +58,7 @@ export async function completeLessonAction(
       xpMessages,
       leveledUp: Boolean(levelUpAward),
       newLevel: levelUpAward?.newLevel,
+      courseCompleted: result.courseCompleted,
     };
   } catch (error) {
     return {

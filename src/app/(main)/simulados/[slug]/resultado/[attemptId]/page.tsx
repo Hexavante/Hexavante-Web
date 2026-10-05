@@ -8,6 +8,8 @@ import {
   getUserSubjectStats,
 } from "@/services/exam-learning.service";
 import { AppLink } from "@/components/ui/app-link";
+import { ConclusionBrandLogo } from "@/components/conclusion-brand-logo";
+import { PanteraMascote } from "@/components/pantera-mascote";
 import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -103,9 +105,20 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
         variant={passed ? "success" : pendingEssays > 0 ? "warning" : "warning"}
         className="p-6"
       >
-        <h1 className="text-2xl font-bold">Resultado</h1>
-        <p className="mt-1 opacity-90">{attempt.exam.title}</p>
-        <p className="mt-1 text-sm opacity-75">{modeLabel}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold">Resultado</h1>
+            <p className="mt-1 opacity-90">{attempt.exam.title}</p>
+            <p className="mt-1 text-sm opacity-75">{modeLabel}</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Selo de conquista — só em temas escuros (gate em animations.css) */}
+            <ConclusionBrandLogo className="h-16 w-16 rounded-xl object-cover shadow-lg shadow-black/30 ring-1 ring-white/15" />
+            {/* Página é re-visitável: pantera em modo idle (respirando), não "feliz".
+                A celebração grande continua sendo o PanteraConquista do maratona. */}
+            <PanteraMascote estado="idle" titulo="Pantera mascote do Hexavante" className="h-16 w-16" />
+          </div>
+        </div>
         <p className="mt-4 text-4xl font-bold">
           {pendingEssays > 0 ? "—" : `${Math.round(attempt.score)}%`}
         </p>

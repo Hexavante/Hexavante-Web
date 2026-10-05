@@ -87,6 +87,7 @@
 [data-theme-mode="light"] .text-violet-100 { color: #5b21b6; }
 [data-theme-mode="light"] .text-red-100 { color: #b91c1c; }
 [data-theme-mode="light"] .text-cyan-100 { color: #155e75; }
+[data-theme-mode="light"] .text-emerald-100 { color: #047857; }
 
 /* ---------- fundos ---------- */
 [data-theme-mode="light"] .bg-white\/\[0\.02\] { background-color: rgb(15 23 42 / 0.03); }

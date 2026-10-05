@@ -14,6 +14,8 @@ export type LessonCompleteResult = {
   progress: number; // Progresso do curso em porcentagem
   xpAwards: XpAward[]; // Lista de prêmios de XP ganhos
   totalXpEarned: number; // Total de XP ganho
+  /** true quando ESTA conclusão levou o curso a 100% (1ª vez). */
+  courseCompleted: boolean;
 };
 
 // Função para obter matrícula do usuário no curso
@@ -148,6 +150,10 @@ export async function markLessonComplete(
   // Calcula progresso em porcentagem
   const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
+  // Conclusão do curso: esta aula levou o progresso a 100% e o curso ainda
+  // não estava completo (mesma condição do bônus de curso lá embaixo).
+  const courseCompleted = !alreadyCompleted && progress >= 100 && !wasCourseComplete;
+
   // Atualiza progresso da matrícula
   await prisma.courseEnrollment.update({
     where: { id: enrollment.id },
@@ -218,7 +224,7 @@ export async function markLessonComplete(
     }
 
     // Verifica se curso foi concluído e concede XP
-    if (progress >= 100 && !wasCourseComplete) {
+    if (courseCompleted) {
       const courseAward = await awardXp(
         userId,
         XP_REWARDS.COURSE,
@@ -266,7 +272,7 @@ export async function markLessonComplete(
   // Calcula total de XP ganho
   const totalXpEarned = xpAwards.reduce((sum, award) => sum + award.amount, 0);
 
-  return { progress, xpAwards, totalXpEarned };
+  return { progress, xpAwards, totalXpEarned, courseCompleted };
 }
 
 // Função para obter aula com verificação de acesso

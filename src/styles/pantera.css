@@ -7,6 +7,9 @@
 .hx-pantera {
   --p-corpo: var(--pantera-corpo, #05070c);
   --p-realce: var(--pantera-realce, var(--accent, #3dc6db));
+  --p-boca: var(--p-corpo);
+  --p-borla: var(--p-corpo);
+  --p-contorno: transparent;
   display: block;
   overflow: visible;
 }
@@ -28,6 +31,24 @@
   stroke-width: 4;
   stroke-linejoin: round;
 }
+.hx-pantera .boca {
+  opacity: 0; /* só aparece com a boca aberta: evita fio na emenda da mandíbula */
+  transition: opacity 0.15s;
+  fill: var(--p-boca);
+  stroke: var(--p-boca);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.hx-pantera[data-estado="rugir"] .boca,
+.hx-pantera[data-estado="feliz"] .boca {
+  opacity: 1;
+}
+.hx-pantera .kb {
+  fill: var(--p-borla);
+  stroke: var(--p-borla);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
 .hx-pantera .c {
   fill: var(--p-realce);
 }
@@ -38,6 +59,43 @@
 .hx-pantera .c3 {
   fill: var(--p-realce);
   opacity: 0.55;
+}
+
+/* ── Tema claro: pantera branca com detalhes vermelhos ──────────────────
+   Usa [data-theme-mode="light"] (o mesmo atributo dos seus temas claros).
+   Vermelho fixo nos 4 temas claros; para trocar, defina --pantera-*-claro. */
+.hx-pantera .contorno {
+  display: none; /* só existe no tema claro */
+}
+[data-theme-mode="light"] .hx-pantera {
+  --p-corpo: var(--pantera-corpo-claro, #ffffff);
+  --p-realce: var(--pantera-realce-claro, #c8102e);
+  --p-contorno: var(--pantera-contorno-claro, #8a0f24);
+  --p-boca: var(--pantera-boca-claro, #9d0b22);
+  --p-borla: var(--pantera-contorno-claro, #8a0f24);
+}
+[data-theme-mode="light"] .hx-pantera .contorno {
+  display: inline;
+}
+/* borda branca maior que no escuro: esconde fios de contorno nas emendas */
+[data-theme-mode="light"] .hx-pantera .k,
+[data-theme-mode="light"] .hx-pantera .boca {
+  stroke-width: 3;
+}
+[data-theme-mode="light"] .hx-pantera .kt {
+  stroke-width: 6;
+}
+.hx-pantera .ck,
+.hx-pantera .ckt {
+  fill: var(--p-contorno);
+  stroke: var(--p-contorno);
+  stroke-linejoin: round;
+}
+.hx-pantera .ck {
+  stroke-width: 9;
+}
+.hx-pantera .ckt {
+  stroke-width: 12;
 }
 
 /* ── Pivôs ── */
