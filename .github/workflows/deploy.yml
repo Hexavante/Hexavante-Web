@@ -1,0 +1,51 @@
+name: Deploy Web to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-web
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.ENABLE_VPS_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          set -Eeuo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${VPS_PORT:-22}" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Sync source
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -Eeuo pipefail
+          ssh -p "${VPS_PORT:-22}" "$VPS_USER@$VPS_HOST" "mkdir -p '$DEPLOY_PATH'"
+          rsync -az --delete             --exclude '.git/'             --exclude '.github/'             --exclude '.env'             --exclude '.env.*'             --exclude 'node_modules/'             --exclude '.next/'             --exclude 'public/uploads/'             -e "ssh -p ${VPS_PORT:-22}"             ./ "$VPS_USER@$VPS_HOST:$DEPLOY_PATH/"
+
+      - name: Build and restart Web
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -Eeuo pipefail
+          ssh -p "${VPS_PORT:-22}" "$VPS_USER@$VPS_HOST" "cd '$DEPLOY_PATH' && docker build -t hexavante-web:latest . && ENV_ARG=''; [ -f .env ] && ENV_ARG='--env-file .env' || true; NET_ARG=''; API_NET=\$(docker inspect hexavante-api --format '{{range \$k,\$v := .NetworkSettings.Networks}}{{\$k}} {{end}}' 2>/dev/null | awk '{print \$1}'); [ -n \"\$API_NET\" ] && NET_ARG=\"--network \$API_NET\" || true; docker rm -f hexavante-web 2>/dev/null || true; docker run -d --name hexavante-web --restart unless-stopped -p 127.0.0.1:3000:3000 \$ENV_ARG \$NET_ARG hexavante-web:latest && docker image prune -f"
