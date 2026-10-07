@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> ## Software proprietário
+> Este repositório e seu conteúdo são propriedade confidencial da **Hexavante**. Não é concedida permissão para usar, copiar, modificar, distribuir, sublicenciar, realizar engenharia reversa ou criar obras derivadas sem autorização prévia e escrita da Hexavante.
+>
+> Consulte [LICENSE](LICENSE) para os termos completos. Acesso ao código não constitui concessão de licença.
+
 <p align="center">
   <img src="public/brand/hexavante-logo.png" width="120" alt="Hexavante" />
 </p>
