@@ -45,6 +45,7 @@ import {
 
 type NavItem = {
   icon: LucideIcon;
+  iconSrc?: string;
   label: string;
   href: string;
   requiresAuth?: boolean;
@@ -62,28 +63,52 @@ const NAV_SECTIONS: NavSection[] = [
   {
     id: "home",
     label: "Início",
-    items: [{ icon: Compass, label: "Painel", href: "/app" }],
+    items: [{ icon: Compass, iconSrc: "/sidebar/painel.png", label: "Painel", href: "/app" }],
   },
   {
     id: "study",
     label: "Estudos",
     items: [
-      { icon: BookOpen, label: "Cursos", href: "/courses" },
-      { icon: History, label: "Histórico de cursos", href: "/courses/history", requiresAuth: true },
+      { icon: BookOpen, iconSrc: "/sidebar/cursos.png", label: "Cursos", href: "/courses" },
+      {
+        icon: History,
+        iconSrc: "/sidebar/historico-cursos.png",
+        label: "Histórico de cursos",
+        href: "/courses/history",
+        requiresAuth: true,
+      },
       { icon: Video, label: "Tutoriais", href: "/tutorials" },
-      { icon: Target, label: "Simulados", href: "/simulados" },
-      { icon: BarChart3, label: "Estatísticas", href: "/estatisticas", requiresAuth: true },
-      { icon: ShoppingBag, label: "Loja", href: "/shop", requiresAuth: true },
-      { icon: Package, label: "Inventário", href: "/inventario", requiresAuth: true },
+      { icon: Target, iconSrc: "/sidebar/simulados.png", label: "Simulados", href: "/simulados" },
+      {
+        icon: BarChart3,
+        iconSrc: "/sidebar/estatisticas.png",
+        label: "Estatísticas",
+        href: "/estatisticas",
+        requiresAuth: true,
+      },
+      { icon: ShoppingBag, iconSrc: "/sidebar/loja.png", label: "Loja", href: "/shop", requiresAuth: true },
+      {
+        icon: Package,
+        iconSrc: "/sidebar/inventario.png",
+        label: "Inventário",
+        href: "/inventario",
+        requiresAuth: true,
+      },
     ],
   },
   {
     id: "social",
     label: "Social",
     items: [
-      { icon: Radio, label: "Ao vivo", href: "/live-rooms", requiresAuth: true },
-      { icon: BarChart2, label: "Ranking", href: "/ranking" },
-      { icon: Award, label: "Certificados", href: "/certificados", requiresAuth: true },
+      { icon: Radio, iconSrc: "/sidebar/ao-vivo.png", label: "Ao vivo", href: "/live-rooms", requiresAuth: true },
+      { icon: BarChart2, iconSrc: "/sidebar/ranking.png", label: "Ranking", href: "/ranking" },
+      {
+        icon: Award,
+        iconSrc: "/sidebar/certificados.png",
+        label: "Certificados",
+        href: "/certificados",
+        requiresAuth: true,
+      },
       {
         icon: History,
         label: "Histórico de simulados",
@@ -190,7 +215,18 @@ function NavSectionBlock({
                 >
                   <Link href={href} title={item.label}>
                     <span className={cn("hx-sidebar-link-icon", active && "hx-sidebar-link-icon-active")}>
-                      <Icon className="h-4 w-4" />
+                      {item.iconSrc ? (
+                        <Image
+                          src={item.iconSrc}
+                          alt=""
+                          aria-hidden
+                          width={24}
+                          height={24}
+                          className="h-6 w-6 object-contain"
+                        />
+                      ) : (
+                        <Icon className="h-4 w-4" />
+                      )}
                     </span>
                     <span className="truncate">{item.label}</span>
                   </Link>
