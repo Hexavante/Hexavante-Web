@@ -29,7 +29,7 @@ services:
       DATABASE_URL: mysql://hexavante:${DB_PASSWORD}@mariadb:3306/hexavante
       AUTH_SECRET: ${AUTH_SECRET}
       AUTH_URL: ${AUTH_URL:-https://hexavante.com.br}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://hexavante.com.br}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://app.hexavante.com.br}
       INTERNAL_APP_URL: ${INTERNAL_APP_URL:-http://127.0.0.1:3000}
       AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
       AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
