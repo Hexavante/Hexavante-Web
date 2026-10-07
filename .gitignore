@@ -45,3 +45,10 @@ web/
 
 # Public uploads
 public/uploads/
+
+# IA / ferramentas de agente (locais, nunca versionar)
+.opencode/
+AGENTS.md
+CLAUDE.md
+.cursor/
+.claude/
