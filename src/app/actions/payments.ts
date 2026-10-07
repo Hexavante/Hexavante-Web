@@ -17,7 +17,7 @@ import { resolvePremiumState } from "@/services/premium.service";
  * Rotas que exibem moedas/saldo ou estado premium — atualizadas quando um
  * pagamento é aprovado (o cliente também faz router.refresh()).
  */
-const AFFECTED_PATHS = ["/app", "/shop", "/perfil", "/hexa", "/inventario"];
+const AFFECTED_PATHS = ["/app", "/shop", "/perfil", "/inventario"];
 
 export type PaymentsErrorCode =
   | "unauthorized"

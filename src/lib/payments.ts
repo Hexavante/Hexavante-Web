@@ -13,7 +13,7 @@ import { SERVER_API_URL } from "@/lib/api-url";
 /** productId fixo do plano premium. */
 export const PREMIUM_PRODUCT_ID = "hexa_premium";
 
-/** Timeout das chamadas à API (evita travar páginas públicas como /hexa). */
+/** Timeout das chamadas à API (evita travar páginas como /shop e o retorno de pagamento). */
 const PAYMENTS_TIMEOUT_MS = 10_000;
 
 export type PaymentPack = {

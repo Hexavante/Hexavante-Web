@@ -193,7 +193,7 @@ export function PaymentReturn({ externalReference }: Props) {
         <p className="mt-2 text-sm hx-text-muted">
           Seu Premium está ativo. Bom estudo!
         </p>
-        <LinkButton href="/hexa" className={PRIMARY_LINK_CLASS}>
+        <LinkButton href="/shop" className={PRIMARY_LINK_CLASS}>
           Ver meu Hexa
         </LinkButton>
       </>
@@ -212,10 +212,7 @@ export function PaymentReturn({ externalReference }: Props) {
             ? "A confirmação chega em instantes e o Hexa é ativado automaticamente."
             : "Pagamento em processamento — as moedas entram em instantes."}
         </p>
-        <LinkButton
-          href={isPremiumPayment ? "/hexa" : "/shop"}
-          className={PRIMARY_LINK_CLASS}
-        >
+        <LinkButton href="/shop" className={PRIMARY_LINK_CLASS}>
           {isPremiumPayment ? "Ver meu Hexa" : "Ir para a loja"}
         </LinkButton>
         <Button type="button" variant="outline" className="mt-3 w-full" onClick={retry}>
@@ -241,10 +238,7 @@ export function PaymentReturn({ externalReference }: Props) {
           {details[payment?.status ?? ""] ??
             "Não conseguimos concluir esse pagamento."}
         </p>
-        <LinkButton
-          href={isPremiumPayment ? "/hexa" : "/shop"}
-          className={PRIMARY_LINK_CLASS}
-        >
+        <LinkButton href="/shop" className={PRIMARY_LINK_CLASS}>
           Tentar de novo
         </LinkButton>
         <a

@@ -11,7 +11,7 @@ import { DashboardCommandCenter } from "@/components/home/dashboard-command-cent
 import { DashboardHighlightsPanel } from "@/components/home/dashboard-highlights-panel";
 import { TutorialVideoModal } from "@/components/onboarding/tutorial-video-modal";
 import { AchievementGrid } from "@/components/achievements/achievement-grid";
-import { ScrollReveal } from "@/components/landing/scroll-reveal";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { CertificateVortex } from "@/components/home/certificate-vortex";
 import { MarqueeShortcuts } from "@/components/home/marquee-shortcuts";
 import { getStudentHomeData } from "@/services/student.service";

@@ -73,7 +73,7 @@ describe("PaymentReturn", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver meu Hexa" })).toHaveAttribute(
       "href",
-      "/hexa",
+      "/shop",
     );
   });
 

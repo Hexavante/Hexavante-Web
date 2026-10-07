@@ -18,7 +18,7 @@ export type PremiumSessionSnapshot = {
 };
 
 /**
- * Estado premium mais atual para UI (loja /hexa, retorno de pagamento).
+ * Estado premium mais atual para UI (loja /shop, retorno de pagamento).
  * Usa os campos da sessão quando a API os expõe; caso contrário cai no banco
  * (mesma fonte usada pela loja), garantindo a data de expiração.
  */

@@ -1,5 +1,5 @@
 import { PageTransition } from "@/components/ui/page-transition";
-import { BackgroundMusic } from "@/components/landing/background-music";
+import { BackgroundMusic } from "@/components/background-music";
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   return (

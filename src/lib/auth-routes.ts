@@ -7,8 +7,6 @@ export const AUTH_PUBLIC_EXACT = new Set([
   "/manutencao",
   "/suspenso",
   "/privacidade",
-  "/hexa",
-  "/ajuda",
 ]);
 
 export const AUTH_PUBLIC_PREFIXES = [

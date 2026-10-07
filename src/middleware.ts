@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { siteUrl } from "@/lib/site-url";
 
 const MODERATOR_REQUIRED = /^\/admin(\/|$)/;
 
 const MAINTENANCE_EXEMPT =
-  /^\/(manutencao|suspenso|login|register|recuperar-senha|redefinir-senha|hexa|ajuda|pagamento)(\/|$)/;
+  /^\/(manutencao|suspenso|login|register|recuperar-senha|redefinir-senha|pagamento)(\/|$)/;
 
 const MAINTENANCE_CACHE_TTL_MS = 30_000;
 const MAINTENANCE_FETCH_TIMEOUT_MS = 2_000;
@@ -86,7 +87,6 @@ async function getSessionUser(cookieHeader: string | null) {
 // do middleware e o processamento da rota. As rotas fazem validação própria
 // via requireBearerAuth, mitigando o problema.
 
-const APP_HOST = "app.hexavante.com.br";
 const ADMIN_HOST = "painel.hexavante.com.br";
 
 function requestHost(req: NextRequest): string {
@@ -111,15 +111,23 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (hostname === APP_HOST && pathname === "/") {
-    return NextResponse.redirect(new URL("/app", origin));
-  }
-
   // A loja do web vive em /shop (sidebar, links e landing apontam pra lá).
   // "/loja" é o nome usado pelo app desktop/mobile — redireciona pra loja
   // real antes de tudo (sem layout/flash e sem página duplicada).
   if (pathname === "/loja") {
     return NextResponse.redirect(new URL("/shop", origin));
+  }
+
+  // Rotas públicas antigas que saíram do app: preserva bookmarks, links antigos e
+  // URLs indexadas. Precisa vir ANTES da checagem de login (publicPaths) logo abaixo.
+  const COMPAT_REDIRECTS: Record<string, string> = {
+    "/cursos": siteUrl("/cursos"),
+    "/ajuda": siteUrl("/ajuda"),
+    "/hexa": "/shop",
+  };
+  const compatTarget = COMPAT_REDIRECTS[pathname];
+  if (compatTarget) {
+    return NextResponse.redirect(new URL(compatTarget, origin));
   }
 
   const cookieHeader = req.headers.get("cookie");
@@ -133,7 +141,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const publicPaths = ["/", "/hexa", "/ajuda", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/cursos", "/certificados/c", "/admin-login", "/admin-verificar", "/pagamento"];
+  const publicPaths = ["/", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/certificados/c", "/admin-login", "/admin-verificar", "/pagamento"];
 
   // O painel admin usa sessão própria (cookie hx_admin_session). O layout
   // /admin valida de verdade; aqui só deixamos passar quem tem o cookie

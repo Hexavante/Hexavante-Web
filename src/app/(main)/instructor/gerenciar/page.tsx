@@ -5,7 +5,7 @@ import { BookOpen, Video, Radio, Plus, Settings, Target, Pencil } from "lucide-r
 import { canModerate, isInstructor } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
-import { ScrollReveal } from "@/components/landing/scroll-reveal";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { prisma } from "@/lib/prisma";
 import { listInstructorCourses } from "@/services/course.service";
 import { listInstructorLiveRooms } from "@/services/live-room.service";
