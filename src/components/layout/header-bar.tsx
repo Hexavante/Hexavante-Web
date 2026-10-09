@@ -23,7 +23,7 @@ function profileHref(username: string | null | undefined): string {
 export function HeaderBar({ session }: Props) {
   return (
     <header className="hx-header-bar sticky top-0 z-20">
-      <div className="flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+      <div className="flex h-full w-full items-center gap-2 px-3 sm:gap-3 sm:px-4">
         <SidebarToggleButton />
 
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">

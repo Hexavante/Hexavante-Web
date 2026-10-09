@@ -441,6 +441,7 @@
     top: 0;
     z-index: 20;
     min-height: var(--hx-header-height);
+    height: var(--hx-header-height);
     border-bottom: 1px solid hsl(var(--sidebar-border));
     background: color-mix(in srgb, hsl(var(--sidebar-background)) 94%, transparent);
     backdrop-filter: blur(20px);
@@ -845,6 +846,12 @@
   }
 
   .hx-sidebar-header {
+    /* Mesma altura da topbar → o border-b daqui e o border-bottom do
+       .hx-header-bar caem exatamente na mesma linha (sem "cruz" torta).
+       justify-content centraliza no eixo principal (flex-col = vertical);
+       align-items continua no eixo transversal (não centralizar horizontal). */
+    height: var(--hx-header-height);
+    justify-content: center;
     background: linear-gradient(135deg, hsl(var(--sidebar-highlight) / 0.1), transparent 55%);
   }
 
@@ -1010,6 +1017,16 @@
   .hx-sidebar-content {
     display: flex;
     flex-direction: column;
+    /* Oculta SÓ a aparência da scrollbar (a rolagem continua intacta):
+       sem isto a scrollbar clássica do Windows/Electron ocupa ~17px dentro
+       da sidebar e desloca os itens de navegação em relação ao brand. */
+    scrollbar-width: none; /* Firefox/Edge moderno */
+    -ms-overflow-style: none; /* Edge legado */
+  }
+
+  .hx-sidebar-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
   }
 
   /* Theme panel */

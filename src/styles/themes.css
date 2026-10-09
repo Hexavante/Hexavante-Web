@@ -15,7 +15,10 @@
   --cyan-glow: rgba(34, 211, 238, 0.22);
   --radius-lg: 0.75rem;
   --radius-xl: 0.875rem;
-  --hx-header-height: 4rem;
+  /* Altura real da topbar (box-sizing border-box), acompanhando os tamanhos
+     naturais do logo/pill por breakpoint. Consumido por .hx-header-bar,
+     .hx-sidebar-header e pelos offsets sticky (exam-timer, messages-shell). */
+  --hx-header-height: 4.75rem;
   --sidebar-background: 240 6% 7%;
   --sidebar-foreground: 210 20% 96%;
   --sidebar-accent: 217 25% 14%;
@@ -24,6 +27,21 @@
   --sidebar-ring: 217 91% 60%;
   --sidebar-highlight: 187 85% 53%;
   --focus-ring: hsl(var(--sidebar-highlight) / 0.45);
+}
+
+/* Breakpoints do header — reproduzem a altura natural da topbar
+   (mobile ~77px, sm ~81px, md+ ~85px). Declarados depois de :root para
+   vencerem na cascata; os blocos de tema abaixo não redeclaram este token. */
+@media (min-width: 640px) {
+  :root {
+    --hx-header-height: 5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --hx-header-height: 5.25rem;
+  }
 }
 
 /* Light Mode */

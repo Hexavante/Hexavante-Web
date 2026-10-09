@@ -21,6 +21,10 @@ html[data-native-shell="true"] .hx-page-md {
 
 html[data-native-shell="true"] .hx-header-bar {
   padding-top: env(safe-area-inset-top, 0px);
+  /* .hx-header-bar agora tem height fixo (border-box): sem este ajuste o
+     padding do notch comeria a altura útil do conteúdo. Soma o inset para
+     manter a mesma altura de conteúdo da web (env = 0 fora do nativo). */
+  height: calc(var(--hx-header-height) + env(safe-area-inset-top, 0px));
 }
 
 html[data-native-shell="true"] body {
