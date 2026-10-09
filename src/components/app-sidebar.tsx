@@ -14,7 +14,6 @@ import {
   History,
   Radio,
   Settings,
-  Shield,
   ShoppingBag,
   Package,
   Target,
@@ -25,7 +24,7 @@ import {
 import { ClientOnly } from "@/components/ui/client-only";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
-import { canModerate, isInstructor } from "@/lib/permissions";
+import { isInstructor } from "@/lib/permissions";
 import type { NavSession } from "@/lib/nav-session";
 import {
   Sidebar,
@@ -50,7 +49,6 @@ type NavItem = {
   href: string;
   requiresAuth?: boolean;
   requiresInstructor?: boolean;
-  requiresModerator?: boolean;
 };
 
 type NavSection = {
@@ -121,7 +119,6 @@ const NAV_SECTIONS: NavSection[] = [
 
 const ACCOUNT_ITEMS: NavItem[] = [
   { icon: Settings, label: "Gerenciar", href: "/instructor/gerenciar", requiresInstructor: true },
-  { icon: Shield, label: "Moderação", href: "https://painel.hexavante.com.br", requiresModerator: true },
 ];
 
 type Props = {
@@ -129,7 +126,6 @@ type Props = {
 };
 
 function isItemVisible(item: NavItem, session: NavSession): boolean {
-  if (item.requiresModerator && !canModerate(session?.user.roles)) return false;
   if (item.requiresInstructor && !isInstructor(session?.user.roles)) return false;
   return true;
 }
