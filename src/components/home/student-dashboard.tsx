@@ -20,7 +20,7 @@ import type { getStudentHomeData } from "@/services/student.service";
 import type { DailyPlan } from "@/services/daily-plan.service";
 
 type DashboardData = Awaited<ReturnType<typeof getStudentHomeData>> & {
-  dailyPlan?: DailyPlan;
+  dailyPlan?: DailyPlan | null;
   cosmetics?: {
     themeId: string | null;
     themeClassName: string;
