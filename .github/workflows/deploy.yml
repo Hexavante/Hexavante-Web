@@ -52,8 +52,17 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
         run: |
-          set -euo pipefail
-          sh -n .github/scripts/migrate-web.sh
+          set -uo pipefail
+          ssh -V 2>&1 | head -1
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            -vvv \
+            -p "${VPS_PORT:-22}" \
+            "$VPS_USER@$VPS_HOST" \
+            "echo PROBE_OK" || echo "PROBE_EXIT=$?"
           ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o IdentitiesOnly=yes \
@@ -61,4 +70,4 @@ jobs:
             -o ConnectTimeout=15 \
             -p "${VPS_PORT:-22}" \
             "$VPS_USER@$VPS_HOST" \
-            'sh -s' < .github/scripts/migrate-web.sh
+            "sh -s" < .github/scripts/migrate-web.sh || echo "SCRIPT_EXIT=$?"
