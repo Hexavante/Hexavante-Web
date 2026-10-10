@@ -43,3 +43,34 @@ jobs:
             -p "${VPS_PORT:-22}" \
             "$VPS_USER@$VPS_HOST" \
             "deploy web $GITHUB_SHA"
+
+      - name: Apply Prisma migrations (web)
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "${VPS_PORT:-22}" \
+            "$VPS_USER@$VPS_HOST" \
+            'set -eu
+             cid=$(docker ps -q -f name=^hexavante-web$ | head -n1)
+             if [ -z "$cid" ]; then cid=$(docker ps -q -f name=^hexavante-app$ | head -n1); fi
+             if [ -z "$cid" ]; then echo "container web nao encontrado"; docker ps; exit 1; fi
+             echo "container: $(docker inspect -f "{{.Name}}" "$cid")"
+             status=$(docker exec "$cid" npx prisma migrate status 2>&1) || true
+             echo "$status"
+             if printf "%s" "$status" | grep -qiE "P1[0-9]{3}|error:|failed"; then
+               echo "migrate status retornou erro — abortando"; exit 1
+             fi
+             pending=$(printf "%s\n" "$status" | awk "/have not yet been applied/{f=1;next} /^To apply migrations|^Database schema/{f=0} f" | tr -d "\r" | grep -E "^[0-9]{6,}" || true)
+             if [ -z "$pending" ]; then echo "Nenhuma migracao pendente."; exit 0; fi
+             echo "Pendentes:"; echo "$pending"
+             if [ "$(printf "%s\n" "$pending" | grep -c .)" -ne 1 ] || ! printf "%s\n" "$pending" | grep -q "20261010000000_registration_preferences"; then
+               echo "Pendencias inesperadas (fora da migracao deste deploy) — abortando migrate deploy automatico."; exit 1
+             fi
+             docker exec "$cid" npx prisma migrate deploy'
