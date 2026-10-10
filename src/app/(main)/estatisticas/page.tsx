@@ -4,13 +4,16 @@ import { auth } from "@/auth";
 import { PersonalStatsView } from "@/components/stats/personal-stats-view";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
-import { getPersonalStats } from "@/services/personal-stats.service";
+import { getPersonalStats, getPersonalStatsCharts } from "@/services/personal-stats.service";
 
 export default async function StatisticsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/estatisticas");
 
-  const stats = await getPersonalStats(session.user.id);
+  const [stats, charts] = await Promise.all([
+    getPersonalStats(session.user.id),
+    getPersonalStatsCharts(session.user.id),
+  ]);
 
   return (
     <PageShell>
@@ -24,7 +27,7 @@ export default async function StatisticsPage() {
       </div>
 
       <div className="anim-enter anim-d2">
-        <PersonalStatsView stats={stats} variant="full" showHeader={false} />
+        <PersonalStatsView stats={stats} charts={charts} variant="full" showHeader={false} />
       </div>
     </PageShell>
   );

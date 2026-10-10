@@ -25,6 +25,15 @@ export type PersonalStats = {
   studyStreakDays: number;
 };
 
+export type PersonalStatsCharts = {
+  xpTimeline: { date: string; xp: number; cumulativeXp: number }[];
+  weeklyProgress: { week: string; xp: number; lessons: number; exams: number; streak: number }[];
+  categoryDistribution: { category: string; value: number; color: string; label: string }[];
+  skillRadar: { skill: string; value: number; maxValue: number; color: string }[];
+  activityHeatmap: Record<string, number>;
+  studyTimeEstimate: number; // total minutes
+};
+
 function countConsecutiveDays(dates: Date[]): number {
   if (dates.length === 0) return 0;
 
@@ -50,6 +59,265 @@ function countConsecutiveDays(dates: Date[]): number {
   }
 
   return streak;
+}
+
+function getWeekLabel(date: Date): string {
+  const weekStart = new Date(date);
+  weekStart.setDate(date.getDate() - date.getDay());
+  return weekStart.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+async function fetchXpTimeline(userId: string): Promise<{ date: string; xp: number; cumulativeXp: number }[]> {
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  const transactions = await prisma.xpTransaction.findMany({
+    where: { userId, createdAt: { gte: ninetyDaysAgo } },
+    select: { amount: true, createdAt: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const dailyMap = new Map<string, number>();
+  for (const t of transactions) {
+    const dateStr = t.createdAt.toISOString().slice(0, 10);
+    dailyMap.set(dateStr, (dailyMap.get(dateStr) ?? 0) + t.amount);
+  }
+
+  // Fill missing days with 0
+  const result: { date: string; xp: number; cumulativeXp: number }[] = [];
+  let cumulative = 0;
+  const currentDate = new Date(ninetyDaysAgo);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().slice(0, 10);
+    const xp = dailyMap.get(dateStr) ?? 0;
+    cumulative += xp;
+    result.push({ date: dateStr, xp, cumulativeXp: cumulative });
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return result;
+}
+
+async function fetchWeeklyProgress(userId: string): Promise<{ week: string; xp: number; lessons: number; exams: number; streak: number }[]> {
+  const twelveWeeksAgo = new Date();
+  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84); // 12 weeks
+
+  const [xpTransactions, lessonProgresses, examAttempts] = await Promise.all([
+    prisma.xpTransaction.findMany({
+      where: { userId, createdAt: { gte: twelveWeeksAgo } },
+      select: { amount: true, createdAt: true },
+    }),
+    prisma.lessonProgress.findMany({
+      where: { userId, completed: true, completedAt: { gte: twelveWeeksAgo } },
+      select: { completedAt: true },
+    }),
+    prisma.examAttempt.findMany({
+      where: { userId, finishedAt: { gte: twelveWeeksAgo, not: null } },
+      select: { finishedAt: true },
+    }),
+  ]);
+
+  // Group by week
+  const weeklyMap = new Map<string, { xp: number; lessons: number; exams: number; dates: Set<string> }>();
+
+  for (const t of xpTransactions) {
+    const weekStart = new Date(t.createdAt);
+    weekStart.setDate(t.createdAt.getDate() - t.createdAt.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const key = weekStart.toISOString().slice(0, 10);
+    const entry = weeklyMap.get(key) ?? { xp: 0, lessons: 0, exams: 0, dates: new Set() };
+    entry.xp += t.amount;
+    weeklyMap.set(key, entry);
+  }
+
+  for (const lp of lessonProgresses) {
+    if (!lp.completedAt) continue;
+    const weekStart = new Date(lp.completedAt);
+    weekStart.setDate(lp.completedAt.getDate() - lp.completedAt.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const key = weekStart.toISOString().slice(0, 10);
+    const entry = weeklyMap.get(key) ?? { xp: 0, lessons: 0, exams: 0, dates: new Set() };
+    entry.lessons += 1;
+    entry.dates.add(lp.completedAt.toISOString().slice(0, 10));
+    weeklyMap.set(key, entry);
+  }
+
+  for (const ea of examAttempts) {
+    if (!ea.finishedAt) continue;
+    const weekStart = new Date(ea.finishedAt);
+    weekStart.setDate(ea.finishedAt.getDate() - ea.finishedAt.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const key = weekStart.toISOString().slice(0, 10);
+    const entry = weeklyMap.get(key) ?? { xp: 0, lessons: 0, exams: 0, dates: new Set() };
+    entry.exams += 1;
+    entry.dates.add(ea.finishedAt.toISOString().slice(0, 10));
+    weeklyMap.set(key, entry);
+  }
+
+  // Calculate streak per week (consecutive days with activity)
+  const result: { week: string; xp: number; lessons: number; exams: number; streak: number }[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let i = 11; i >= 0; i--) {
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay() - i * 7);
+    const key = weekStart.toISOString().slice(0, 10);
+    const entry = weeklyMap.get(key) ?? { xp: 0, lessons: 0, exams: 0, dates: new Set() };
+
+    // Calculate streak for this week
+    const sortedDates = Array.from(entry.dates).sort();
+    let streak = 0;
+    if (sortedDates.length > 0) {
+      streak = 1;
+      for (let j = 1; j < sortedDates.length; j++) {
+        const prev = new Date(sortedDates[j - 1]);
+        const curr = new Date(sortedDates[j]);
+        const diff = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff === 1) streak++;
+        else streak = 1;
+      }
+    }
+
+    result.push({
+      week: getWeekLabel(weekStart),
+      xp: entry.xp,
+      lessons: entry.lessons,
+      exams: entry.exams,
+      streak,
+    });
+  }
+
+  return result;
+}
+
+async function fetchCategoryDistribution(userId: string): Promise<{ category: string; value: number; color: string; label: string }[]> {
+  const enrollments = await prisma.courseEnrollment.findMany({
+    where: { userId },
+    include: {
+      course: {
+        select: {
+          category: { select: { name: true } },
+          modules: { select: { lessons: { select: { id: true } } } },
+        },
+      },
+      lessonProgresses: { where: { completed: true }, select: { lessonId: true } },
+    },
+  });
+
+  const categoryMap = new Map<string, { lessons: number; completed: number }>();
+
+  for (const e of enrollments) {
+    const catName = e.course.category?.name ?? "Outros";
+    const totalLessons = e.course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
+    const completedLessons = e.lessonProgresses.length;
+
+    const existing = categoryMap.get(catName) ?? { lessons: 0, completed: 0 };
+    existing.lessons += totalLessons;
+    existing.completed += completedLessons;
+    categoryMap.set(catName, existing);
+  }
+
+  const colors = [
+    "hsl(var(--sidebar-highlight))",
+    "#22d3ee",
+    "#f97316",
+    "#a78bfa",
+    "#4ade80",
+    "#fb7185",
+    "#fcd34d",
+    "#60a5fa",
+  ];
+
+  return Array.from(categoryMap.entries())
+    .map(([category, data], i) => ({
+      category,
+      value: data.completed,
+      color: colors[i % colors.length],
+      label: `${data.completed}/${data.lessons} aulas`,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 8);
+}
+
+async function fetchSkillRadar(userId: string): Promise<{ skill: string; value: number; maxValue: number; color: string }[]> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      xp: { select: { level: true, totalXp: true } },
+      enrollments: {
+        where: { progress: { gte: 100 } },
+        include: { course: { select: { level: true, modules: { select: { lessons: { select: { id: true } } } } } } },
+      },
+      lessonProgresses: { where: { completed: true }, select: { lessonId: true } },
+      examAttempts: { where: { finishedAt: { not: null } }, select: { score: true } },
+      certificates: { select: { id: true } },
+    },
+  });
+
+  if (!user) return [];
+
+  const completedCourses = user.enrollments.length;
+  const totalLessons = user.lessonProgresses.length;
+  const avgExamScore = user.examAttempts.length > 0
+    ? user.examAttempts.reduce((sum, e) => sum + e.score, 0) / user.examAttempts.length
+    : 0;
+  const certificates = user.certificates.length;
+  const level = user.xp?.level ?? 1;
+
+  // Define skills with max values for normalization
+  return [
+    { skill: "Progresso", value: completedCourses, maxValue: Math.max(completedCourses, 20), color: "hsl(var(--sidebar-highlight))" },
+    { skill: "Aulas", value: totalLessons, maxValue: Math.max(totalLessons, 200), color: "#22d3ee" },
+    { skill: "Simulados", value: user.examAttempts.length, maxValue: Math.max(user.examAttempts.length, 50), color: "#f97316" },
+    { skill: "Precisão", value: Math.round(avgExamScore), maxValue: 100, color: "#a78bfa" },
+    { skill: "Certificados", value: certificates, maxValue: Math.max(certificates, 10), color: "#4ade80" },
+    { skill: "Nível", value: level, maxValue: Math.max(level, 50), color: "#fcd34d" },
+  ];
+}
+
+async function fetchActivityHeatmap(userId: string): Promise<Record<string, number>> {
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  const [xpTransactions, lessonProgresses, examAttempts] = await Promise.all([
+    prisma.xpTransaction.findMany({
+      where: { userId, createdAt: { gte: ninetyDaysAgo } },
+      select: { createdAt: true },
+    }),
+    prisma.lessonProgress.findMany({
+      where: { userId, completed: true, completedAt: { gte: ninetyDaysAgo } },
+      select: { completedAt: true },
+    }),
+    prisma.examAttempt.findMany({
+      where: { userId, finishedAt: { gte: ninetyDaysAgo, not: null } },
+      select: { finishedAt: true },
+    }),
+  ]);
+
+  const activityMap: Record<string, number> = {};
+
+  for (const t of xpTransactions) {
+    const dateStr = t.createdAt.toISOString().slice(0, 10);
+    activityMap[dateStr] = (activityMap[dateStr] ?? 0) + 1;
+  }
+
+  for (const lp of lessonProgresses) {
+    if (!lp.completedAt) continue;
+    const dateStr = lp.completedAt.toISOString().slice(0, 10);
+    activityMap[dateStr] = (activityMap[dateStr] ?? 0) + 1;
+  }
+
+  for (const ea of examAttempts) {
+    if (!ea.finishedAt) continue;
+    const dateStr = ea.finishedAt.toISOString().slice(0, 10);
+    activityMap[dateStr] = (activityMap[dateStr] ?? 0) + 1;
+  }
+
+  return activityMap;
 }
 
 export async function getPersonalStats(userId: string): Promise<PersonalStats> {
@@ -128,5 +396,29 @@ export async function getPersonalStats(userId: string): Promise<PersonalStats> {
     xpThisWeek: xpThisWeek._sum.amount ?? 0,
     activeDays,
     studyStreakDays: countConsecutiveDays(dates),
+  };
+}
+
+export async function getPersonalStatsCharts(userId: string): Promise<PersonalStatsCharts> {
+  const [xpTimeline, weeklyProgress, categoryDistribution, skillRadar, activityHeatmap] = await Promise.all([
+    fetchXpTimeline(userId),
+    fetchWeeklyProgress(userId),
+    fetchCategoryDistribution(userId),
+    fetchSkillRadar(userId),
+    fetchActivityHeatmap(userId),
+  ]);
+
+  // Estimate study time: 15 min per lesson + 30 min per exam
+  const lessonsCompleted = await prisma.lessonProgress.count({ where: { userId, completed: true } });
+  const examsTaken = await prisma.examAttempt.count({ where: { userId, finishedAt: { not: null } } });
+  const studyTimeEstimate = lessonsCompleted * 15 + examsTaken * 30;
+
+  return {
+    xpTimeline,
+    weeklyProgress,
+    categoryDistribution,
+    skillRadar,
+    activityHeatmap,
+    studyTimeEstimate,
   };
 }

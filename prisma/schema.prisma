@@ -60,6 +60,7 @@ model User {
   trustedDevices     TrustedDevice[]
   deviceCodes        DeviceVerificationCode[]
   pushTokens         PushToken[]
+  dailyPlans         DailyPlan[]
   instructedCourses  CourseInstructor[]
   enrollments        CourseEnrollment[]
   lessonProgresses   LessonProgress[]
@@ -109,6 +110,22 @@ model User {
   contentPolicyViolations ContentPolicyViolation[]
 
   @@map("users")
+}
+
+model DailyPlan {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  date            DateTime @db.Date @map("plan_date")
+  tasks           Json     @default("[]")
+  completedTasks  Json     @default("[]")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("daily_plans")
 }
 
 model UserAchievement {

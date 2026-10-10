@@ -7,6 +7,7 @@ import { getUserAchievements } from "@/services/achievement.service";
 import { shouldShowOnboardingTour } from "@/services/onboarding.service";
 import { getDashboardHighlights } from "@/services/dashboard-goals.service";
 import { getDashboardPendingItems } from "@/services/dashboard-pending.service";
+import { getOrCreateDailyPlan } from "@/services/daily-plan.service";
 
 export async function getUserProfile(userId: string) {
   return prisma.user.findUnique({
@@ -102,7 +103,7 @@ export async function getStudentDashboard(userId: string) {
 }
 
 export async function getStudentHomeData(userId: string) {
-  const [dashboard, continuation, recommendations, stats, achievements, showOnboardingTour, highlights, pendingItems] =
+  const [dashboard, continuation, recommendations, stats, achievements, showOnboardingTour, highlights, pendingItems, dailyPlan] =
     await Promise.all([
       getStudentDashboard(userId),
       getStudyContinuation(userId),
@@ -112,6 +113,7 @@ export async function getStudentHomeData(userId: string) {
       shouldShowOnboardingTour(userId),
       getDashboardHighlights(userId),
       getDashboardPendingItems(userId),
+      getOrCreateDailyPlan(userId),
     ]);
 
   return {
@@ -123,5 +125,6 @@ export async function getStudentHomeData(userId: string) {
     showOnboardingTour,
     highlights,
     pendingItems,
+    dailyPlan,
   };
 }

@@ -9,31 +9,33 @@ import { StudyContinueHero } from "@/components/home/study-continue-hero";
 import { CourseRecommendations } from "@/components/home/course-recommendations";
 import { DashboardCommandCenter } from "@/components/home/dashboard-command-center";
 import { DashboardHighlightsPanel } from "@/components/home/dashboard-highlights-panel";
+import { DailyStudyPlan } from "@/components/home/daily-study-plan";
 import { TutorialVideoModal } from "@/components/onboarding/tutorial-video-modal";
 import { AchievementGrid } from "@/components/achievements/achievement-grid";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { CertificateVortex } from "@/components/home/certificate-vortex";
 import { MarqueeShortcuts } from "@/components/home/marquee-shortcuts";
 import { getStudentHomeData } from "@/services/student.service";
+import { getProfileCosmetics } from "@/services/shop.service";
 import Link from "next/link";
 
 const highlights = [
   {
     label: "Cursos",
     value: "Aprendizado guiado",
-    icon: BookOpen,
+    icon: "BookOpen",
     tone: "hx-accent-text bg-[hsl(var(--sidebar-highlight)/0.1)]",
   },
   {
     label: "Simulados",
     value: "Prática com desempenho",
-    icon: Target,
+    icon: "Target",
     tone: "text-teal-300 bg-teal-400/10",
   },
   {
     label: "Certificados",
     value: "Evolução registrada",
-    icon: Award,
+    icon: "Award",
     tone: "text-amber-300 bg-amber-400/10",
   },
 ];
@@ -47,10 +49,19 @@ const shortcuts = [
 
 export default async function HomePage() {
   const session = await auth();
-  const homeData = session?.user?.id ? await getStudentHomeData(session.user.id) : null;
+  const userId = session?.user?.id;
+
+  const [homeData, cosmetics] = userId
+    ? await Promise.all([
+        getStudentHomeData(userId),
+        getProfileCosmetics(userId),
+      ])
+    : [null, null];
+
+  const themeClass = cosmetics?.themeClassName ?? "theme-default";
 
   return (
-    <PageShell>
+    <PageShell className={themeClass}>
       {homeData?.showOnboardingTour && <TutorialVideoModal show />}
 
       {homeData && session?.user ? (
@@ -84,31 +95,41 @@ export default async function HomePage() {
                     <BarChart3 className="h-3.5 w-3.5" />
                     Ver estatísticas
                   </Link>
+                  <Link href="/plano-diario" className="hx-intro-chip">
+                    <span className="h-3.5 w-3.5">📋</span>
+                    Meu plano do dia
+                  </Link>
                 </div>
               </div>
             </section>
           </ScrollReveal>
 
-          <ScrollReveal delay={100}>
+          <ScrollReveal delay={80}>
             <StudyContinueHero continuation={homeData.continuation} />
           </ScrollReveal>
 
-          <ScrollReveal delay={200}>
+          {homeData.dailyPlan && (
+            <ScrollReveal delay={120}>
+              <DailyStudyPlan dailyPlan={homeData.dailyPlan} />
+            </ScrollReveal>
+          )}
+
+          <ScrollReveal delay={180}>
             <DashboardHighlightsPanel highlights={homeData.highlights} />
           </ScrollReveal>
 
-          <ScrollReveal delay={250}>
+          <ScrollReveal delay={220}>
             <DashboardCommandCenter pendingItems={homeData.pendingItems} />
           </ScrollReveal>
 
           <div className="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
             <div className="min-w-0 space-y-8">
-              <ScrollReveal>
+              <ScrollReveal delay={100}>
                 <CourseRecommendations courses={homeData.recommendations} />
               </ScrollReveal>
 
               {homeData.achievements.some((a) => a.unlocked) && (
-                <ScrollReveal delay={150}>
+                <ScrollReveal delay={180}>
                   <section>
                     <h2 className="mb-4 text-lg font-bold hx-text-title">Conquistas recentes</h2>
                     <AchievementGrid
@@ -121,10 +142,20 @@ export default async function HomePage() {
             </div>
 
             <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
-              <ScrollReveal delay={150}>
+              <ScrollReveal delay={140}>
                 <StudentDashboard
-                  data={homeData}
+                  data={{
+                    ...homeData,
+                    cosmetics: {
+                      themeId: cosmetics?.themeId ?? null,
+                      themeClassName: cosmetics?.themeClassName ?? "theme-default",
+                      avatarBorderClassName: cosmetics?.avatarBorderClassName ?? null,
+                      profileBackgroundId: cosmetics?.profileBackgroundId ?? null,
+                      frameId: cosmetics?.frameId ?? null,
+                    },
+                  }}
                   userName={session.user.name ?? session.user.username ?? "Estudante"}
+                  userAvatar={session.user.image ?? null}
                 />
               </ScrollReveal>
             </div>
@@ -164,14 +195,14 @@ export default async function HomePage() {
               </div>
               <div className="mt-5 grid gap-3">
                 {highlights.map((item) => {
-                  const Icon = item.icon;
+                  const IconComponent = item.icon === "BookOpen" ? BookOpen : item.icon === "Target" ? Target : Award;
                   return (
                     <div
                       key={item.label}
                       className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.04] p-4"
                     >
                       <span className={`grid h-10 w-10 place-items-center rounded-lg ${item.tone}`}>
-                        <Icon className="h-5 w-5" />
+                        <IconComponent className="h-5 w-5" />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-white">{item.label}</p>
