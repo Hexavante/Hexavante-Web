@@ -8,6 +8,11 @@ import {
   type NotificationView,
 } from "@/components/notifications/notification-item";
 import { cn } from "@/lib/cn";
+import {
+  listRecentNotificationsAction,
+  markAllNotificationsReadAction,
+  markNotificationReadAction,
+} from "@/app/actions/notifications";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
@@ -17,18 +22,7 @@ export function NotificationBell() {
 
   const loadNotifications = useCallback(async () => {
     try {
-      const response = await fetch("/api/notifications");
-      if (!response.ok) {
-        if (response.status === 401) {
-          setNotifications([]);
-          setUnreadCount(0);
-        }
-        return;
-      }
-      const data = (await response.json()) as {
-        notifications: NotificationView[];
-        unreadCount: number;
-      };
+      const data = await listRecentNotificationsAction();
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
     } catch {
@@ -67,8 +61,8 @@ export function NotificationBell() {
 
   const markAllRead = async () => {
     try {
-      const response = await fetch("/api/notifications", { method: "PATCH" });
-      if (!response.ok) return;
+      const result = await markAllNotificationsReadAction();
+      if (!result.success) return;
       setUnreadCount(0);
       setNotifications((current) =>
         current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })),
@@ -85,7 +79,7 @@ export function NotificationBell() {
       ),
     );
     setUnreadCount((count) => Math.max(count - 1, 0));
-    void fetch(`/api/notifications/${id}/read`, { method: "PATCH" }).catch(() => undefined);
+    void markNotificationReadAction(id).catch(() => undefined);
   }, []);
 
   return (

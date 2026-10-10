@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { redirectOnUnauthorized } from "@/lib/client-auth";
 import { formatMessageTime } from "@/lib/message-thread-format";
 import { usePollFeedback } from "@/hooks/use-poll-feedback";
+import { listInboxConversationsAction } from "@/app/actions/messages";
 
 export type InboxConversation = {
   id: string;
@@ -64,10 +65,12 @@ export function InboxList({ initialConversations, activeConversationId, currentU
 
   const refresh = useCallback(async () => {
     try {
-      const response = await fetch("/api/conversations");
-      if (response.status === 401) { redirectOnUnauthorized(); return; }
-      if (!response.ok) { onFailure(); return; }
-      const data = (await response.json()) as { conversations: InboxConversation[] };
+      const data = await listInboxConversationsAction();
+      if (!data.success) {
+        if (data.unauthorized) redirectOnUnauthorized();
+        else onFailure();
+        return;
+      }
       setConversations(data.conversations);
       onSuccess();
     } catch {

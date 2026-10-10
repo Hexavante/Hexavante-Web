@@ -6,6 +6,10 @@ import { useToast } from "@/components/ui/toast";
 import { usePollFeedback } from "@/hooks/use-poll-feedback";
 import { redirectOnUnauthorized } from "@/lib/client-auth";
 import type { SerializedDirectMessage } from "@/services/direct-message.service";
+import {
+  getConversationMessagesAction,
+  sendDirectMessageAction,
+} from "@/app/actions/messages";
 
 type Props = {
   conversationId: string;
@@ -55,18 +59,16 @@ export function MessageThreadWrapper({ conversationId, currentUserId, initialMes
 
     const poll = async () => {
       const last = messagesRef.current[messagesRef.current.length - 1];
-      const since = last ? encodeURIComponent(last.createdAt) : "";
-      const url = since
-        ? `/api/conversations/${conversationId}/messages?since=${since}`
-        : `/api/conversations/${conversationId}/messages`;
 
       try {
-        const response = await fetch(url);
+        const response = await getConversationMessagesAction(conversationId, last?.createdAt);
         if (!active) return;
-        if (response.status === 401) { redirectOnUnauthorized(); return; }
-        if (!response.ok) { onFailureRef.current(); return; }
-        const data = (await response.json()) as SerializedDirectMessage[];
-        mergeMessages(data);
+        if (!response.success) {
+          if (response.unauthorized) redirectOnUnauthorized();
+          else onFailureRef.current();
+          return;
+        }
+        mergeMessages(response.messages);
         onSuccessRef.current();
       } catch {
         if (active) onFailureRef.current();
@@ -94,35 +96,22 @@ export function MessageThreadWrapper({ conversationId, currentUserId, initialMes
     setMessages((c) => [...c, optimisticMsg]);
 
     try {
-      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
-      });
+      const result = await sendDirectMessageAction(conversationId, body);
 
-      if (response.status === 401) {
+      if (!result.success && result.error === "Faça login para enviar mensagens.") {
         setMessages((c) => c.filter((m) => m.id !== optimisticId));
         redirectOnUnauthorized();
         return;
       }
 
-      const data = (await response.json().catch(() => null)) as
-        | SerializedDirectMessage
-        | { error?: string }
-        | null;
-
-      if (!response.ok) {
+      if (!result.success) {
         setMessages((c) => c.filter((m) => m.id !== optimisticId));
-        const err =
-          data && typeof data === "object" && "error" in data && data.error
-            ? data.error
-            : "Erro ao enviar mensagem";
-        toast(err, "error");
+        toast(result.error ?? "Erro ao enviar mensagem", "error");
         return;
       }
 
-      if (data && "id" in data) {
-        setMessages((c) => c.map((m) => (m.id === optimisticId ? data : m)));
+      if (result.message) {
+        setMessages((c) => c.map((m) => (m.id === optimisticId ? result.message! : m)));
       }
     } catch {
       setMessages((c) => c.filter((m) => m.id !== optimisticId));

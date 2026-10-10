@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { usePollFeedback } from "@/hooks/use-poll-feedback";
+import { getUnreadMessageCountAction } from "@/app/actions/messages";
 
 export function MessagesNavBadge() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -12,13 +13,7 @@ export function MessagesNavBadge() {
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch("/api/messages/unread-count");
-      if (!response.ok) {
-        if (response.status === 401) setUnreadCount(0);
-        else onFailure();
-        return;
-      }
-      const data = (await response.json()) as { unreadCount: number };
+      const data = await getUnreadMessageCountAction();
       setUnreadCount(data.unreadCount ?? 0);
       onSuccess();
     } catch {
