@@ -1,5 +1,5 @@
 import { clearAllSessionCookies } from "@/lib/auth-cookies";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const login = new URL("/login", request.url);

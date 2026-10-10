@@ -115,14 +115,18 @@ export default async function HomePage() {
           )}
 
           <ScrollReveal delay={180}>
-            <DashboardHighlightsPanel highlights={homeData.highlights} />
-          </ScrollReveal>
-
-          <ScrollReveal delay={220}>
             <DashboardCommandCenter pendingItems={homeData.pendingItems} />
           </ScrollReveal>
 
-          <div className="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+          {(homeData.highlights.nextGoal ||
+            homeData.highlights.lastCertificate ||
+            homeData.highlights.nextLiveEvent) && (
+            <ScrollReveal delay={220}>
+              <DashboardHighlightsPanel highlights={homeData.highlights} />
+            </ScrollReveal>
+          )}
+
+          <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
             <div className="min-w-0 space-y-8">
               <ScrollReveal delay={100}>
                 <CourseRecommendations courses={homeData.recommendations} />

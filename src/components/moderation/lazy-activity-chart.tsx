@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 // Lazy load the ActivityChart component (uses recharts which is heavy)
 const ActivityChartComponent = dynamic(

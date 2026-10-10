@@ -1,7 +1,10 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getStudyContinuation } from "@/services/study-continuation.service";
 import { getRecommendedCourses } from "@/services/recommendation.service";
 import { listUserEnrollments } from "@/services/student.service";
+
+type Enrollment = Awaited<ReturnType<typeof listUserEnrollments>>[number];
 
 export type DailyPlanTask = {
   id: string;
@@ -33,12 +36,6 @@ function getTodayDateString(): string {
   return now.toISOString().slice(0, 10);
 }
 
-function getTomorrowDateString(): string {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().slice(0, 10);
-}
-
 function generateTaskId(type: string, referenceId: string): string {
   return `${type}-${referenceId}-${Date.now().toString(36)}`.slice(0, 50);
 }
@@ -56,7 +53,7 @@ export async function getOrCreateDailyPlan(userId: string): Promise<DailyPlan> {
       data: {
         userId,
         date: new Date(today),
-        tasks: tasks as any,
+        tasks: tasks as unknown as Prisma.InputJsonValue,
         completedTasks: [],
       },
     });
@@ -92,7 +89,6 @@ async function generateDailyTasks(userId: string): Promise<DailyPlanTask[]> {
   ]);
 
   const inProgressCourses = enrollments.filter((e) => e.progress < 100 && e.progress > 0);
-  const notStartedCourses = enrollments.filter((e) => e.progress === 0);
 
   // 1. Continuar aula atual (prioridade alta)
   if (continuation) {
@@ -197,7 +193,7 @@ async function generateDailyTasks(userId: string): Promise<DailyPlanTask[]> {
       type: "social",
       title: "Interagir na comunidade",
       description: "Comente em uma discussão ou siga um colega",
-      href: "/comunidade",
+      href: "/social",
       icon: "Users",
       estimatedMinutes: 5,
       xpReward: 15,
@@ -258,7 +254,7 @@ async function getTodaysExamSuggestion(userId: string) {
   return exam ? { exam } : null;
 }
 
-async function generateReviewTask(userId: string, inProgressCourses: any[]) {
+async function generateReviewTask(userId: string, inProgressCourses: Enrollment[]) {
   if (inProgressCourses.length === 0) return null;
 
   const completedCourse = await prisma.courseEnrollment.findFirst({
@@ -274,7 +270,7 @@ async function generateReviewTask(userId: string, inProgressCourses: any[]) {
     type: "review" as const,
     title: "Revisão espaçada",
     description: `Revise conceitos de ${completedCourse.course.title}`,
-    href: `/courses/${completedCourse.course.slug}/review`,
+    href: `/courses/${completedCourse.course.slug}`,
     icon: "RefreshCw",
     estimatedMinutes: 10,
     xpReward: 25,
@@ -285,7 +281,7 @@ async function generateReviewTask(userId: string, inProgressCourses: any[]) {
   };
 }
 
-async function getTodaysLiveSession(userId: string) {
+async function getTodaysLiveSession(_userId: string) {
   const now = new Date();
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);

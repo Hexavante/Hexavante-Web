@@ -551,6 +551,12 @@
     color: hsl(var(--sidebar-highlight));
   }
 
+  .hx-header-hud {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .hx-header-hud-coins {
     display: grid;
     grid-template-columns: auto auto;
@@ -605,10 +611,12 @@
 
   .hx-header-hud-xp {
     display: none;
-    width: 10.5rem;
-    min-width: 10.5rem;
+    width: clamp(9rem, 12vw, 12rem);
+    min-width: 9rem;
+    max-width: 12rem;
     grid-template-rows: auto auto;
     row-gap: 0.375rem;
+    overflow: hidden;
     border-radius: 0.5rem;
     border: 1px solid hsl(var(--sidebar-highlight) / 0.28);
     background: hsl(var(--sidebar-highlight) / 0.08);
@@ -647,24 +655,28 @@
   }
 
   .hx-header-hud-xp-row {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    display: flex;
     align-items: baseline;
-    column-gap: 0.5rem;
+    justify-content: space-between;
+    gap: 0.375rem;
     font-size: 0.75rem;
     line-height: 1.15;
+    min-width: 0;
   }
 
   .hx-header-hud-xp-level {
-    font-weight: 600;
+    font-weight: 700;
     color: hsl(var(--sidebar-highlight) / 0.9);
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .hx-header-hud-xp-count {
-    justify-self: end;
-    color: hsl(var(--sidebar-foreground) / 0.72);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    color: hsl(var(--sidebar-foreground) / 0.72);
     font-variant-numeric: tabular-nums;
     text-align: right;
   }

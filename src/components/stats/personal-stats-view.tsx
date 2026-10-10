@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Award,
@@ -59,10 +59,10 @@ export function PersonalStatsView({
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [mounted, setMounted] = useState(false);
 
-  // Client-side only for charts
-  if (typeof window !== "undefined") {
+  // Garante hidratação completa antes de renderizar gráficos client-only
+  useEffect(() => {
     setMounted(true);
-  }
+  }, []);
 
   if (compact) {
     return renderCompactView(stats);

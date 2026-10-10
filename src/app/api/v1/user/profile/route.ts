@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { type z } from "zod";
 import { ApiError, withApiErrorHandling } from "@/lib/api-error";
 import { requireBearerAuth } from "@/lib/api-auth";
 import { serializeUserProfile } from "@/lib/api-serialize";
