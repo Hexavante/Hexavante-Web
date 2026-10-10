@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUserXpProfile, getXpHistory } from "@/services/xp.service";
 import { getStudyContinuation } from "@/services/study-continuation.service";
@@ -113,7 +114,7 @@ export async function getStudentHomeData(userId: string) {
       shouldShowOnboardingTour(userId),
       getDashboardHighlights(userId),
       getDashboardPendingItems(userId),
-      getOrCreateDailyPlan(userId),
+      getDailyPlanWhenAvailable(userId),
     ]);
 
   return {
@@ -127,4 +128,20 @@ export async function getStudentHomeData(userId: string) {
     pendingItems,
     dailyPlan,
   };
+}
+
+/**
+ * Mantém o painel utilizável durante a janela entre o deploy e a aplicação da
+ * migration. A funcionalidade aparece automaticamente assim que a tabela for
+ * criada; qualquer outro erro continua sendo propagado para não esconder falhas.
+ */
+async function getDailyPlanWhenAvailable(userId: string) {
+  try {
+    return await getOrCreateDailyPlan(userId);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+      return null;
+    }
+    throw error;
+  }
 }
