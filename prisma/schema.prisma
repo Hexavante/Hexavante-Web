@@ -36,6 +36,8 @@ model User {
   updatedAt         DateTime  @updatedAt @map("updated_at")
   lastLogin         DateTime? @map("last_login")
   onboardingCompletedAt DateTime? @map("onboarding_completed_at")
+  registrationIntent String?   @db.VarChar(32) @map("registration_intent")
+  registrationPreferences Json? @map("registration_preferences")
   lastStudyCourseSlug   String?   @map("last_study_course_slug")
   lastStudyLessonId     String?   @map("last_study_lesson_id")
   lastStudyAt           DateTime? @map("last_study_at")

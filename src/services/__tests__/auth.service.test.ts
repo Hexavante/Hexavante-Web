@@ -32,6 +32,8 @@ describe("auth.service", () => {
         state: undefined,
         terms: true,
         birthDate: new Date("2000-01-01"),
+        accountType: "STUDENT" as const,
+        studyInterests: [],
       };
 
       prismaMock.user.findFirst.mockResolvedValue(null);
@@ -70,6 +72,8 @@ describe("auth.service", () => {
         state: undefined,
         terms: true,
         birthDate: new Date("2000-01-01"),
+        accountType: "STUDENT" as const,
+        studyInterests: [],
       };
 
       prismaMock.user.findFirst.mockResolvedValue({ email: mockData.email });
@@ -89,6 +93,8 @@ describe("auth.service", () => {
         state: undefined,
         terms: true,
         birthDate: new Date("2020-01-01"),
+        accountType: "STUDENT" as const,
+        studyInterests: [],
       };
 
       await expect(registerUser(mockData)).rejects.toThrow(

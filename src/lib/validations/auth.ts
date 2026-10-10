@@ -36,6 +36,14 @@ export const registerSchema = z.object({
     .optional()
     .transform((value) => value === "on" || value === "true")
     .refine((value) => value === true, "Você precisa aceitar os termos para continuar."),
+  accountType: z.enum(["STUDENT", "INSTRUCTOR"]).default("STUDENT"),
+  studyGoal: z.enum(["ENEM", "VESTIBULAR", "SCHOOL", "CAREER", "OTHER"]).optional(),
+  studyInterests: z
+    .string()
+    .optional()
+    .transform((value) => (value ?? "").split(",").map((item) => item.trim()).filter(Boolean).slice(0, 6)),
+  instructorMotivation: z.string().max(500, "Conte no máximo 500 caracteres.").optional(),
+  instructorExperience: z.string().max(500, "Descreva sua experiência em no máximo 500 caracteres.").optional(),
 }).superRefine((data, ctx) => {
   if (data.password !== data.confirmPassword) {
     ctx.addIssue({
@@ -60,6 +68,7 @@ export const registerSchema = z.object({
       message: "É necessário ter no mínimo 13 anos para se cadastrar.",
     });
   }
+
 });
 
 // Schema de validação para login

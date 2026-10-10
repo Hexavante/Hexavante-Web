@@ -6,6 +6,7 @@ import type { ZodError } from "zod";
 import { getApiUrl } from "@/lib/auth-session";
 import { addAccount } from "@/lib/account-switcher";
 import { getClientDevice } from "@/lib/client-device";
+import { saveRegistrationProfile } from "@/services/registration-profile.service";
 
 const WEB_ORIGIN =
   process.env.WEB_ORIGIN ||
@@ -75,6 +76,11 @@ export async function registerAction(
     city: formData.get("city") || undefined,
     state: formData.get("state") || undefined,
     terms: formData.get("terms") ? "on" : undefined,
+    accountType: formData.get("accountType") || "STUDENT",
+    studyGoal: formData.get("studyGoal") || undefined,
+    studyInterests: formData.get("studyInterests") || undefined,
+    instructorMotivation: formData.get("instructorMotivation") || undefined,
+    instructorExperience: formData.get("instructorExperience") || undefined,
   };
   const callbackUrl = (formData.get("callbackUrl") as string) || "/";
   if (!isSafeRedirect(callbackUrl)) {
@@ -156,6 +162,7 @@ export async function registerAction(
 
     if (loginRes.ok) {
       const loginData = await loginRes.json() as {
+        user?: { id: string };
         session?: { token: string; expiresAt: string };
       };
       if (loginData.session) {
@@ -172,6 +179,18 @@ export async function registerAction(
           await addAccount(loginData.session.token);
         } catch (e) {
           console.error("[auth] addAccount falhou (não bloqueante):", e);
+        }
+
+        if (loginData.user?.id) {
+          try {
+            await saveRegistrationProfile(loginData.user.id, parsed.data);
+          } catch (e) {
+            // A conta continua válida mesmo se a personalização falhar; evita
+            // registrar duas vezes quando o usuário tentar novamente.
+            console.error("[auth] não foi possível salvar escolhas do cadastro:", e);
+          }
+        } else {
+          console.warn("[auth] login sem user.id — escolhas do cadastro não foram salvas");
         }
       }
     }

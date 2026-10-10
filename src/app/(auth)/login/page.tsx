@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: Props) {
     : null;
 
   return (
-    <AuthPageShell>
+    <AuthPageShell variant="login">
       <OAuthButtons callbackUrl={safeCallback} providers={providers} />
 
       {oauthError && (
