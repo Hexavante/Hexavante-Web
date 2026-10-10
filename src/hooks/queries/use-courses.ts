@@ -1,63 +1,21 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getApiUrl } from "@/lib/api-url";
-
-const API_URL = getApiUrl();
+import {
+  enrollWebCourseAction,
+  getWebCourseAction,
+  listWebCoursesAction,
+  type WebCourseDetail,
+  type WebCourseQuery,
+  type WebCourseSummary,
+  type WebPaginatedResponse,
+} from "@/app/actions/web-course";
 
 // Types
-export interface Course {
-  id: string;
-  title: string;
-  slug: string;
-  shortDescription: string | null;
-  thumbnailUrl: string | null;
-  courseType: string;
-  level: string;
-  estimatedHours: number | null;
-  totalModules: number;
-  totalLessons: number;
-  instructorName: string;
-  createdAt: string;
-}
-
-export interface CourseDetail extends Course {
-  description: string | null;
-  coverImage: string | null;
-  progressionType: string;
-  status: string;
-  modules: {
-    id: string;
-    title: string;
-    description: string | null;
-    orderNumber: number;
-    lessons: {
-      id: string;
-      title: string;
-      description: string | null;
-      duration: number | null;
-      orderNumber: number;
-    }[];
-  }[];
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-export interface CourseQueryParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  level?: string;
-  courseType?: string;
-}
+export type Course = WebCourseSummary;
+export type CourseDetail = WebCourseDetail;
+export type PaginatedResponse<T> = WebPaginatedResponse<T>;
+export type CourseQueryParams = WebCourseQuery;
 
 // Query Keys
 export const courseKeys = {
@@ -72,31 +30,18 @@ export const courseKeys = {
 export function useCourses(params: CourseQueryParams = {}) {
   return useQuery({
     queryKey: courseKeys.list(params),
-    queryFn: async (): Promise<PaginatedResponse<Course>> => {
-      const searchParams = new URLSearchParams();
-      if (params.page) searchParams.set("page", String(params.page));
-      if (params.limit) searchParams.set("limit", String(params.limit));
-      if (params.search) searchParams.set("search", params.search);
-      if (params.level) searchParams.set("level", params.level);
-      if (params.courseType) searchParams.set("courseType", params.courseType);
-
-      const res = await fetch(
-        `${API_URL}/api/v1/courses?${searchParams.toString()}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch courses");
-      return res.json();
-    },
+    queryFn: () => listWebCoursesAction(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
-export function useCourse(id: string) {
+export function useCourse(slug: string) {
   return useQuery({
-    queryKey: courseKeys.detail(id),
+    queryKey: courseKeys.detail(slug),
     queryFn: async (): Promise<CourseDetail> => {
-      const res = await fetch(`${API_URL}/api/v1/courses/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch course");
-      return res.json();
+      const course = await getWebCourseAction(slug);
+      if (!course) throw new Error("Curso não encontrado");
+      return course;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -107,15 +52,9 @@ export function useEnrollCourse() {
 
   return useMutation({
     mutationFn: async (courseId: string) => {
-      const res = await fetch(`${API_URL}/api/v1/courses/${courseId}/enroll`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to enroll");
-      }
-      return res.json();
+      const result = await enrollWebCourseAction(courseId);
+      if (!result.success) throw new Error(result.error);
+      return result;
     },
     onSuccess: () => {
       // Invalidate and refetch course details
