@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LinkButton } from "@/components/ui/button";
 import type { RecommendedCourse } from "@/services/recommendation.service";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -15,10 +17,33 @@ type Props = {
 };
 
 export function CourseRecommendations({ courses }: Props) {
-  if (courses.length === 0) return null;
+  if (courses.length === 0) {
+    return (
+      <section data-tour="course-recommendations">
+        <div className="mb-4 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-violet-300" />
+          <h2 className="text-lg font-bold text-white">Recomendados para você</h2>
+        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="Nenhuma recomendação por enquanto"
+          description="Explore o catálogo de cursos ou pratique com simulados para descobrir o próximo passo."
+        >
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <LinkButton href="/courses" size="sm">
+              Explorar cursos
+            </LinkButton>
+            <LinkButton href="/simulados" variant="outline" size="sm">
+              Ver simulados
+            </LinkButton>
+          </div>
+        </EmptyState>
+      </section>
+    );
+  }
 
   return (
-    <section data-tour="course-recommendations" className="mt-8">
+    <section data-tour="course-recommendations">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">

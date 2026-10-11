@@ -115,7 +115,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
   const isComplete = dailyPlan.completedCount === dailyPlan.totalCount && dailyPlan.totalCount > 0;
 
   return (
-    <section className="mt-8" data-tour="daily-study-plan">
+    <section data-tour="daily-study-plan">
       {/* Header */}
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-in-left">
         <div className="flex items-center gap-3">
@@ -213,7 +213,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
       </div>
 
       {/* Tasks Grid */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {dailyPlan.tasks.map((task, i) => {
           const isCompleted = completedTasks.has(task.id);
           const isAnimating = animatingTask === task.id;

@@ -46,11 +46,11 @@ export function HeaderBar({ session }: Props) {
           </div>
         </div>
 
-        <nav className="flex shrink-0 items-center gap-1.5 text-sm sm:gap-2">
+        <nav className="flex min-w-0 max-w-full items-center gap-1.5 text-sm sm:gap-2">
           {session?.user ? (
             <>
               <Suspense fallback={<HeaderGamificationHudSkeleton />}>
-                <div data-tour="header-gamification">
+                <div data-tour="header-gamification" className="flex min-w-0 max-w-full">
                   <HeaderGamificationHud userId={session.user.id} />
                 </div>
               </Suspense>

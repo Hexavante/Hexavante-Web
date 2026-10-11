@@ -13,6 +13,7 @@ import { CookieBanner } from "@/components/ui/cookie-banner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { BrandIntro } from "@/components/brand-intro";
 import { ToastProvider } from "@/components/ui/toast";
+import { AchievementToastHost } from "@/components/achievements/achievement-toast-host";
 import { Providers } from "@/providers/query-provider";
 import { cn } from "@/lib/cn";
 import { isAccountSyncPending } from "@/lib/account-switcher";
@@ -88,6 +89,10 @@ export default async function RootLayout({
                 themeClassName={cosmetics.themeClassName}
               />
               <ThemeEquipOverlay />
+              {/* Toast global de conquistas (hx:achievement-unlocked) — montado
+                  UMA vez aqui. Não confundir com o ConquistaPanteraHost
+                  (hx:conquista, só maratona) montado no AppShell. */}
+              <AchievementToastHost />
               {navSession && <PresenceHeartbeat />}
               {accountSyncPending && <AccountSyncTracker />}
               <AppShell session={navSession} header={<HeaderBar session={navSession} />}>

@@ -57,7 +57,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
   if (!hasContent) return null;
 
   return (
-    <section className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-tour="dashboard-highlights">
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-tour="dashboard-highlights">
       {nextGoal && (
         <div
           className={cn(

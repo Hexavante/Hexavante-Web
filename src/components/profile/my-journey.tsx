@@ -20,7 +20,7 @@ export function MyJourney({ enrollments }: Props) {
           <p className="mt-1 text-sm text-slate-400">Cursos matriculados e progresso.</p>
         </div>
         <div className="flex gap-3 text-sm">
-          <AppLink href="/courses/history" muted className="inline-flex items-center gap-1">
+          <AppLink href="/historico?aba=cursos" muted className="inline-flex items-center gap-1">
             <Clock3 className="h-4 w-4" />
             Histórico de cursos
           </AppLink>
@@ -28,7 +28,7 @@ export function MyJourney({ enrollments }: Props) {
             <Award className="h-4 w-4" />
             Certificados
           </AppLink>
-          <AppLink href="/simulados/historico" muted className="inline-flex items-center gap-1">
+          <AppLink href="/historico?aba=simulados" muted className="inline-flex items-center gap-1">
             <Target className="h-4 w-4" />
             Simulados
           </AppLink>

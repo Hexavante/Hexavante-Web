@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { completeLessonAction } from "@/app/actions/enrollment";
+import { dispatchAchievementUnlocked } from "@/lib/achievement-events";
 import { NextLessonCard } from "@/components/courses/next-lesson-card";
 import { ConclusionBrandLogo } from "@/components/conclusion-brand-logo";
 import { PanteraMascote, type EstadoPantera } from "@/components/pantera-mascote";
@@ -119,6 +120,11 @@ export function CompleteLessonButton({
         startTransition(async () => {
           const result = await completeLessonAction(courseSlug, lessonId, courseId);
           if (result.success) {
+            // Só dispara o toast global quando o servidor confirma desbloqueio
+            // real (newAchievementKeys). Nunca inventa conquista no cliente.
+            if (result.newAchievementKeys && result.newAchievementKeys.length > 0) {
+              dispatchAchievementUnlocked(result.newAchievementKeys);
+            }
             setJustCompleted(true);
             if (result.courseCompleted) {
               setCourseCompleted(true);

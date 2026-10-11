@@ -8,6 +8,7 @@ import {
   BarChart2,
   BarChart3,
   BookOpen,
+  History,
   Radio,
   Target,
   Users,
@@ -49,6 +50,11 @@ const QUICK_ACTION_META: Record<
     icon: Target,
     tone: "hover:border-teal-400/35 hover:bg-teal-400/10",
     iconTone: "bg-teal-400/15 text-teal-300",
+  },
+  "/historico": {
+    icon: History,
+    tone: "hover:border-violet-400/35 hover:bg-violet-400/10",
+    iconTone: "bg-violet-400/15 text-violet-300",
   },
   "/estatisticas": {
     icon: BarChart3,
@@ -101,7 +107,7 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
   }, [pendingItems.length]);
 
   return (
-    <section className="mt-8" data-tour="dashboard-command">
+    <section data-tour="dashboard-command">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3 animate-slide-in-left">
         <div>
           <div className="flex items-center gap-2 hx-accent-text animate-fade-in">
@@ -125,7 +131,7 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
       </div>
 
       {pendingItems.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <div className="grid gap-3 sm:grid-cols-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           {pendingItems.map((item, i) => {
             const Icon = PENDING_ICONS[item.tone];
             const isVisible = visibleItems.has(i);
@@ -195,7 +201,7 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
           <p className="text-xs font-semibold uppercase tracking-wide hx-text-subtle">Atalhos rápidos</p>
           <span className="text-xs text-slate-500">{DASHBOARD_QUICK_ACTIONS.length} disponíveis</span>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {DASHBOARD_QUICK_ACTIONS.map((action, i) => {
             const meta = QUICK_ACTION_META[action.href] ?? defaultQuickMeta;
             const Icon = meta.icon;

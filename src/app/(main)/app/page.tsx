@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ArrowRight, Award, BarChart3, BookOpen, Radio, Target } from "lucide-react";
+import { ArrowRight, Award, BarChart3, BookOpen, Target, Trophy, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { CertificateVortex } from "@/components/home/certificate-vortex";
 import { MarqueeShortcuts } from "@/components/home/marquee-shortcuts";
 import { getStudentHomeData } from "@/services/student.service";
+import { getLightningDailyStatus } from "@/services/lightning-challenge.service";
 import { getProfileCosmetics } from "@/services/shop.service";
 import Link from "next/link";
 
@@ -40,9 +41,11 @@ const highlights = [
   },
 ];
 
-const shortcuts = [
+const shortcuts: { href: string; label: string; icon: string; requiresAuth?: boolean }[] = [
   { href: "/courses", label: "Catálogo de cursos", icon: "BookOpen" },
   { href: "/simulados", label: "Simulados", icon: "Target" },
+  { href: "/historico", label: "Histórico", icon: "History", requiresAuth: true },
+  { href: "/desafio-relampago", label: "Desafio Relâmpago", icon: "Zap" },
   { href: "/estatisticas", label: "Estatísticas", icon: "BarChart3", requiresAuth: true },
   { href: "/live-rooms", label: "Aulas ao vivo", icon: "Radio" },
 ];
@@ -51,23 +54,32 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const [homeData, cosmetics] = userId
+  const [homeData, cosmetics, lightningStatus] = userId
     ? await Promise.all([
         getStudentHomeData(userId),
         getProfileCosmetics(userId),
+        getLightningDailyStatus(userId).catch(() => null),
       ])
-    : [null, null];
+    : [null, null, null];
 
   const themeClass = cosmetics?.themeClassName ?? "theme-default";
+  const hasHighlights = Boolean(
+    homeData?.highlights?.nextGoal ||
+      homeData?.highlights?.lastCertificate ||
+      homeData?.highlights?.nextLiveEvent,
+  );
+  const hasUnlockedAchievements = Boolean(
+    homeData?.achievements?.some((a) => a.unlocked),
+  );
 
   return (
     <PageShell className={themeClass}>
       {homeData?.showOnboardingTour && <TutorialVideoModal show />}
 
       {homeData && session?.user ? (
-        <>
+        <div className="mx-auto w-full min-w-0 max-w-6xl">
           <ScrollReveal>
-            <section className="relative mb-8">
+            <section className="relative mb-6 min-w-0">
               <div
                 aria-hidden
                 className="animate-bg-breathe pointer-events-none absolute -top-12 right-0 h-48 w-48 rounded-full bg-[hsl(var(--sidebar-highlight)/0.1)] blur-[5rem]"
@@ -108,33 +120,77 @@ export default async function HomePage() {
             <StudyContinueHero continuation={homeData.continuation} />
           </ScrollReveal>
 
-          {homeData.dailyPlan && (
-            <ScrollReveal delay={120}>
-              <DailyStudyPlan dailyPlan={homeData.dailyPlan} />
-            </ScrollReveal>
-          )}
+          <div className="mt-6 grid w-full min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+            <div className="min-w-0 space-y-6">
+              {homeData.dailyPlan && (
+                <ScrollReveal delay={120}>
+                  <DailyStudyPlan dailyPlan={homeData.dailyPlan} />
+                </ScrollReveal>
+              )}
 
-          <ScrollReveal delay={180}>
-            <DashboardCommandCenter pendingItems={homeData.pendingItems} />
-          </ScrollReveal>
+              <ScrollReveal delay={180}>
+                <DashboardCommandCenter pendingItems={homeData.pendingItems} />
+              </ScrollReveal>
 
-          {(homeData.highlights.nextGoal ||
-            homeData.highlights.lastCertificate ||
-            homeData.highlights.nextLiveEvent) && (
-            <ScrollReveal delay={220}>
-              <DashboardHighlightsPanel highlights={homeData.highlights} />
-            </ScrollReveal>
-          )}
+              <ScrollReveal delay={200}>
+                <Card padding="md" className="flex min-w-0 flex-col gap-4 border-amber-400/25 bg-amber-400/[0.06] sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/10 text-amber-200">
+                      <Zap className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-200">
+                        Desafio Relâmpago
+                        {lightningStatus?.played ? (
+                          <Badge variant="emerald">Concluído hoje</Badge>
+                        ) : (
+                          <Badge variant="amber">Disponível hoje</Badge>
+                        )}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-white">
+                        {lightningStatus?.played && lightningStatus.attempt
+                          ? `Hoje: ${lightningStatus.attempt.score}/${lightningStatus.attempt.totalQuestions} acertos · +${lightningStatus.attempt.xpAwarded} XP`
+                          : "5 questões em 60 segundos · 15 XP + 3 moedas por acerto"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        1 tentativa por dia · reseta à meia-noite de Brasília.
+                      </p>
+                    </div>
+                  </div>
+                  <LinkButton
+                    href="/desafio-relampago"
+                    variant="outline"
+                    className="shrink-0"
+                    aria-label={lightningStatus?.played ? "Ver resultado do Desafio Relâmpago" : "Jogar o Desafio Relâmpago de hoje"}
+                  >
+                    {lightningStatus?.played ? (
+                      <>
+                        <Trophy className="h-4 w-4 text-amber-200" />
+                        Ver resultado
+                      </>
+                    ) : (
+                      <>
+                        Jogar agora
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </LinkButton>
+                </Card>
+              </ScrollReveal>
 
-          <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-            <div className="min-w-0 space-y-8">
+              {hasHighlights && (
+                <ScrollReveal delay={220}>
+                  <DashboardHighlightsPanel highlights={homeData.highlights} />
+                </ScrollReveal>
+              )}
+
               <ScrollReveal delay={100}>
                 <CourseRecommendations courses={homeData.recommendations} />
               </ScrollReveal>
 
-              {homeData.achievements.some((a) => a.unlocked) && (
+              {hasUnlockedAchievements && (
                 <ScrollReveal delay={180}>
-                  <section>
+                  <section className="min-w-0">
                     <h2 className="mb-4 text-lg font-bold hx-text-title">Conquistas recentes</h2>
                     <AchievementGrid
                       achievements={homeData.achievements.filter((a) => a.unlocked).slice(0, 4)}
@@ -145,7 +201,7 @@ export default async function HomePage() {
               )}
             </div>
 
-            <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
+            <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start">
               <ScrollReveal delay={140}>
                 <StudentDashboard
                   data={{
@@ -162,9 +218,9 @@ export default async function HomePage() {
                   userAvatar={session.user.image ?? null}
                 />
               </ScrollReveal>
-            </div>
+            </aside>
           </div>
-        </>
+        </div>
       ) : (
         <ScrollReveal>
           <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8">

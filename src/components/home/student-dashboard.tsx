@@ -174,7 +174,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
               {dailyPlan.completedCount}/{dailyPlan.totalCount} concluídas
             </Badge>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2">
             {dailyPlan.tasks.slice(0, 3).map((task, i) => {
               const TaskIcon = ICON_MAP[task.icon] ?? BookOpen;
               return (
@@ -265,7 +265,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
         </div>
       </div>
 
-      {inProgress.length > 0 && !data.continuation ? (
+      {inProgress.length > 0 ? (
         <div className="mt-5 space-y-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Continue estudando
@@ -303,9 +303,17 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
         <div className="mt-5 rounded-lg border border-dashed border-white/15 bg-white/[0.02] p-6 text-center animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           <BookOpen className="mx-auto h-8 w-8 text-slate-500" />
           <p className="mt-3 text-sm text-slate-300">Nenhum curso em andamento.</p>
-          <LinkButton href="/courses" variant="outline" size="sm" className="mt-4">
-            Explorar cursos
-          </LinkButton>
+          <p className="mt-1 text-xs text-slate-500">
+            Explore o catálogo ou pratique com simulados para começar.
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <LinkButton href="/courses" variant="outline" size="sm">
+              Explorar cursos
+            </LinkButton>
+            <LinkButton href="/simulados" variant="outline" size="sm">
+              Ver simulados
+            </LinkButton>
+          </div>
         </div>
       )}
 

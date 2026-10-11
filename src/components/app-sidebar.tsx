@@ -19,6 +19,7 @@ import {
   Target,
   Users,
   Video,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import { ClientOnly } from "@/components/ui/client-only";
@@ -71,12 +72,13 @@ const NAV_SECTIONS: NavSection[] = [
       {
         icon: History,
         iconSrc: "/sidebar/historico-cursos.png",
-        label: "Histórico de cursos",
-        href: "/courses/history",
+        label: "Histórico",
+        href: "/historico",
         requiresAuth: true,
       },
       { icon: Video, label: "Tutoriais", href: "/tutorials" },
       { icon: Target, iconSrc: "/sidebar/simulados.png", label: "Simulados", href: "/simulados" },
+      { icon: Zap, label: "Desafio Relâmpago", href: "/desafio-relampago" },
       {
         icon: BarChart3,
         iconSrc: "/sidebar/estatisticas.png",
@@ -105,12 +107,6 @@ const NAV_SECTIONS: NavSection[] = [
         iconSrc: "/sidebar/certificados.png",
         label: "Certificados",
         href: "/certificados",
-        requiresAuth: true,
-      },
-      {
-        icon: History,
-        label: "Histórico de simulados",
-        href: "/simulados/historico",
         requiresAuth: true,
       },
     ],
