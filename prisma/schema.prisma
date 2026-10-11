@@ -108,6 +108,7 @@ model User {
   moderationLogsAsActor  ModerationLog[]   @relation("ModerationActor")
   moderationLogsAsTarget ModerationLog[]   @relation("ModerationTarget")
   contentPolicyViolations ContentPolicyViolation[]
+  lightningChallenges     LightningChallengeAttempt[]
 
   @@map("users")
 }
@@ -1406,4 +1407,22 @@ model PushToken {
 
   @@index([userId])
   @@map("push_tokens")
+}
+
+model LightningChallengeAttempt {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  challengeDate   DateTime @db.Date @map("challenge_date") // data do desafio (sem hora)
+  score           Int      @default(0)                     // número de acertos
+  totalQuestions  Int      @default(0)                     @map("total_questions")
+  timeUsedSeconds Int      @default(0)                     @map("time_used_seconds")
+  xpAwarded       Int      @default(0)                     @map("xp_awarded")
+  coinsAwarded    Int      @default(0)                     @map("coins_awarded")
+  completedAt     DateTime @default(now())                 @map("completed_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeDate]) // uma tentativa por dia por usuário
+  @@index([userId])
+  @@map("lightning_challenge_attempts")
 }

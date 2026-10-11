@@ -51,17 +51,14 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          set -uo pipefail
-          for c in "true" "echo hi" "deploy" "deploy usage"; do
-            echo "=== TRY [$c]"
-            ssh -i ~/.ssh/id_ed25519 \
-              -o BatchMode=yes \
-              -o IdentitiesOnly=yes \
-              -o StrictHostKeyChecking=yes \
-              -o ConnectTimeout=15 \
-              -p "${VPS_PORT:-22}" \
-              "$VPS_USER@$VPS_HOST" \
-              "$c" 2>&1 | tail -12 || true
-            echo "rc=${PIPESTATUS[0]}"
-          done
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            -p "${VPS_PORT:-22}" \
+            "$VPS_USER@$VPS_HOST" \
+            "set -euo pipefail; cd /opt/hexavante && DATABASE_URL=\"\$DATABASE_URL\" npx --yes prisma migrate deploy" || true
