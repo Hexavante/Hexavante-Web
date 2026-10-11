@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  buildCoursesHistoryRedirect,
+  buildSimuladosHistoryRedirect,
+} from "@/lib/historico";
 import { siteUrl } from "@/lib/site-url";
 
 const MODERATOR_REQUIRED = /^\/admin(\/|$)/;
@@ -89,6 +93,31 @@ async function getSessionUser(cookieHeader: string | null) {
 
 const ADMIN_HOST = "painel.hexavante.com.br";
 
+/**
+ * Monta o `callbackUrl` do login preservando a query atual.
+ *
+ * As rotas legadas do histórico (`/courses/history` e `/simulados/historico`)
+ * apontam direto para o destino unificado (`/historico?aba=…`, via helpers de
+ * `src/lib/historico.ts`): o middleware intercepta o deslogado antes do
+ * `page.tsx` fazer o redirect, então sem esse mapeamento os filtros
+ * (`?page`/`?tipo`) se perderiam no retorno do login. Rotas comuns preservam
+ * `pathname + search` na íntegra.
+ */
+function buildLoginCallbackUrl(req: NextRequest): string {
+  const { pathname, searchParams } = req.nextUrl;
+  if (pathname === "/courses/history") {
+    return buildCoursesHistoryRedirect({ page: searchParams.get("page") });
+  }
+  if (pathname === "/simulados/historico") {
+    return buildSimuladosHistoryRedirect({
+      tipo: searchParams.get("tipo"),
+      examType: searchParams.get("examType"),
+      page: searchParams.get("page"),
+    });
+  }
+  return `${pathname}${req.nextUrl.search}`;
+}
+
 function requestHost(req: NextRequest): string {
   const host = (req.headers.get("host") || "").toLowerCase();
   return host.startsWith("[") ? host.slice(1, host.indexOf("]")) : host.split(":")[0];
@@ -114,12 +143,14 @@ export async function middleware(req: NextRequest) {
   // A loja do web vive em /shop (sidebar, links e landing apontam pra lá).
   // "/loja" é o nome usado pelo app desktop/mobile — redireciona pra loja
   // real antes de tudo (sem layout/flash e sem página duplicada).
+  // Preserva a query original (ex.: /loja?destaque=x).
   if (pathname === "/loja") {
-    return NextResponse.redirect(new URL("/shop", origin));
+    return NextResponse.redirect(new URL(`/shop${req.nextUrl.search}`, origin));
   }
 
   // Rotas públicas antigas que saíram do app: preserva bookmarks, links antigos e
   // URLs indexadas. Precisa vir ANTES da checagem de login (publicPaths) logo abaixo.
+  // A query original é repassada ao destino (ex.: /cursos?busca=x).
   const COMPAT_REDIRECTS: Record<string, string> = {
     "/cursos": siteUrl("/cursos"),
     "/ajuda": siteUrl("/ajuda"),
@@ -127,7 +158,11 @@ export async function middleware(req: NextRequest) {
   };
   const compatTarget = COMPAT_REDIRECTS[pathname];
   if (compatTarget) {
-    return NextResponse.redirect(new URL(compatTarget, origin));
+    const target = new URL(compatTarget, origin);
+    req.nextUrl.searchParams.forEach((value, key) => {
+      target.searchParams.set(key, value);
+    });
+    return NextResponse.redirect(target);
   }
 
   const cookieHeader = req.headers.get("cookie");
@@ -154,7 +189,7 @@ export async function middleware(req: NextRequest) {
       return nextWithPathname(req);
     }
     const login = new URL("/login", origin);
-    login.searchParams.set("callbackUrl", pathname);
+    login.searchParams.set("callbackUrl", buildLoginCallbackUrl(req));
     return NextResponse.redirect(login);
   }
 

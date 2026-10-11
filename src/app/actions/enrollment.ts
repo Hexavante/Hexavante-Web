@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { enrollInCourse, markLessonComplete } from "@/services/enrollment.service";
+import { syncUserAchievements } from "@/services/achievement.service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -14,6 +15,8 @@ export type ActionResult = {
   newLevel?: number;
   /** true quando esta conclusão completou o curso (100%) — vira selo na UI. */
   courseCompleted?: boolean;
+  /** Chaves de conquistas recém-desbloqueadas nesta ação. O cliente dispara o evento. */
+  newAchievementKeys?: string[];
 };
 
 export async function enrollAction(courseId: string, courseSlug: string) {
@@ -39,6 +42,21 @@ export async function completeLessonAction(
 
   try {
     const result = await markLessonComplete(session.user.id, lessonId, courseId);
+
+    // O serviço já sincroniza e devolve as chaves novas. Fazemos um sync
+    // complementar por segurança (ex.: mocks antigos sem o campo) e unimos
+    // sem duplicar — erros nunca bloqueiam o fluxo principal.
+    const fromService = Array.isArray(result.newAchievementKeys)
+      ? result.newAchievementKeys
+      : [];
+    let extraKeys: string[] = [];
+    try {
+      extraKeys = await syncUserAchievements(session.user.id);
+    } catch {
+      // Falha silenciosa: conquistas virão na próxima sincronização.
+    }
+    const newAchievementKeys = [...new Set([...fromService, ...extraKeys])];
+
     revalidatePath("/");
     revalidatePath(`/courses/${courseSlug}/learn`);
     revalidatePath(`/courses/${courseSlug}/learn/${lessonId}`);
@@ -59,6 +77,7 @@ export async function completeLessonAction(
       leveledUp: Boolean(levelUpAward),
       newLevel: levelUpAward?.newLevel,
       courseCompleted: result.courseCompleted,
+      newAchievementKeys,
     };
   } catch (error) {
     return {

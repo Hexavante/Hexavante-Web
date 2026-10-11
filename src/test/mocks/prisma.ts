@@ -23,16 +23,44 @@ export const prismaMock = {
     findMany: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    count: vi.fn(),
   },
   xpTransaction: {
     findUnique: vi.fn(),
+    findMany: vi.fn(),
     create: vi.fn(),
     groupBy: vi.fn(),
+    aggregate: vi.fn(),
+  },
+  courseEnrollment: {
+    findMany: vi.fn(),
+    count: vi.fn(),
+  },
+  lessonProgress: {
+    findMany: vi.fn(),
+    count: vi.fn(),
+  },
+  examAttempt: {
+    findMany: vi.fn(),
+    count: vi.fn(),
+  },
+  certificate: {
+    count: vi.fn(),
   },
   coinTransaction: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     create: vi.fn(),
+  },
+  lightningChallengeAttempt: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  examQuestion: {
+    count: vi.fn(),
+    findMany: vi.fn(),
   },
   storeItem: {
     updateMany: vi.fn().mockResolvedValue({ count: 0 }),

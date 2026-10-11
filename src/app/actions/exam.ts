@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { submitExamSchema } from "@/lib/validations/exam";
 import { getActiveAttempt, startAttempt, submitAttempt } from "@/services/exam.service";
+import { syncUserAchievements } from "@/services/achievement.service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -70,12 +71,16 @@ export async function submitExamAction(
   }
 
   let celebrateMarathon = false;
+  let serviceAchievementKeys: string[] = [];
   try {
     const result = await submitAttempt(session.user.id, parsed.data.attemptId, {
       answers: parsed.data.answers,
       essays: parsed.data.essays,
     });
     celebrateMarathon = result.celebrateMarathon;
+    serviceAchievementKeys = Array.isArray(result.newAchievements)
+      ? result.newAchievements
+      : [];
   } catch (error) {
     return {
       success: false,
@@ -83,12 +88,36 @@ export async function submitExamAction(
     };
   }
 
+  // Sincroniza conquistas após submissão. Erros não bloqueiam o redirect.
+  // `submitAttempt` já sincroniza e devolve as chaves — unimos com um sync
+  // complementar (normalmente vazio) para não perder nenhum desbloqueio.
+  let syncedKeys: string[] = [];
+  try {
+    syncedKeys = await syncUserAchievements(session.user.id);
+  } catch {
+    // Falha silenciosa.
+  }
+  const newAchievementKeys = [...new Set([...serviceAchievementKeys, ...syncedKeys])];
+
   revalidatePath("/simulados");
-  revalidatePath("/simulados/historico");
+  revalidatePath("/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  const celebration = celebrateMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
-  redirect(`/simulados/${slug}/resultado/${parsed.data.attemptId}${celebration}`);
+
+  // Monta a query string para o resultado:
+  // - `conquista` mantém o comportamento legado (animação da Pantera)
+  // - `achievements` passa as chaves novas para o toast de conquista
+  const query = new URLSearchParams();
+  if (celebrateMarathon) {
+    query.set("conquista", MARATHON_ACHIEVEMENT_KEY);
+  }
+  // Remove a maratona das keys extras (já tratada pelo PanteraConquista)
+  const extraKeys = newAchievementKeys.filter((k) => k !== MARATHON_ACHIEVEMENT_KEY);
+  if (extraKeys.length > 0) {
+    query.set("achievements", extraKeys.join(","));
+  }
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  redirect(`/simulados/${slug}/resultado/${parsed.data.attemptId}${qs}`);
 }
 
 export async function submitExamTimeoutAction(
@@ -105,6 +134,7 @@ export async function submitExamTimeoutAction(
   const { answers, essays } = parseExamSubmission(formData);
 
   let celebrateMarathon = false;
+  let serviceAchievementKeys: string[] = [];
   try {
     const result = await submitAttempt(
       session.user.id,
@@ -113,6 +143,9 @@ export async function submitExamTimeoutAction(
       { allowPartial: true },
     );
     celebrateMarathon = result.celebrateMarathon;
+    serviceAchievementKeys = Array.isArray(result.newAchievements)
+      ? result.newAchievements
+      : [];
   } catch (error) {
     return {
       success: false,
@@ -120,10 +153,29 @@ export async function submitExamTimeoutAction(
     };
   }
 
+  // Sincroniza conquistas após submissão por timeout (complementar ao sync
+  // interno de `submitAttempt`).
+  let syncedKeys: string[] = [];
+  try {
+    syncedKeys = await syncUserAchievements(session.user.id);
+  } catch {
+    // Falha silenciosa.
+  }
+  const newAchievementKeys = [...new Set([...serviceAchievementKeys, ...syncedKeys])];
+
   revalidatePath("/simulados");
-  revalidatePath("/simulados/historico");
+  revalidatePath("/historico");
   revalidatePath("/perfil");
   revalidatePath("/ranking");
-  const celebration = celebrateMarathon ? `?conquista=${MARATHON_ACHIEVEMENT_KEY}` : "";
-  redirect(`/simulados/${slug}/resultado/${attemptId}${celebration}`);
+
+  const query = new URLSearchParams();
+  if (celebrateMarathon) {
+    query.set("conquista", MARATHON_ACHIEVEMENT_KEY);
+  }
+  const extraKeys = newAchievementKeys.filter((k) => k !== MARATHON_ACHIEVEMENT_KEY);
+  if (extraKeys.length > 0) {
+    query.set("achievements", extraKeys.join(","));
+  }
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  redirect(`/simulados/${slug}/resultado/${attemptId}${qs}`);
 }

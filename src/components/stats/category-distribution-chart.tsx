@@ -37,8 +37,23 @@ export function CategoryDistributionChart({ data, className, title, valueKey = "
     );
   }
 
-  const maxValue = Math.max(...data.map((d) => d[valueKey] ?? 0));
-  const totalValue = data.reduce((sum, d) => sum + (d[valueKey] ?? 0), 0);
+  // Sanitiza valores: nulos/não-finitos viram 0 para nunca gerar escala NaN.
+  const safeData = data.map((d) => {
+    const raw = d[valueKey] ?? 0;
+    const numeric = Number.isFinite(raw) ? (raw as number) : 0;
+    return { ...d, [valueKey]: numeric } as CategoryData;
+  });
+  const totalValue = safeData.reduce((sum, d) => sum + ((d[valueKey] ?? 0) as number), 0);
+
+  // BarChart vertical com domínio [0,0] (todos os valores zerados) gera escala
+  // NaN no recharts em build minificado e derruba a rota — mostra estado vazio.
+  if (totalValue <= 0) {
+    return (
+      <div className={cn("h-64 flex items-center justify-center px-6 text-center", className)}>
+        <p className="text-slate-500 text-sm">Sem distribuição suficiente para exibir</p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("h-64 w-full", className)}>
@@ -46,7 +61,7 @@ export function CategoryDistributionChart({ data, className, title, valueKey = "
         <h3 className="mb-3 text-sm font-semibold text-white">{title}</h3>
       )}
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ top: 10, right: 10, left: 60, bottom: 0 }}>
+        <BarChart data={safeData} layout="vertical" margin={{ top: 10, right: 10, left: 60, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.05} horizontal={false} />
           <XAxis type="number" tick={{ display: "none" }} axisLine={false} tickLine={false} />
           <YAxis
@@ -71,7 +86,7 @@ export function CategoryDistributionChart({ data, className, title, valueKey = "
               return [valueKey === "percentage" ? `${num}%` : num.toLocaleString("pt-BR"), name ?? "—"];
             }}
             labelFormatter={(label) => {
-              const item = data.find((d) => d.category === label);
+              const item = safeData.find((d) => d.category === label);
               return item?.label ?? label;
             }}
           />
@@ -88,7 +103,7 @@ export function CategoryDistributionChart({ data, className, title, valueKey = "
             radius={[0, 4, 4, 0]}
             maxBarSize={32}
           >
-            {data.map((entry, index) => (
+            {safeData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Bar>
@@ -98,12 +113,12 @@ export function CategoryDistributionChart({ data, className, title, valueKey = "
       {/* Summary stats */}
       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
         <span>Total: <span className="text-white font-medium">{totalValue.toLocaleString("pt-BR")}</span></span>
-        <span>Categorias: <span className="text-white font-medium">{data.length}</span></span>
-        {data.length > 0 && (
+        <span>Categorias: <span className="text-white font-medium">{safeData.length}</span></span>
+        {safeData.length > 0 && (
           <span>
             Maior:{" "}
             <span className="text-white font-medium">
-              {data.reduce((max: CategoryData, d: CategoryData) => ((d[valueKey] ?? 0) > (max[valueKey] ?? 0) ? d : max)).category}
+              {safeData.reduce((max: CategoryData, d: CategoryData) => ((d[valueKey] ?? 0) > (max[valueKey] ?? 0) ? d : max)).category}
             </span>
           </span>
         )}

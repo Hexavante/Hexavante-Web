@@ -25,6 +25,13 @@ export type PersonalStats = {
   studyStreakDays: number;
 };
 
+export type ExamScoreBucket = {
+  category: string;
+  value: number;
+  color: string;
+  label: string;
+};
+
 export type PersonalStatsCharts = {
   xpTimeline: { date: string; xp: number; cumulativeXp: number }[];
   weeklyProgress: { week: string; xp: number; lessons: number; exams: number; streak: number }[];
@@ -32,6 +39,7 @@ export type PersonalStatsCharts = {
   skillRadar: { skill: string; value: number; maxValue: number; color: string }[];
   activityHeatmap: Record<string, number>;
   studyTimeEstimate: number; // total minutes
+  examScoreDistribution: ExamScoreBucket[];
 };
 
 function countConsecutiveDays(dates: Date[]): number {
@@ -79,8 +87,11 @@ async function fetchXpTimeline(userId: string): Promise<{ date: string; xp: numb
 
   const dailyMap = new Map<string, number>();
   for (const t of transactions) {
+    if (!t.createdAt) continue;
+    const amount = t.amount ?? 0;
+    if (!Number.isFinite(amount)) continue;
     const dateStr = t.createdAt.toISOString().slice(0, 10);
-    dailyMap.set(dateStr, (dailyMap.get(dateStr) ?? 0) + t.amount);
+    dailyMap.set(dateStr, (dailyMap.get(dateStr) ?? 0) + amount);
   }
 
   // Fill missing days with 0
@@ -124,12 +135,15 @@ async function fetchWeeklyProgress(userId: string): Promise<{ week: string; xp: 
   const weeklyMap = new Map<string, { xp: number; lessons: number; exams: number; dates: Set<string> }>();
 
   for (const t of xpTransactions) {
+    if (!t.createdAt) continue;
+    const amount = t.amount ?? 0;
+    if (!Number.isFinite(amount)) continue;
     const weekStart = new Date(t.createdAt);
     weekStart.setDate(t.createdAt.getDate() - t.createdAt.getDay());
     weekStart.setHours(0, 0, 0, 0);
     const key = weekStart.toISOString().slice(0, 10);
     const entry = weeklyMap.get(key) ?? { xp: 0, lessons: 0, exams: 0, dates: new Set() };
-    entry.xp += t.amount;
+    entry.xp += amount;
     weeklyMap.set(key, entry);
   }
 
@@ -211,9 +225,11 @@ async function fetchCategoryDistribution(userId: string): Promise<{ category: st
   const categoryMap = new Map<string, { lessons: number; completed: number }>();
 
   for (const e of enrollments) {
-    const catName = e.course.category?.name ?? "Outros";
-    const totalLessons = e.course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
-    const completedLessons = e.lessonProgresses.length;
+    // Relações podem estar ausentes em dados legados — nunca quebrar por isso.
+    const catName = e.course?.category?.name ?? "Outros";
+    const modules = e.course?.modules ?? [];
+    const totalLessons = modules.reduce((sum, m) => sum + (m.lessons?.length ?? 0), 0);
+    const completedLessons = e.lessonProgresses?.length ?? 0;
 
     const existing = categoryMap.get(catName) ?? { lessons: 0, completed: 0 };
     existing.lessons += totalLessons;
@@ -260,23 +276,63 @@ async function fetchSkillRadar(userId: string): Promise<{ skill: string; value: 
 
   if (!user) return [];
 
-  const completedCourses = user.enrollments.length;
-  const totalLessons = user.lessonProgresses.length;
-  const avgExamScore = user.examAttempts.length > 0
-    ? user.examAttempts.reduce((sum, e) => sum + e.score, 0) / user.examAttempts.length
+  const completedCourses = user.enrollments?.length ?? 0;
+  const totalLessons = user.lessonProgresses?.length ?? 0;
+  // Linhas antigas podem ter score null — trata como 0 e ignora não-finitos.
+  const validScores = (user.examAttempts ?? [])
+    .map((e) => e.score ?? 0)
+    .filter((s) => Number.isFinite(s));
+  const avgExamScore = validScores.length > 0
+    ? validScores.reduce((sum, s) => sum + s, 0) / validScores.length
     : 0;
-  const certificates = user.certificates.length;
+  const certificates = user.certificates?.length ?? 0;
   const level = user.xp?.level ?? 1;
 
   // Define skills with max values for normalization
   return [
     { skill: "Progresso", value: completedCourses, maxValue: Math.max(completedCourses, 20), color: "hsl(var(--sidebar-highlight))" },
     { skill: "Aulas", value: totalLessons, maxValue: Math.max(totalLessons, 200), color: "#22d3ee" },
-    { skill: "Simulados", value: user.examAttempts.length, maxValue: Math.max(user.examAttempts.length, 50), color: "#f97316" },
+    { skill: "Simulados", value: validScores.length, maxValue: Math.max(validScores.length, 50), color: "#f97316" },
     { skill: "Precisão", value: Math.round(avgExamScore), maxValue: 100, color: "#a78bfa" },
     { skill: "Certificados", value: certificates, maxValue: Math.max(certificates, 10), color: "#4ade80" },
     { skill: "Nível", value: level, maxValue: Math.max(level, 50), color: "#fcd34d" },
   ];
+}
+
+/**
+ * Agrupa notas de simulados em faixas para o gráfico de distribuição.
+ * Função pura (sem I/O) para facilitar testes. Nulos de linhas antigas
+ * contam como 0; NaN/Infinity são descartados para nunca gerar NaN no gráfico.
+ */
+export function buildExamScoreDistribution(
+  scores: Array<number | null | undefined>,
+): ExamScoreBucket[] {
+  const buckets: ExamScoreBucket[] = [
+    { category: "90-100%", value: 0, color: "#4ade80", label: "Excelente" },
+    { category: "70-89%", value: 0, color: "#22d3ee", label: "Bom" },
+    { category: "50-69%", value: 0, color: "#fcd34d", label: "Regular" },
+    { category: "<50%", value: 0, color: "#f97316", label: "Precisa melhorar" },
+  ];
+
+  for (const raw of scores) {
+    const score = raw ?? 0;
+    if (!Number.isFinite(score)) continue;
+    if (score >= 90) buckets[0].value += 1;
+    else if (score >= 70) buckets[1].value += 1;
+    else if (score >= 50) buckets[2].value += 1;
+    else buckets[3].value += 1;
+  }
+
+  return buckets;
+}
+
+async function fetchExamScoreDistribution(userId: string): Promise<ExamScoreBucket[]> {
+  const attempts = await prisma.examAttempt.findMany({
+    where: { userId, finishedAt: { not: null } },
+    select: { score: true },
+  });
+
+  return buildExamScoreDistribution(attempts.map((a) => a.score));
 }
 
 async function fetchActivityHeatmap(userId: string): Promise<Record<string, number>> {
@@ -301,6 +357,7 @@ async function fetchActivityHeatmap(userId: string): Promise<Record<string, numb
   const activityMap: Record<string, number> = {};
 
   for (const t of xpTransactions) {
+    if (!t.createdAt) continue;
     const dateStr = t.createdAt.toISOString().slice(0, 10);
     activityMap[dateStr] = (activityMap[dateStr] ?? 0) + 1;
   }
@@ -367,13 +424,19 @@ export async function getPersonalStats(userId: string): Promise<PersonalStats> {
     }),
   ]);
 
+  // Linhas antigas podem ter score null — trata como 0 e ignora não-finitos.
+  const validScores = examScores
+    .map((e) => e.score ?? 0)
+    .filter((s) => Number.isFinite(s));
   const averageExamScore =
-    examScores.length > 0
-      ? examScores.reduce((sum, e) => sum + e.score, 0) / examScores.length
+    validScores.length > 0
+      ? validScores.reduce((sum, s) => sum + s, 0) / validScores.length
       : null;
 
-  const dates = activityDates.map((t) => t.createdAt);
-  if (user?.lastStudyAt) dates.push(user.lastStudyAt);
+  const dates = activityDates
+    .map((t) => t.createdAt)
+    .filter((d): d is Date => d instanceof Date);
+  if (user?.lastStudyAt instanceof Date) dates.push(user.lastStudyAt);
 
   const activeDays = new Set(dates.map((d) => d.toISOString().slice(0, 10))).size;
 
@@ -400,12 +463,13 @@ export async function getPersonalStats(userId: string): Promise<PersonalStats> {
 }
 
 export async function getPersonalStatsCharts(userId: string): Promise<PersonalStatsCharts> {
-  const [xpTimeline, weeklyProgress, categoryDistribution, skillRadar, activityHeatmap] = await Promise.all([
+  const [xpTimeline, weeklyProgress, categoryDistribution, skillRadar, activityHeatmap, examScoreDistribution] = await Promise.all([
     fetchXpTimeline(userId),
     fetchWeeklyProgress(userId),
     fetchCategoryDistribution(userId),
     fetchSkillRadar(userId),
     fetchActivityHeatmap(userId),
+    fetchExamScoreDistribution(userId),
   ]);
 
   // Estimate study time: 15 min per lesson + 30 min per exam
@@ -420,5 +484,6 @@ export async function getPersonalStatsCharts(userId: string): Promise<PersonalSt
     skillRadar,
     activityHeatmap,
     studyTimeEstimate,
+    examScoreDistribution,
   };
 }

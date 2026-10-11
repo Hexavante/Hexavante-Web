@@ -471,12 +471,28 @@ function renderActivityTab(stats: PersonalStats, charts: PersonalStatsCharts) {
 }
 
 function renderDistributionTab(stats: PersonalStats, charts: PersonalStatsCharts) {
+  const categoryTotal = charts.categoryDistribution.reduce(
+    (sum, d) => sum + (Number.isFinite(d.value) ? d.value : 0),
+    0,
+  );
+  const scoreDistribution = charts.examScoreDistribution ?? [];
+  const scoreTotal = scoreDistribution.reduce(
+    (sum, d) => sum + (Number.isFinite(d.value) ? d.value : 0),
+    0,
+  );
+
   return (
     <div className="space-y-6">
       {/* Category Distribution */}
       <Card padding="md">
         <h3 className="mb-4 text-sm font-semibold text-white">Distribuição por categoria</h3>
-        <CategoryDistributionChart data={charts.categoryDistribution} />
+        {categoryTotal > 0 ? (
+          <CategoryDistributionChart data={charts.categoryDistribution} />
+        ) : (
+          <p className="py-8 text-center text-sm text-slate-500">
+            Sem distribuição suficiente — conclua aulas para ver sua distribuição por categoria.
+          </p>
+        )}
       </Card>
 
       {/* Exam Performance */}
@@ -509,15 +525,16 @@ function renderDistributionTab(stats: PersonalStats, charts: PersonalStatsCharts
         {stats.examsTaken > 0 && (
           <div className="mt-6 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Distribuição de notas</h4>
-            <CategoryDistributionChart
-              data={[
-                { category: "90-100%", value: 0, color: "#4ade80", label: "Excelente" },
-                { category: "70-89%", value: 0, color: "#22d3ee", label: "Bom" },
-                { category: "50-69%", value: 0, color: "#fcd34d", label: "Regular" },
-                { category: "<50%", value: 0, color: "#f97316", label: "Precisa melhorar" },
-              ]}
-              valueKey="value"
-            />
+            {scoreTotal > 0 ? (
+              <CategoryDistributionChart
+                data={scoreDistribution}
+                valueKey="value"
+              />
+            ) : (
+              <p className="py-6 text-center text-sm text-slate-500">
+                Sem distribuição suficiente — faça mais simulados para ver a distribuição das suas notas.
+              </p>
+            )}
           </div>
         )}
       </Card>
