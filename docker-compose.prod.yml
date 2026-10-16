@@ -43,7 +43,8 @@ services:
 
   api-go:
     build:
-      context: ./api-go
+      # Cópia canônica em Webs/Hexavante-api-go (./api-go não existe no repo).
+      context: ../../Hexavante-api-go
       dockerfile: Dockerfile
     container_name: hexavante-api-go
     restart: unless-stopped
@@ -55,10 +56,17 @@ services:
       DATABASE_URL: hexavante:${DB_PASSWORD}@tcp(mariadb:3306)/hexavante?parseTime=true
       FRONTEND_URL: ${AUTH_URL:-https://hexavante.com.br}
       NODE_ENV: production
+      CORS_ORIGIN: "https://hexavante.com.br,https://www.hexavante.com.br,https://app.hexavante.com.br,https://painel.hexavante.com.br"
     ports:
       - "127.0.0.1:3050:3050"
     networks:
       - hexavante_net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3050/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   hexavante_data:

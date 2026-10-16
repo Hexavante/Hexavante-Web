@@ -1,4 +1,8 @@
-const GO_API_BASE_URL = process.env.NEXT_PUBLIC_GO_API_URL || "http://localhost:3050";
+const GO_API_BASE_URL =
+  process.env.NEXT_PUBLIC_GO_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://api.hexavante.com.br"
+    : "http://localhost:3050");
 
 export interface SmartNote {
   id: string;

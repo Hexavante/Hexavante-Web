@@ -13,6 +13,8 @@ RUN mkdir -p public
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_APP_URL=https://app.hexavante.com.br
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_GO_API_URL=https://api.hexavante.com.br
+ENV NEXT_PUBLIC_GO_API_URL=$NEXT_PUBLIC_GO_API_URL
 RUN npx prisma generate
 RUN npm run build
 
