@@ -109,6 +109,7 @@ model User {
   moderationLogsAsTarget ModerationLog[]   @relation("ModerationTarget")
   contentPolicyViolations ContentPolicyViolation[]
   lightningChallenges     LightningChallengeAttempt[]
+  studyPreferences        UserStudyPreferences?
 
   @@map("users")
 }
@@ -531,6 +532,22 @@ model LessonNote {
   @@unique([userId, lessonId])
   @@index([userId])
   @@map("lesson_notes")
+}
+
+model UserStudyPreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique @map("user_id")
+  diagramType   String   @default("auto") @map("diagram_type") // auto, flowchart, mindmap, timeline, sequence
+  detailLevel   String   @default("intermediate") @map("detail_level") // simple, intermediate, advanced
+  autoSuggest   Boolean  @default(true) @map("auto_suggest")
+  animations    Boolean  @default(true)
+  autoSaveNotes Boolean  @default(true) @map("autosave_notes")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_study_preferences")
 }
 
 model Material {

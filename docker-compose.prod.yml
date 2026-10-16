@@ -35,8 +35,28 @@ services:
       AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
       AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
       AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
+      NEXT_PUBLIC_GO_API_URL: ${NEXT_PUBLIC_GO_API_URL:-https://api.hexavante.com.br}
     ports:
       - "127.0.0.1:3000:3000"
+    networks:
+      - hexavante_net
+
+  api-go:
+    build:
+      context: ./api-go
+      dockerfile: Dockerfile
+    container_name: hexavante-api-go
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      PORT: 3050
+      DATABASE_URL: hexavante:${DB_PASSWORD}@tcp(mariadb:3306)/hexavante?parseTime=true
+      FRONTEND_URL: ${AUTH_URL:-https://hexavante.com.br}
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:3050:3050"
     networks:
       - hexavante_net
 
