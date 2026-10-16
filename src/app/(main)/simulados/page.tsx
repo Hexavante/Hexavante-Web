@@ -44,7 +44,7 @@ export default async function SimuladosPage({ searchParams }: Props) {
           description="Resolva questões objetivas e acompanhe sua evolução por tentativa."
           action={
             <LinkButton
-              href="/simulados/historico"
+              href="/historico?aba=simulados"
               variant="outline"
               aria-label="Ver histórico de simulados"
             >

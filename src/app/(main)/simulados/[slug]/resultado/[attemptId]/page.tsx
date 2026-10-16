@@ -19,6 +19,7 @@ import { ExamQuestionFavoriteButton } from "@/components/exams/exam-question-fav
 import { ExamSubjectStatsPanel } from "@/components/exams/exam-subject-stats-panel";
 import { ExamAttemptComparisonPanel } from "@/components/exams/exam-attempt-comparison-panel";
 import { AchievementCelebrationTrigger } from "@/components/achievements/achievement-celebration-trigger";
+import { ExamAchievementDispatcher } from "@/components/exams/exam-achievement-dispatcher";
 import { EXAM_PASS_SCORE } from "@/lib/gamification";
 import {
   EXAM_STUDY_MODE_LABELS,
@@ -38,7 +39,7 @@ const ESSAY_STATUS_LABELS: Record<string, string> = {
 
 type Props = {
   params: Promise<{ slug: string; attemptId: string }>;
-  searchParams: Promise<{ conquista?: string }>;
+  searchParams: Promise<{ conquista?: string; achievements?: string }>;
 };
 
 export default async function ExamResultPage({ params, searchParams }: Props) {
@@ -62,6 +63,21 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
     attempt.studyMode === "FULL" &&
     attempt.totalQuestions >= 100 &&
     attempt.answers.length >= attempt.totalQuestions;
+
+  // Parse das chaves extras de conquistas (todas exceto maratona, que usa a Pantera)
+  const newAchievementKeys: string[] =
+    query.achievements
+      ? query.achievements.split(",").filter((k) => k.trim().length > 0)
+      : [];
+  // Sanitiza para o dispatcher: trim + remove maratona (Pantera) + dedupe.
+  // Só contém chaves reais que o servidor colocou na query antes do redirect.
+  const toastAchievementKeys = [
+    ...new Set(
+      newAchievementKeys
+        .map((k) => k.trim())
+        .filter((k) => k.length > 0 && k !== "maratona_100"),
+    ),
+  ];
 
   const pendingEssays = attempt.answers.filter((a) => a.essayStatus === "PENDING").length;
   const mcAnswers = attempt.answers.filter((a) => a.alternativeId);
@@ -97,7 +113,10 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
           attemptId={attemptId}
         />
       )}
-      <AppLink href="/simulados/historico" muted className="mb-4 inline-flex items-center gap-1">
+      {toastAchievementKeys.length > 0 && (
+        <ExamAchievementDispatcher achievementKeys={toastAchievementKeys} />
+      )}
+      <AppLink href="/historico?aba=simulados" muted className="mb-4 inline-flex items-center gap-1">
         ← Meu histórico
       </AppLink>
 

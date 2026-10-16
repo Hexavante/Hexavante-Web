@@ -16,6 +16,8 @@ export type LessonCompleteResult = {
   totalXpEarned: number; // Total de XP ganho
   /** true quando ESTA conclusão levou o curso a 100% (1ª vez). */
   courseCompleted: boolean;
+  /** Chaves de conquistas recém-desbloqueadas nesta conclusão. */
+  newAchievementKeys: string[];
 };
 
 // Função para obter matrícula do usuário no curso
@@ -164,6 +166,7 @@ export async function markLessonComplete(
   });
 
   const xpAwards: XpAward[] = [];
+  const newAchievementKeys: string[] = [];
 
   // Concede XP apenas se aula não estava concluída
   if (!alreadyCompleted) {
@@ -260,19 +263,33 @@ export async function markLessonComplete(
       }
 
       const { syncUserAchievements } = await import("@/services/achievement.service");
-      await syncUserAchievements(userId);
+      try {
+        const keys = await syncUserAchievements(userId);
+        for (const k of keys) {
+          if (!newAchievementKeys.includes(k)) newAchievementKeys.push(k);
+        }
+      } catch {
+        // Falha silenciosa: a action tenta sincronizar de novo.
+      }
     }
   }
 
   if (!alreadyCompleted) {
     const { syncUserAchievements } = await import("@/services/achievement.service");
-    await syncUserAchievements(userId);
+    try {
+      const keys = await syncUserAchievements(userId);
+      for (const k of keys) {
+        if (!newAchievementKeys.includes(k)) newAchievementKeys.push(k);
+      }
+    } catch {
+      // Falha silenciosa: a action tenta sincronizar de novo.
+    }
   }
 
   // Calcula total de XP ganho
   const totalXpEarned = xpAwards.reduce((sum, award) => sum + award.amount, 0);
 
-  return { progress, xpAwards, totalXpEarned, courseCompleted };
+  return { progress, xpAwards, totalXpEarned, courseCompleted, newAchievementKeys };
 }
 
 // Função para obter aula com verificação de acesso

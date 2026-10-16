@@ -6,6 +6,7 @@ import {
   BookOpen,
   Target,
   BarChart3,
+  History,
   Radio,
   Award,
   Zap,
@@ -22,6 +23,7 @@ type ShortcutItem = {
 const ICON_MAP: Record<string, LucideIcon> = {
   BookOpen,
   Target,
+  History,
   BarChart3,
   Radio,
   Award,
@@ -39,6 +41,10 @@ const QUICK_ACTION_META: Record<
   "/simulados": {
     tone: "hover:border-teal-400/35 hover:bg-teal-400/10",
     iconTone: "bg-teal-400/15 text-teal-300",
+  },
+  "/historico": {
+    tone: "hover:border-violet-400/35 hover:bg-violet-400/10",
+    iconTone: "bg-violet-400/15 text-violet-300",
   },
   "/estatisticas": {
     tone: "hover:border-cyan-400/35 hover:bg-cyan-400/10",
