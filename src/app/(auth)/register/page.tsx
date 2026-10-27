@@ -16,9 +16,17 @@ export default async function RegisterPage({ searchParams }: Props) {
 
   return (
     <AuthPageShell variant="register">
-      <OAuthButtons callbackUrl={safeCallback} providers={providers} />
-
-      <div className="mt-6"><RegisterWizard action={registerAction} callbackUrl={safeCallback} /></div>
+      <RegisterWizard
+        action={registerAction}
+        callbackUrl={safeCallback}
+        socialOptions={
+          <OAuthButtons
+            callbackUrl={safeCallback}
+            providers={providers}
+            placement="after-form"
+          />
+        }
+      />
     </AuthPageShell>
   );
 }

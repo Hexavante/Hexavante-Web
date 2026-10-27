@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import type { ActionResult } from "@/app/actions/auth";
 import { AppLink } from "@/components/ui/app-link";
 import { Alert } from "@/components/ui/alert";
@@ -158,7 +158,7 @@ export function AuthForm({
         <div className="relative">
           {Icon ? (
             <Icon
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+              className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-500"
               aria-hidden="true"
             />
           ) : null}
@@ -197,8 +197,8 @@ export function AuthForm({
   const formContent = (
     <>
       <div className={embedded ? "mb-6" : "mb-7"}>
-        <p className="anim-enter-fade text-xs font-semibold uppercase tracking-wide text-sky-300">Hexavante</p>
-        <h1 className="anim-enter mt-2 text-2xl font-black tracking-tight text-white">{title}</h1>
+        <p className="anim-enter-fade text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{embedded && formKind === "login" ? "Bem-vindo de volta" : "Hexavante"}</p>
+        <h1 className={cn("anim-enter mt-2 font-black tracking-tight text-white", embedded && formKind === "login" ? "text-3xl" : "text-2xl")}>{title}</h1>
         <p className="anim-enter mt-2 text-sm leading-6 text-slate-400" style={{ animationDelay: "0.05s" }}>{subtitle}</p>
       </div>
 
@@ -237,7 +237,7 @@ export function AuthForm({
                 {pendingLabel}
               </>
             ) : (
-              submitLabel
+              <>{submitLabel}{embedded && formKind === "login" && <ArrowRight className="h-4 w-4" aria-hidden="true" />}</>
             )}
           </Button>
         </div>

@@ -1,38 +1,115 @@
 import { BookOpenCheck, Sparkles, Target } from "lucide-react";
-import { HexavanteLogo } from "@/components/brand/hexavante-logo";
+import Image from "next/image";
+import styles from "./login-shell.module.css";
 
 type Props = { children: React.ReactNode; variant?: "login" | "register" };
 
 export function AuthPageShell({ children, variant = "login" }: Props) {
   const isRegister = variant === "register";
+
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-[#11151f] px-4 py-6 sm:px-7 lg:p-10">
-      <div className="grid w-full max-w-6xl overflow-hidden rounded-[28px] border border-white/10 bg-[#1c2230] shadow-2xl shadow-black/40 lg:grid-cols-[1.03fr_0.97fr]">
-        <section className="relative hidden min-h-[680px] overflow-hidden bg-[linear-gradient(135deg,#243a8f_0%,#5d5ce6_55%,#8778f7_100%)] p-12 text-white lg:flex lg:flex-col">
-          <div className="absolute inset-0 opacity-30 [background:radial-gradient(circle_at_90%_0%,white_0,transparent_34%),radial-gradient(circle_at_0%_100%,#0c1456_0,transparent_52%)]" />
-          <div className="relative"><HexavanteLogo size="md" wordmarkClassName="text-white" /></div>
-          <div className="relative my-auto max-w-md">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-100">
+    <main className={styles.page}>
+      <div
+        className={`${styles.card} ${isRegister ? styles.registerCard : ""}`}
+      >
+        <section className={styles.story} aria-label="Aprenda com a Hexavante">
+          <svg
+            className={styles.art}
+            viewBox="0 0 620 760"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="login-wave" x1="0" y1="0" x2="1" y2="1">
+                <stop stopColor="#203c97" />
+                <stop offset=".55" stopColor="#1679dc" />
+                <stop offset="1" stopColor="#39c5ef" />
+              </linearGradient>
+              <linearGradient id="login-ribbon" x1="0" y1="0" x2="1" y2="1">
+                <stop stopColor="#69def3" />
+                <stop offset="1" stopColor="#1684ec" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0 0H310L490 185Q625 315 480 445Q395 520 465 610L615 760H0Z"
+              fill="#249ad8"
+              opacity=".32"
+            />
+            <path
+              d="M0 0H275L455 190Q585 310 447 433Q357 520 435 610L575 760H0Z"
+              fill="url(#login-wave)"
+            />
+            <path
+              d="M325 -80L465 60Q530 125 565 65Q590 25 550 -20L455 -110Z"
+              fill="url(#login-ribbon)"
+            />
+            <path
+              d="M520 580Q460 520 430 575Q410 610 450 650L570 780H690Z"
+              fill="url(#login-ribbon)"
+            />
+          </svg>
+          <div className={styles.brand}>
+            <Image
+              src="/brand/hexavante-logo.webp"
+              alt=""
+              width={38}
+              height={38}
+              priority
+            />
+            <span>HEXAVANTE</span>
+          </div>
+          <Image
+            className={styles.watermark}
+            src="/brand/hexavante-logo.webp"
+            alt=""
+            width={330}
+            height={330}
+            aria-hidden="true"
+          />
+          <div className={styles.storyContent}>
+            <p className={styles.eyebrow}>
               {isRegister ? "Sua jornada começa aqui" : "Estude no seu ritmo"}
             </p>
-            <h1 className="mt-5 text-5xl font-black leading-[1.05] tracking-tight">
-              {isRegister ? "Transforme metas em conquistas." : "Seu próximo passo começa agora."}
-            </h1>
-            <p className="mt-6 max-w-sm text-base leading-7 text-indigo-50/90">
-              {isRegister ? "Organize seus estudos, encontre conteúdos que fazem sentido e evolua todos os dias." : "Retome sua rotina, acompanhe seu progresso e siga aprendendo com a Hexavante."}
+            <h2>
+              {isRegister ? (
+                <>
+                  Grandes sonhos. <br />
+                  Novos caminhos. <br />
+                  <span>Seu começo.</span>
+                </>
+              ) : (
+                <>
+                  Seu próximo <br />
+                  passo começa <br />
+                  <span>agora.</span>
+                </>
+              )}
+            </h2>
+            <p className={styles.description}>
+              {isRegister
+                ? "Um espaço para aprender, descobrir seus próximos passos e transformar metas em conquistas."
+                : "Retome sua rotina, acompanhe seu progresso e siga aprendendo com a Hexavante."}
             </p>
-            <div className="mt-9 space-y-3 text-sm font-medium text-white/95">
-              <p className="flex items-center gap-2"><BookOpenCheck className="h-4 w-4" /> Trilhas para o seu objetivo</p>
-              <p className="flex items-center gap-2"><Target className="h-4 w-4" /> Progresso claro a cada etapa</p>
-              <p className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Uma experiência feita para você</p>
-            </div>
+            <ul className={styles.benefits}>
+              <li>
+                <BookOpenCheck aria-hidden="true" /> Trilhas para o seu objetivo
+              </li>
+              <li>
+                <Target aria-hidden="true" /> Progresso claro a cada etapa
+              </li>
+              <li>
+                <Sparkles aria-hidden="true" /> Uma experiência feita para você
+              </li>
+            </ul>
           </div>
         </section>
-        <section className="flex min-h-[min(760px,calc(100vh-3rem))] items-center justify-center bg-[#1d2330] px-5 py-9 sm:px-10 lg:px-14">
-          <div className="w-full max-w-md">
-            <div className="mb-9 lg:hidden"><HexavanteLogo size="md" wordmarkClassName="text-white" /></div>
-            {children}
-          </div>
+        <section
+          className={styles.formPanel}
+          aria-label={isRegister ? "Crie sua conta" : "Acesse sua conta"}
+        >
+          <div className={styles.dots} aria-hidden="true" />
+          <div className={styles.formContent}>{children}</div>
+          <span className={styles.orb} aria-hidden="true" />
         </section>
       </div>
     </main>

@@ -4,6 +4,7 @@ import { oauthProviders, type OAuthProviders } from "@/lib/oauth";
 type Props = {
   callbackUrl: string;
   providers?: OAuthProviders;
+  placement?: "before-form" | "after-form";
 };
 
 const ORDER: { key: keyof OAuthProviders; label: string; Icon: () => React.ReactElement }[] = [
@@ -13,8 +14,28 @@ const ORDER: { key: keyof OAuthProviders; label: string; Icon: () => React.React
   { key: "discord", label: "Discord", Icon: DiscordIcon },
 ];
 
-export function OAuthButtons({ callbackUrl, providers = oauthProviders }: Props) {
+export function OAuthButtons({ callbackUrl, providers = oauthProviders, placement = "before-form" }: Props) {
   const active = ORDER.filter((item) => providers[item.key] === true);
+
+  if (placement === "after-form") {
+    if (!active.length) return null;
+    return (
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs text-slate-400">ou continue com</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+        <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+          {active.map(({ key, label, Icon }) => (
+            <OAuthSignInButton key={key} provider={key} callbackUrl={callbackUrl}>
+              <Icon />Continuar com {label}
+            </OAuthSignInButton>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={active.length > 0 ? "w-full space-y-3" : "w-full"}>

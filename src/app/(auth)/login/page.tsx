@@ -22,29 +22,29 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <AuthPageShell variant="login">
-      <OAuthButtons callbackUrl={safeCallback} providers={providers} />
-
       {oauthError && (
         <Alert variant="danger" className="mt-4">
           {oauthError}
         </Alert>
       )}
 
-      <div className="mt-6">
+      <div>
         <AuthForm
           embedded
-          title="ENTRAR"
-          subtitle="Acesse sua conta Hexavante"
+          title="HEXAVANTE"
+          subtitle="Acesse sua conta e continue sua jornada."
           submitLabel="Entrar"
           action={loginAction}
           callbackUrl={safeCallback}
           formKind="login"
           fields={[
-            { name: "email", label: "E-mail", type: "email" },
-            { name: "password", label: "Senha", type: "password" },
+            { name: "email", label: "E-mail", type: "email", placeholder: "seu@email.com" },
+            { name: "password", label: "Senha", type: "password", placeholder: "Sua senha" },
           ]}
           footer={
-            <p>
+            <>
+            <OAuthButtons callbackUrl={safeCallback} providers={providers} placement="after-form" />
+            <p className="text-xs">
               Não tem conta?{" "}
               <AppLink
                 href={
@@ -56,6 +56,7 @@ export default async function LoginPage({ searchParams }: Props) {
                 Cadastre-se
               </AppLink>
             </p>
+            </>
           }
         />
       </div>
