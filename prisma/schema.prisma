@@ -520,17 +520,19 @@ model LessonFavorite {
 }
 
 model LessonNote {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  lessonId  String   @map("lesson_id")
-  content   String   @db.Text
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  lessonId   String   @map("lesson_id")
+  content    String   @db.Text
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([userId])
+  @@index([userId, isFavorite])
   @@map("lesson_notes")
 }
 

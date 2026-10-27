@@ -17,15 +17,14 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
-import { listUserNotes, type SmartNote } from "@/lib/go-api";
+import { listUserNotes, setNoteFavorite, type SmartNote } from "@/lib/go-api";
 
-type NoteFilter = "all" | "favorites" | "courses" | "exams";
+type NoteFilter = "all" | "favorites" | "courses";
 
 const FILTER_LABELS: Record<NoteFilter, string> = {
   all: "Todas",
   favorites: "Favoritas",
   courses: "Cursos",
-  exams: "Simulados",
 };
 
 export default function NotesLibraryPage() {
@@ -35,6 +34,7 @@ export default function NotesLibraryPage() {
   const [failed, setFailed] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const [filter, setFilter] = useState<NoteFilter>("all");
+  const [savingFavorite, setSavingFavorite] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -66,7 +66,6 @@ export default function NotesLibraryPage() {
       all: notes.length,
       favorites: notes.filter((note) => note.isFavorite).length,
       courses: notes.filter((note) => Boolean(note.lessonId)).length,
-      exams: notes.filter((note) => Boolean(note.examId)).length,
     }),
     [notes],
   );
@@ -74,9 +73,27 @@ export default function NotesLibraryPage() {
   const filteredNotes = notes.filter((note) => {
     if (filter === "favorites") return note.isFavorite;
     if (filter === "courses") return Boolean(note.lessonId);
-    if (filter === "exams") return Boolean(note.examId);
     return true;
   });
+
+  const toggleFavorite = async (note: SmartNote) => {
+    const next = !note.isFavorite;
+    setSavingFavorite(note.id);
+    setNotes((current) =>
+      current.map((item) => (item.id === note.id ? { ...item, isFavorite: next } : item)),
+    );
+
+    const res = await setNoteFavorite(note.id, next);
+    setSavingFavorite(null);
+
+    if (!res.success) {
+      setNotes((current) =>
+        current.map((item) =>
+          item.id === note.id ? { ...item, isFavorite: note.isFavorite } : item,
+        ),
+      );
+    }
+  };
 
   return (
     <PageShell size="md">
@@ -84,7 +101,7 @@ export default function NotesLibraryPage() {
         badge="Smart Notes"
         icon={NotebookPen}
         title="Caderno Central de Estudos"
-        description="Todas as suas anotações de aulas e simulados reunidas, organizadas e sincronizadas."
+        description="Todas as suas anotações de aulas reunidas, organizadas e sincronizadas."
       />
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -94,7 +111,7 @@ export default function NotesLibraryPage() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por palavra-chave, resumo ou título..."
+            placeholder="Buscar por palavra-chave, resumo ou aula..."
             aria-label="Buscar anotações"
             className="hx-input w-full pl-9 text-base"
           />
@@ -158,7 +175,7 @@ export default function NotesLibraryPage() {
           }
           description={
             notes.length === 0 && !search
-              ? "Abra uma aula ou simulado e use o Smart Notes para começar a anotar."
+              ? "Abra uma aula e use o Smart Notes para começar a anotar."
               : "Tente outra palavra-chave ou selecione outro filtro."
           }
         >
@@ -195,26 +212,31 @@ export default function NotesLibraryPage() {
                       <BookOpen className="h-3 w-3" />
                       {note.lessonName || "Aula"}
                     </Badge>
-                  ) : note.examId ? (
-                    <Badge variant="sky" className="gap-1">
-                      <Target className="h-3 w-3" />
-                      {note.examTitle || "Simulado"}
-                    </Badge>
                   ) : (
                     <Badge>Anotação</Badge>
                   )}
-                  {note.isFavorite && (
-                    <Star className="h-4 w-4 fill-amber-300 text-amber-300" aria-label="Favorita" />
-                  )}
-                  <span className="ml-auto flex items-center gap-1 text-xs text-slate-500">
+                  <span className="ml-auto flex items-center gap-2 text-xs text-slate-500">
                     <Clock className="h-3.5 w-3.5" />
                     {new Date(note.updatedAt).toLocaleDateString("pt-BR")}
+                    <button
+                      type="button"
+                      onClick={() => void toggleFavorite(note)}
+                      disabled={savingFavorite === note.id}
+                      aria-label={
+                        note.isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
+                      }
+                      aria-pressed={note.isFavorite}
+                      className="rounded p-1 transition hover:bg-white/10 disabled:opacity-50"
+                    >
+                      <Star
+                        className={`h-4 w-4 ${
+                          note.isFavorite ? "fill-amber-300 text-amber-300" : "text-slate-500"
+                        }`}
+                      />
+                    </button>
                   </span>
                 </div>
 
-                {note.title && (
-                  <h2 className="text-base font-bold leading-snug text-white">{note.title}</h2>
-                )}
                 <p className="mt-1 line-clamp-5 whitespace-pre-wrap text-[15px] leading-6 text-slate-300">
                   {note.content}
                 </p>
@@ -228,13 +250,6 @@ export default function NotesLibraryPage() {
                     className="flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300"
                   >
                     Abrir curso <ExternalLink className="h-3.5 w-3.5" />
-                  </Link>
-                ) : note.examId ? (
-                  <Link
-                    href="/simulados"
-                    className="flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300"
-                  >
-                    Abrir simulado <ExternalLink className="h-3.5 w-3.5" />
                   </Link>
                 ) : null}
               </div>
