@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUserXpProfile, getXpHistory } from "@/services/xp.service";
@@ -103,7 +104,7 @@ export async function getStudentDashboard(userId: string) {
   };
 }
 
-export async function getStudentHomeData(userId: string) {
+export const getStudentHomeData = cache(async (userId: string) => {
   const [dashboard, continuation, recommendations, stats, achievements, showOnboardingTour, highlights, pendingItems, dailyPlan] =
     await Promise.all([
       getStudentDashboard(userId),
@@ -128,7 +129,7 @@ export async function getStudentHomeData(userId: string) {
     pendingItems,
     dailyPlan,
   };
-}
+});
 
 /**
  * Mantém o painel utilizável durante a janela entre o deploy e a aplicação da

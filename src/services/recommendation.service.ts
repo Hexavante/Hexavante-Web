@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 export type RecommendedCourse = {
@@ -12,10 +13,10 @@ export type RecommendedCourse = {
   reason: string;
 };
 
-export async function getRecommendedCourses(
+export const getRecommendedCourses = cache(async (
   userId: string,
   limit = 4,
-): Promise<RecommendedCourse[]> {
+): Promise<RecommendedCourse[]> => {
   const enrollments = await prisma.courseEnrollment.findMany({
     where: { userId },
     select: {
@@ -99,4 +100,4 @@ export async function getRecommendedCourses(
   }
 
   return results.slice(0, limit);
-}
+});

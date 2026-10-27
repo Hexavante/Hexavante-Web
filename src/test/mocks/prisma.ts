@@ -72,6 +72,7 @@ export const prismaMock = {
     findFirst: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue({}),
     update: vi.fn().mockResolvedValue({}),
+    upsert: vi.fn().mockResolvedValue({}),
   },
   $transaction: vi.fn(),
 };

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { EXAM_PASS_SCORE } from "@/lib/gamification";
 import { ACHIEVEMENT_DEFINITIONS } from "@/lib/achievements";
@@ -377,7 +378,7 @@ async function fetchActivityHeatmap(userId: string): Promise<Record<string, numb
   return activityMap;
 }
 
-export async function getPersonalStats(userId: string): Promise<PersonalStats> {
+export const getPersonalStats = cache(async (userId: string): Promise<PersonalStats> => {
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
@@ -460,7 +461,7 @@ export async function getPersonalStats(userId: string): Promise<PersonalStats> {
     activeDays,
     studyStreakDays: countConsecutiveDays(dates),
   };
-}
+});
 
 export async function getPersonalStatsCharts(userId: string): Promise<PersonalStatsCharts> {
   const [xpTimeline, weeklyProgress, categoryDistribution, skillRadar, activityHeatmap, examScoreDistribution] = await Promise.all([

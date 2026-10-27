@@ -60,7 +60,11 @@ async function getSeasonXpByUser(
   return new Map(grouped.map((row) => [row.userId, row._sum.amount ?? 0]));
 }
 
+const ensuredSeasonKeys = new Set<string>();
+
 async function ensureCurrentSeasonRecord(seasonKey: string) {
+  if (ensuredSeasonKeys.has(seasonKey)) return;
+
   const bounds = getSeasonBounds(seasonKey);
   await prisma.rankingSeason.upsert({
     where: { seasonKey },
@@ -71,9 +75,39 @@ async function ensureCurrentSeasonRecord(seasonKey: string) {
     },
     update: {},
   });
+  ensuredSeasonKeys.add(seasonKey);
 }
 
+/**
+ * O fechamento da temporada é idempotente, mas roda consultas pesadas em toda
+ * visita ao ranking. Guardamos a promise em voo e um TTL curto para que várias
+ * navegações simultâneas não disparem o processamento em paralelo.
+ */
+const SEASON_PROCESSING_TTL_MS = 5 * 60 * 1000;
+let seasonProcessingPromise: Promise<void> | null = null;
+let seasonProcessedAt = 0;
+
 export async function processPreviousSeasonIfNeeded(): Promise<void> {
+  if (Date.now() - seasonProcessedAt < SEASON_PROCESSING_TTL_MS) return;
+
+  if (!seasonProcessingPromise) {
+    seasonProcessingPromise = runPreviousSeasonProcessing()
+      .then(() => {
+        seasonProcessedAt = Date.now();
+      })
+      .catch((error) => {
+        // Nunca derruba o ranking por causa do fechamento da temporada.
+        console.error("[ranking] Falha ao processar temporada anterior:", error);
+      })
+      .finally(() => {
+        seasonProcessingPromise = null;
+      });
+  }
+
+  await seasonProcessingPromise;
+}
+
+async function runPreviousSeasonProcessing(): Promise<void> {
   const previousKey = getPreviousSeasonKey();
   const currentKey = getCurrentSeasonKey();
   if (previousKey >= currentKey) return;

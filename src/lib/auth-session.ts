@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { SERVER_API_URL } from "./api-url";
 
@@ -37,7 +38,11 @@ export interface AuthSession {
   expires: string;
 }
 
-export async function getApiSession(): Promise<AuthSession | null> {
+/**
+ * Memoizado por requisição: o layout raiz e a página chamam a sessão durante o
+ * mesmo render. Sem o `cache`, cada navegação fazia duas idas à API.
+ */
+export const getApiSession = cache(async (): Promise<AuthSession | null> => {
   try {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore
@@ -72,7 +77,7 @@ export async function getApiSession(): Promise<AuthSession | null> {
   } catch {
     return null;
   }
-}
+});
 
 // Re-export for backward compatibility
 export function getApiUrl(): string { return SERVER_API_URL; }

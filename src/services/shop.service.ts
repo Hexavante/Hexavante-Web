@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getAvatarBorderClassName, resolveAppTheme, resolveProfileIcon } from "@/lib/cosmetics";
 import { buildPremiumStatus } from "@/lib/premium";
 import { prisma } from "@/lib/prisma";
@@ -13,13 +14,23 @@ import type { StoreItem, StoreItemCategory } from "@prisma/client";
 
 const DEPRECATED_SHOP_SLUGS = ["booster-coins-24h"];
 
+/**
+ * O catálogo tem centenas de itens e o `upsert` de cada um custa caro. Antes
+ * isso rodava em TODA renderização (layout + página), tornando a navegação
+ * lenta e esgotando o pool do Prisma. Agora é executado no máximo uma vez por
+ * janela, reaproveitando a promise em voo para evitar corrida entre requisições.
+ */
+const SHOP_CATALOG_TTL_MS = 10 * 60 * 1000;
+let shopCatalogPromise: Promise<void> | null = null;
+let shopCatalogEnsuredAt = 0;
+
 type TemporaryMetadata = {
   multiplier?: number;
   durationHours?: number;
   durationDays?: number;
 };
 
-export async function ensureShopCatalog() {
+async function syncShopCatalog(): Promise<void> {
   if (DEPRECATED_SHOP_SLUGS.length > 0) {
     await prisma.storeItem.updateMany({
       where: { slug: { in: DEPRECATED_SHOP_SLUGS } },
@@ -27,32 +38,53 @@ export async function ensureShopCatalog() {
     });
   }
 
-  for (const item of SHOP_CATALOG) {
-    await prisma.storeItem.upsert({
-      where: { slug: item.slug },
-      update: {
-        name: item.name,
-        description: item.description,
-        cost: item.cost,
-        category: item.category,
-        imageUrl: item.imageUrl ?? null,
-        isPremiumOnly: item.isPremiumOnly ?? false,
-        isPermanent: item.isPermanent ?? true,
-        metadata: item.metadata ?? undefined,
-        isActive: true,
-      },
-      create: {
-        slug: item.slug,
-        name: item.name,
-        description: item.description,
-        cost: item.cost,
-        category: item.category,
-        imageUrl: item.imageUrl ?? null,
-        isPremiumOnly: item.isPremiumOnly ?? false,
-        isPermanent: item.isPermanent ?? true,
-        metadata: item.metadata ?? undefined,
-      },
-    });
+  await prisma.$transaction(
+    SHOP_CATALOG.map((item) =>
+      prisma.storeItem.upsert({
+        where: { slug: item.slug },
+        update: {
+          name: item.name,
+          description: item.description,
+          cost: item.cost,
+          category: item.category,
+          imageUrl: item.imageUrl ?? null,
+          isPremiumOnly: item.isPremiumOnly ?? false,
+          isPermanent: item.isPermanent ?? true,
+          metadata: item.metadata ?? undefined,
+          isActive: true,
+        },
+        create: {
+          slug: item.slug,
+          name: item.name,
+          description: item.description,
+          cost: item.cost,
+          category: item.category,
+          imageUrl: item.imageUrl ?? null,
+          isPremiumOnly: item.isPremiumOnly ?? false,
+          isPermanent: item.isPermanent ?? true,
+          metadata: item.metadata ?? undefined,
+        },
+      }),
+    ),
+  );
+}
+
+export async function ensureShopCatalog(): Promise<void> {
+  const now = Date.now();
+  if (shopCatalogPromise && now - shopCatalogEnsuredAt < SHOP_CATALOG_TTL_MS) {
+    return shopCatalogPromise;
+  }
+
+  shopCatalogEnsuredAt = now;
+  shopCatalogPromise = syncShopCatalog();
+
+  try {
+    await shopCatalogPromise;
+  } catch (error) {
+    // Falha não fica cacheada: a próxima navegação tenta novamente.
+    shopCatalogPromise = null;
+    shopCatalogEnsuredAt = 0;
+    throw error;
   }
 }
 
@@ -292,12 +324,16 @@ export async function ensureDefaultUserCosmetics(userId: string) {
   });
 
   if (!existing) {
-    await prisma.userInventory.create({
-      data: {
+    // `upsert` em vez de `create`: o layout e a página renderizam em paralelo
+    // e os dois podem tentar criar o item padrão ao mesmo tempo (P2002).
+    await prisma.userInventory.upsert({
+      where: { userId_storeItemId: { userId, storeItemId: defaultTheme.id } },
+      create: {
         userId,
         storeItemId: defaultTheme.id,
         isEquipped: true,
       },
+      update: {},
     });
     return;
   }
@@ -386,7 +422,7 @@ export async function equipStoreItem(userId: string, inventoryId: string) {
   });
 }
 
-export async function getProfileCosmetics(userId: string) {
+export const getProfileCosmetics = cache(async (userId: string) => {
   await ensureDefaultUserCosmetics(userId);
   const equipped = await getEquippedItems(userId);
   const title = equipped.find((e) => e.storeItem.category === "TITLE");
@@ -450,4 +486,4 @@ export async function getProfileCosmetics(userId: string) {
     emojiPackId: emojiMeta?.emojiPackId ?? null,
     emojiPackEmojis: emojiList,
   };
-}
+});

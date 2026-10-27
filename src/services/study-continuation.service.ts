@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { EXAM_PASS_SCORE } from "@/lib/gamification";
 
@@ -27,7 +28,7 @@ export type StudyContinuation = {
   examScore?: number;
 };
 
-export async function getStudyContinuation(userId: string): Promise<StudyContinuation | null> {
+export const getStudyContinuation = cache(async (userId: string): Promise<StudyContinuation | null> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -140,7 +141,7 @@ export async function getStudyContinuation(userId: string): Promise<StudyContinu
   }
 
   return null;
-}
+});
 
 export async function getResumeLessonId(
   userId: string,

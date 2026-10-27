@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { EXAM_PASS_SCORE } from "@/lib/gamification";
 import {
@@ -101,7 +102,7 @@ export type UserAchievementView = {
   unlockedAt: Date | null;
 };
 
-export async function getUserAchievements(userId: string): Promise<UserAchievementView[]> {
+export const getUserAchievements = cache(async (userId: string): Promise<UserAchievementView[]> => {
   await syncUserAchievements(userId);
 
   const unlocked = await prisma.userAchievement.findMany({
@@ -119,7 +120,7 @@ export async function getUserAchievements(userId: string): Promise<UserAchieveme
     unlocked: unlockedMap.has(def.key),
     unlockedAt: unlockedMap.get(def.key) ?? null,
   }));
-}
+});
 
 export async function getUnlockedAchievementCount(userId: string): Promise<number> {
   return prisma.userAchievement.count({ where: { userId } });
