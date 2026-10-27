@@ -7,7 +7,13 @@ import { getClientDevice } from "@/lib/client-device";
 
 const API_URL = getApiUrl();
 
-export type DeviceAuthResult = { ok: boolean; error?: string };
+export type DeviceAuthResult = {
+  ok: boolean;
+  error?: string;
+  /** A API confirmou o dispositivo/e-mail, mas a conta exige 2FA. */
+  requiresTwoFactor?: boolean;
+  verificationId?: string;
+};
 
 function sessionCookieOpts() {
   return {
@@ -42,9 +48,26 @@ export async function verifyDeviceAction(
     }
 
     const data = (await res.json()) as {
-      user: { id: string };
-      session: { token: string };
+      requiresVerification?: boolean;
+      verificationId?: string;
+      reason?: string;
+      user?: { id: string };
+      session?: { token: string };
     };
+
+    // Dispositivo/e-mail confirmados, mas falta o código de 2FA.
+    // Sem sessão aqui: a API só cria depois do segundo código.
+    if (data.requiresVerification && data.verificationId) {
+      return {
+        ok: false,
+        requiresTwoFactor: true,
+        verificationId: data.verificationId,
+      };
+    }
+
+    if (!data.session?.token) {
+      return { ok: false, error: "Não foi possível concluir a verificação. Tente novamente." };
+    }
 
     const cookieStore = await cookies();
     cookieStore.set("__Secure-hexavante.session_token", data.session.token, sessionCookieOpts());

@@ -23,13 +23,22 @@ import { useEffect } from "react";
 function VerificarDispositivoForm({ searchParams }: Props) {
   const { vid = "", callbackUrl = "/app", motivo = "" } = use(searchParams);
   const isEmail = motivo === "email";
-  const is2fa = motivo === "2fa";
+  const [step, setStep] = useState<"device" | "2fa">(motivo === "2fa" ? "2fa" : "device");
+  const is2fa = step === "2fa";
   const [code, setCode] = useState("");
   const [vid2, setVid2] = useState(vid);
   const [state, action, pending] = useActionState(
     async (): Promise<Awaited<ReturnType<typeof verifyDeviceAction>> | null> => {
       try {
-        return await verifyDeviceAction(vid2, code);
+        const result = await verifyDeviceAction(vid2, code);
+        // Dispositivo/e-mail confirmados, mas a conta exige 2FA: troca a
+        // etapa usando o novo verificationId, sem recarregar a página.
+        if (result.requiresTwoFactor && result.verificationId) {
+          setVid2(result.verificationId);
+          setStep("2fa");
+          setCode("");
+        }
+        return result;
       } catch {
         return { ok: false, error: "Erro inesperado. Tente novamente." };
       }
@@ -55,7 +64,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
     return (
       <AuthPageShell>
         <p className="anim-enter-fade text-center text-sm text-slate-400">
-          Dispositivo confirmado! Redirecionando...
+          Verificado! Redirecionando...
         </p>
       </AuthPageShell>
     );
@@ -76,7 +85,9 @@ function VerificarDispositivoForm({ searchParams }: Props) {
         <p className="mt-2 text-sm leading-6 text-slate-400">
           {isEmail
             ? "Enviamos um código de 6 dígitos para o seu e-mail. Confirme para ativar sua conta."
-            : "Enviamos um código de 6 dígitos para o seu e-mail. Ele expira em 10 minutos."}
+            : is2fa
+              ? "Sua conta usa verificação em duas etapas. Enviamos o código para o seu e-mail."
+              : "Enviamos um código de 6 dígitos para o seu e-mail. Ele expira em 10 minutos."}
         </p>
       </div>
 
@@ -101,7 +112,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
         {state?.error && <p className="text-sm text-red-300">{state.error}</p>}
 
         <Button type="submit" disabled={pending || code.length !== 6} className="hx-lift h-11 w-full" size="lg">
-          {pending ? "Verificando..." : "Confirmar dispositivo"}
+          {pending ? "Verificando..." : is2fa ? "Confirmar código" : "Confirmar dispositivo"}
         </Button>
       </form>
 
