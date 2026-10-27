@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,14 +10,13 @@ import {
   BarChart3,
   BookOpen,
   Compass,
-  GraduationCap,
   History,
+  NotebookPen,
   Radio,
   Settings,
   ShoppingBag,
   Package,
   Target,
-  Users,
   Video,
   Zap,
   type LucideIcon,
@@ -77,6 +76,12 @@ const NAV_SECTIONS: NavSection[] = [
         requiresAuth: true,
       },
       { icon: Video, label: "Tutoriais", href: "/tutorials" },
+      {
+        icon: NotebookPen,
+        label: "Caderno",
+        href: "/anotacoes",
+        requiresAuth: true,
+      },
       { icon: Target, iconSrc: "/sidebar/simulados.png", label: "Simulados", href: "/simulados" },
       { icon: Zap, label: "Desafio Relâmpago", href: "/desafio-relampago" },
       {

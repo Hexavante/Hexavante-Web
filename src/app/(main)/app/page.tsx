@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ArrowRight, Award, BarChart3, BookOpen, Target, Trophy, Zap } from "lucide-react";
+import { ArrowRight, Award, BarChart3, BookOpen, NotebookPen, RefreshCw, Target, Trophy, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -45,6 +45,7 @@ const shortcuts: { href: string; label: string; icon: string; requiresAuth?: boo
   { href: "/courses", label: "Catálogo de cursos", icon: "BookOpen" },
   { href: "/simulados", label: "Simulados", icon: "Target" },
   { href: "/historico", label: "Histórico", icon: "History", requiresAuth: true },
+  { href: "/anotacoes", label: "Caderno", icon: "NotebookPen", requiresAuth: true },
   { href: "/desafio-relampago", label: "Desafio Relâmpago", icon: "Zap" },
   { href: "/estatisticas", label: "Estatísticas", icon: "BarChart3", requiresAuth: true },
   { href: "/live-rooms", label: "Aulas ao vivo", icon: "Radio" },
@@ -56,8 +57,14 @@ export default async function HomePage() {
 
   const [homeData, cosmetics, lightningStatus] = userId
     ? await Promise.all([
-        getStudentHomeData(userId),
-        getProfileCosmetics(userId),
+        getStudentHomeData(userId).catch((error) => {
+          console.error("[painel] Falha ao carregar dados do estudante:", error);
+          return null;
+        }),
+        getProfileCosmetics(userId).catch((error) => {
+          console.error("[painel] Falha ao carregar cosméticos:", error);
+          return null;
+        }),
         getLightningDailyStatus(userId).catch(() => null),
       ])
     : [null, null, null];
@@ -110,6 +117,10 @@ export default async function HomePage() {
                   <Link href="/plano-diario" className="hx-intro-chip">
                     <span className="h-3.5 w-3.5">📋</span>
                     Meu plano do dia
+                  </Link>
+                  <Link href="/anotacoes" className="hx-intro-chip">
+                    <NotebookPen className="h-3.5 w-3.5" />
+                    Meu caderno
                   </Link>
                 </div>
               </div>
@@ -221,6 +232,37 @@ export default async function HomePage() {
             </aside>
           </div>
         </div>
+      ) : session?.user ? (
+        <ScrollReveal>
+          <section className="mx-auto w-full max-w-3xl py-8 text-center">
+            <Badge variant="sky">Seu espaço de estudos</Badge>
+            <h1 className="mt-3 text-2xl font-black tracking-tight hx-text-title sm:text-3xl">
+              Olá, {session.user.name?.split(" ")[0] ?? session.user.username}!
+            </h1>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 hx-text-muted">
+              Não conseguimos carregar seus dados agora, mas você pode continuar estudando
+              pelos atalhos abaixo. Tente atualizar a página em instantes.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <LinkButton href="/courses">
+                <BookOpen className="h-4 w-4" />
+                Explorar cursos
+              </LinkButton>
+              <LinkButton href="/simulados" variant="outline">
+                <Target className="h-4 w-4" />
+                Simulados
+              </LinkButton>
+              <LinkButton href="/anotacoes" variant="outline">
+                <NotebookPen className="h-4 w-4" />
+                Meu caderno
+              </LinkButton>
+              <LinkButton href="/app" variant="ghost">
+                <RefreshCw className="h-4 w-4" />
+                Tentar novamente
+              </LinkButton>
+            </div>
+          </section>
+        </ScrollReveal>
       ) : (
         <ScrollReveal>
           <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8">

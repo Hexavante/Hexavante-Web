@@ -7,6 +7,7 @@ import {
   Target,
   BarChart3,
   History,
+  NotebookPen,
   Radio,
   Award,
   Zap,
@@ -25,6 +26,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Target,
   History,
   BarChart3,
+  NotebookPen,
   Radio,
   Award,
   Zap,
@@ -45,6 +47,10 @@ const QUICK_ACTION_META: Record<
   "/historico": {
     tone: "hover:border-violet-400/35 hover:bg-violet-400/10",
     iconTone: "bg-violet-400/15 text-violet-300",
+  },
+  "/anotacoes": {
+    tone: "hover:border-emerald-400/35 hover:bg-emerald-400/10",
+    iconTone: "bg-emerald-400/15 text-emerald-300",
   },
   "/estatisticas": {
     tone: "hover:border-cyan-400/35 hover:bg-cyan-400/10",

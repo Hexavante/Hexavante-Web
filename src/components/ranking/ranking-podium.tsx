@@ -47,9 +47,9 @@ export function RankingPodium({ entries, currentUserId, periodLabel }: Props) {
         Pódio {periodLabel}
       </p>
 
-      <div className="flex items-end justify-center gap-3 md:gap-6">
+      <div className="flex w-full items-end justify-center gap-2 sm:gap-4 md:gap-6">
         {topThree.map((entry, index) => {
-          if (!entry) return <div key={index} className="w-28" />;
+          if (!entry) return <div key={index} className="w-1/3 max-w-36" />;
           const style = podiumStyles[index];
           const Icon = style.icon;
           const isCurrentUser = currentUserId === entry.userId;
@@ -59,39 +59,38 @@ export function RankingPodium({ entries, currentUserId, periodLabel }: Props) {
               key={entry.id}
               href={`/perfil/${entry.user.username}`}
               className={cn(
-                "flex w-28 flex-col items-center transition hover:opacity-90 md:w-32",
+                "flex w-1/3 min-w-0 max-w-36 flex-col items-center text-center transition hover:opacity-90",
                 style.order,
               )}
             >
               <Avatar src={entry.user.avatarUrl} alt={entry.user.username ?? ""} size="sm" />
-              <p className="mt-2 truncate text-center text-sm font-bold text-white">
+              <p className="mt-2 w-full min-w-0 truncate text-sm font-bold text-white">
                 {entry.user.fullName}
               </p>
-              <p className="truncate text-center text-xs text-slate-400">@{entry.user.username}</p>
-              {isCurrentUser && (
-                <Badge variant="sky" className="mt-1">
-                  Você
-                </Badge>
-              )}
-              {entry.league && (
-                <div className="mt-1">
-                  <LeagueBadge league={entry.league} />
-                </div>
-              )}
-              <div className="mt-2 flex items-center gap-1 text-xs text-slate-400">
-                <Sparkles className="h-3.5 w-3.5 hx-accent-text" />
-                Nv. {entry.level}
-              </div>
-              <p className="mt-1 text-sm font-semibold hx-accent-text">
-                {entry.periodXp.toLocaleString("pt-BR")} XP
+              <p className="w-full min-w-0 truncate text-xs text-slate-400">
+                @{entry.user.username}
               </p>
+              <div className="mt-1 flex min-h-[3.5rem] w-full flex-col items-center gap-1">
+                {isCurrentUser && <Badge variant="sky">Você</Badge>}
+                {entry.league && <LeagueBadge league={entry.league} />}
+                <div className="flex items-center gap-1 text-xs text-slate-400">
+                  <Sparkles className="h-3.5 w-3.5 hx-accent-text" />
+                  Nv. {entry.level}
+                </div>
+                <p className="text-sm font-semibold hx-accent-text">
+                  {entry.periodXp.toLocaleString("pt-BR")} XP
+                </p>
+              </div>
               <div
                 className={cn(
                   "mt-3 flex w-full items-end justify-center rounded-t-xl border border-white/10 bg-white/[0.06]",
                   style.height,
                 )}
               >
-                <span className="pb-2 text-lg font-black text-white">{style.label}</span>
+                <span className="flex items-center gap-1 pb-2 text-lg font-black text-white">
+                  <Icon className="h-4 w-4" />
+                  {style.label}
+                </span>
               </div>
             </Link>
           );

@@ -37,7 +37,7 @@ export function HeaderBar({ session }: Props) {
               size="lg"
               className="gap-2 sm:gap-2.5"
               imageClassName="hx-header-logo-glow h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12"
-              wordmarkClassName="hx-header-wordmark hidden md:inline md:text-xl lg:text-[1.35rem]"
+              wordmarkClassName="hx-header-wordmark hidden lg:inline lg:text-[1.35rem]"
             />
           </Link>
 

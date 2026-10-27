@@ -87,6 +87,7 @@ export type DashboardQuickAction = {
 export const DASHBOARD_QUICK_ACTIONS: DashboardQuickAction[] = [
   { href: "/courses", label: "Cursos" },
   { href: "/simulados", label: "Simulados" },
+  { href: "/anotacoes", label: "Caderno" },
   { href: "/historico", label: "Histórico" },
   { href: "/estatisticas", label: "Estatísticas" },
   { href: "/ranking", label: "Ranking" },

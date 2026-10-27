@@ -53,7 +53,7 @@ export function HexavanteLogo({
       {showWordmark ? (
         <span
           className={cn(
-            "font-black uppercase tracking-[0.2em]",
+            "shrink-0 whitespace-nowrap font-black uppercase tracking-[0.2em]",
             dimensions.text,
             wordmarkClassName,
           )}

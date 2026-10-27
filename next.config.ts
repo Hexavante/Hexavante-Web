@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
       (process.env.NODE_ENV === "production"
-        ? "https://hexavante.com.br"
+        ? "https://app.hexavante.com.br"
         : "http://localhost:3000"),
   },
   allowedDevOrigins: ["hexavante.com.br", "www.hexavante.com.br", "26.249.87.48"],

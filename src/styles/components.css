@@ -1178,19 +1178,20 @@
 
   .hx-sidebar-group-label {
     height: auto !important;
-    padding: 0.35rem 0.5rem 0.15rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.45rem 0.5rem 0.2rem !important;
+    font-size: 0.7rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: hsl(var(--sidebar-foreground) / 0.42) !important;
+    color: hsl(var(--sidebar-foreground) / 0.5) !important;
   }
 
   .hx-sidebar-link {
-    height: 2.625rem !important;
+    height: 2.75rem !important;
     border-radius: 0.7rem !important;
     padding-left: 0.55rem !important;
     padding-right: 0.65rem !important;
+    font-size: 0.9375rem;
     font-weight: 500;
     color: hsl(var(--sidebar-foreground) / 0.82);
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
