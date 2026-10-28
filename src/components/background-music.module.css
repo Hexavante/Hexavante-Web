@@ -1,0 +1,223 @@
+.player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 90;
+  color: hsl(var(--sidebar-foreground));
+  font-size: 13px;
+}
+.panel {
+  width: min(356px, calc(100vw - 32px));
+  max-height: calc(100dvh - 100px);
+  overflow: auto;
+  margin-bottom: 12px;
+  padding: 18px;
+  border: 1px solid hsl(var(--sidebar-border));
+  border-radius: 24px;
+  background: hsl(var(--sidebar-background));
+  box-shadow: 0 20px 70px #0005;
+}
+.collapsed {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 16px;
+}
+.header small {
+  color: hsl(var(--sidebar-highlight));
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+.header h2 {
+  font-size: 15px;
+  font-weight: 750;
+  margin-top: 3px;
+}
+.header > button {
+  margin-left: auto;
+}
+.art {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  color: #67e8f9;
+  background: linear-gradient(135deg, #164e63, #172554);
+}
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.iconButton:hover {
+  background: hsl(var(--sidebar-foreground) / 0.08);
+}
+.video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  height: auto;
+  border: 0;
+  border-radius: 14px;
+}
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 28px 20px;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at top, #0891b233, transparent),
+    hsl(var(--sidebar-foreground) / 0.035);
+  border: 1px solid hsl(var(--sidebar-border));
+}
+.placeholder svg {
+  color: hsl(var(--sidebar-highlight));
+}
+.placeholder span,
+.track small,
+.form > small {
+  color: hsl(var(--sidebar-foreground) / 0.6);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+}
+.play,
+.dockPlay {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22d3ee, #2563eb);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 18px #0891b233;
+}
+.track strong,
+.track small {
+  display: block;
+}
+.track strong {
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+.volume input {
+  width: 100%;
+  min-width: 0;
+  accent-color: #06b6d4;
+  cursor: pointer;
+}
+.volume output {
+  width: 36px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.form {
+  border-top: 1px solid hsl(var(--sidebar-border));
+  padding-top: 16px;
+}
+.form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 12px;
+}
+.form > div {
+  display: flex;
+  gap: 7px;
+}
+.form input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid hsl(var(--sidebar-border));
+  background: hsl(var(--sidebar-foreground) / 0.04);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+}
+.form button {
+  background: hsl(var(--sidebar-highlight) / 0.15);
+  color: hsl(var(--sidebar-highlight));
+  border-radius: 10px;
+  padding: 0 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.form > small {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+}
+.form p {
+  margin-top: 8px;
+  color: #fb7185;
+}
+.dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  width: fit-content;
+  padding: 6px;
+  border: 1px solid hsl(var(--sidebar-border));
+  border-radius: 40px;
+  background: hsl(var(--sidebar-background));
+  box-shadow: 0 8px 32px #0003;
+}
+.expand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+.expand > svg:first-child {
+  color: hsl(var(--sidebar-highlight));
+}
+.dockPlay {
+  width: 34px;
+  height: 34px;
+}
+.player button:focus-visible,
+.player input:focus-visible {
+  outline: 2px solid hsl(var(--sidebar-highlight));
+  outline-offset: 3px;
+}
+@media (max-width: 640px) {
+  .player {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+.video { pointer-events:none; }

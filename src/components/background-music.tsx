@@ -1,7 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { Volume2, VolumeX, Play, Pause, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import {
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  ChevronDown,
+  ChevronUp,
+  Headphones,
+} from "lucide-react";
+import styles from "./background-music.module.css";
 
 const DEFAULT_VIDEO_ID = "MX-iaTDEyGI";
 const DEFAULT_VOLUME = 70;
@@ -71,8 +86,16 @@ export function parseYouTubeVideoId(raw: string): string | null {
   return null;
 }
 
-function readStorage(): { videoId: string | null; volume: number | null; playing: boolean | null } {
-  const result = { videoId: null as string | null, volume: null as number | null, playing: null as boolean | null };
+function readStorage(): {
+  videoId: string | null;
+  volume: number | null;
+  playing: boolean | null;
+} {
+  const result = {
+    videoId: null as string | null,
+    volume: null as number | null,
+    playing: null as boolean | null,
+  };
   try {
     const video = localStorage.getItem(KEY_VIDEO);
     if (video && VIDEO_ID_RE.test(video)) result.videoId = video;
@@ -102,6 +125,7 @@ export function BackgroundMusic() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playingRef = useRef(false);
   const volumeRef = useRef(DEFAULT_VOLUME);
+  const lastVolumeRef = useRef(DEFAULT_VOLUME);
 
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -122,7 +146,7 @@ export function BackgroundMusic() {
         ? { event: "command", func: fn, args: [arg] }
         : { event: "command", func: fn, args: [] };
     try {
-      target.postMessage(JSON.stringify(message), "*");
+      target.postMessage(JSON.stringify(message), "https://www.youtube.com");
     } catch {
       // janela do iframe indisponível — ignorado
     }
@@ -164,6 +188,7 @@ export function BackgroundMusic() {
     if (stored.videoId) setVideoId(stored.videoId);
     if (stored.volume !== null) {
       volumeRef.current = stored.volume;
+      if (stored.volume > 0) lastVolumeRef.current = stored.volume;
       setVolume(stored.volume);
     }
     if (stored.playing) {
@@ -219,6 +244,7 @@ export function BackgroundMusic() {
 
   const changeVolume = (raw: number) => {
     const next = clamp(Math.round(raw), 0, 100);
+    if (next > 0) lastVolumeRef.current = next;
     volumeRef.current = next;
     setVolume(next);
     persistVolume(next);
@@ -264,138 +290,139 @@ export function BackgroundMusic() {
   // para o áudio não parar).
   const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&enablejsapi=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&rel=0&loop=1&playlist=${videoId}`;
 
-  const iconButton =
-    "grid place-items-center rounded-full border border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground)/0.7)] shadow-lg backdrop-blur transition hover:border-[hsl(var(--sidebar-foreground)/0.25)] hover:text-[hsl(var(--sidebar-foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--sidebar-ring))]";
-
   return (
-    <div className="fixed bottom-5 right-5 z-[9999] flex flex-col items-end gap-2">
-      {started && (
-        <div
-          aria-hidden={!expanded}
-          className={
-            expanded
-              ? "overflow-hidden rounded-xl border border-[hsl(var(--sidebar-border))] bg-black shadow-2xl"
-              : "pointer-events-none absolute right-0 top-0 h-0 w-0 overflow-hidden opacity-0"
-          }
-        >
+    <section className={styles.player} aria-label="Música para estudar">
+      <div
+        id="study-music-panel"
+        className={expanded ? styles.panel : styles.collapsed}
+        aria-hidden={!expanded}
+        inert={!expanded}
+      >
+        <header className={styles.header}>
+          <span className={styles.art}>
+            <Headphones size={23} />
+          </span>
+          <div>
+            <small>SEU MOMENTO DE FOCO</small>
+            <h2>Música para estudar</h2>
+          </div>
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={() => setExpanded(false)}
+            aria-label="Recolher player"
+          >
+            <ChevronDown size={19} />
+          </button>
+        </header>
+        {started ? (
           <iframe
             ref={iframeRef}
+            tabIndex={-1}
             src={embedUrl}
             title="Player de música de fundo"
             width={320}
             height={180}
-            tabIndex={-1}
             allow="autoplay; encrypted-media"
-            className="pointer-events-none"
+            className={styles.video}
           />
+        ) : (
+          <div className={styles.placeholder}>
+            <Headphones size={32} />
+            <strong>Dê ritmo aos seus estudos</strong>
+            <span>Comece com nossa seleção ou escolha um vídeo.</span>
+          </div>
+        )}
+        <div className={styles.controls}>
+          <button
+            type="button"
+            onClick={togglePlay}
+            className={styles.play}
+            aria-label={playing ? "Pausar música" : "Tocar música"}
+          >
+            {playing ? <Pause size={20} /> : <Play size={20} />}
+          </button>
+          <div className={styles.track}>
+            <strong>
+              {videoId === DEFAULT_VIDEO_ID
+                ? "Seleção Hexavante"
+                : "Seu vídeo do YouTube"}
+            </strong>
+            <small>
+              {playing
+                ? "Reprodução ativada"
+                : "Pronto para o seu próximo foco"}
+            </small>
+          </div>
         </div>
-      )}
-
-      {started && expanded && (
-        <div className="w-80 rounded-xl border border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] p-3 shadow-2xl">
-          <form onSubmit={handleUrlSubmit} className="flex items-center gap-2">
+        <div className={styles.volume}>
+          <button
+            type="button"
+            className={styles.iconButton}
+            aria-label={volume === 0 ? "Ativar som" : "Silenciar"}
+            onClick={() =>
+              changeVolume(volume === 0 ? lastVolumeRef.current : 0)
+            }
+          >
+            {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={(event) => changeVolume(Number(event.target.value))}
+            aria-label="Volume da música"
+          />
+          <output>{volume}%</output>
+        </div>
+        <form onSubmit={handleUrlSubmit} className={styles.form}>
+          <label htmlFor="study-music-url">Sua música, seu ritmo</label>
+          <div>
             <input
+              id="study-music-url"
               type="text"
               inputMode="url"
               value={urlDraft}
               onChange={(event) => {
                 setUrlDraft(event.target.value);
-                if (urlError) setUrlError(null);
+                setUrlError(null);
               }}
-              placeholder="https://www.youtube.com/watch?v=..."
-              aria-label="Link do vídeo do YouTube"
-              className="h-10 min-w-0 flex-1 rounded-lg border border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-foreground)/0.06)] px-3 text-sm text-[hsl(var(--sidebar-foreground))] placeholder:text-[hsl(var(--sidebar-foreground)/0.45)] focus:border-[hsl(var(--sidebar-ring))] focus:outline-none"
+              placeholder="Cole um link do YouTube"
+              aria-invalid={Boolean(urlError)}
+              aria-describedby={urlError ? "study-music-error" : undefined}
             />
-            <button
-              type="submit"
-              className="hx-btn-primary h-10 shrink-0 px-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--sidebar-ring))]"
-            >
-              Tocar
-            </button>
-          </form>
-
+            <button type="submit">Tocar</button>
+          </div>
           {urlError && (
-            <p
-              role="alert"
-              className="mt-1.5 inline-block rounded-md bg-rose-700 px-2 py-1 text-xs font-semibold text-slate-50"
-            >
+            <p id="study-music-error" role="alert">
               {urlError}
             </p>
           )}
-
-          <div className="mt-3 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={togglePlay}
-              title={playing ? "Pausar música" : "Tocar música"}
-              aria-label={playing ? "Pausar música" : "Tocar música"}
-              className={`${iconButton} h-10 w-10 shrink-0`}
-            >
-              {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </button>
-
-            {volume === 0 ? (
-              <VolumeX className="h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.5)]" aria-hidden />
-            ) : (
-              <Volume2 className="h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.5)]" aria-hidden />
-            )}
-
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={volume}
-              onChange={(event) => changeVolume(Number(event.target.value))}
-              aria-label="Volume da música"
-              title={`Volume: ${volume}`}
-              className="h-10 min-w-0 flex-1 cursor-pointer accent-[hsl(var(--sidebar-highlight))]"
-            />
-            <span className="w-7 shrink-0 text-right text-xs font-semibold tabular-nums text-[hsl(var(--sidebar-foreground)/0.6)]">
-              {volume}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {started && (
+          <small>O vídeo precisa permitir reprodução em outros sites.</small>
+        </form>
+      </div>
+      <div className={styles.dock}>
         <button
           type="button"
+          className={styles.expand}
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          aria-label={expanded ? "Recolher player" : "Mostrar player"}
-          title={expanded ? "Recolher player" : "Mostrar player"}
-          className={`${iconButton} h-10 w-10`}
+          aria-controls="study-music-panel"
         >
-          {expanded ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronUp className="h-4 w-4" />
-          )}
+          <Headphones size={18} />
+          <span>Música de foco</span>
+          {expanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
         </button>
-      )}
-
-      <button
-        type="button"
-        onClick={togglePlay}
-        title={
-          !started
-            ? "Tocar música de fundo"
-            : playing
-              ? "Pausar música"
-              : "Retomar música"
-        }
-        aria-label={
-          !started
-            ? "Tocar música de fundo"
-            : playing
-              ? "Pausar música"
-              : "Retomar música"
-        }
-        className={`${iconButton} h-11 w-11`}
-      >
-        {!started || !playing ? <Play className="h-4.5 w-4.5" /> : <Pause className="h-4.5 w-4.5" />}
-      </button>
-    </div>
+        <button
+          type="button"
+          className={styles.dockPlay}
+          onClick={togglePlay}
+          aria-label={playing ? "Pausar música" : "Tocar música"}
+        >
+          {playing ? <Pause size={17} /> : <Play size={17} />}
+        </button>
+      </div>
+    </section>
   );
 }
