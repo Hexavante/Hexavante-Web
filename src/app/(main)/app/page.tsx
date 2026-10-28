@@ -1,7 +1,16 @@
 import { NavigationIcon } from "@/components/brand/navigation-icon";
 import styles from "@/components/home/dashboard-design.module.css";
 import { auth } from "@/auth";
-import { ArrowRight, Award, BookOpen, NotebookPen, RefreshCw, Target, Trophy, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  NotebookPen,
+  RefreshCw,
+  Target,
+  Trophy,
+  Zap,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -43,13 +52,33 @@ const highlights = [
   },
 ];
 
-const shortcuts: { href: string; label: string; icon: string; requiresAuth?: boolean }[] = [
+const shortcuts: {
+  href: string;
+  label: string;
+  icon: string;
+  requiresAuth?: boolean;
+}[] = [
   { href: "/courses", label: "Catálogo de cursos", icon: "BookOpen" },
   { href: "/simulados", label: "Simulados", icon: "Target" },
-  { href: "/historico", label: "Histórico", icon: "History", requiresAuth: true },
-  { href: "/anotacoes", label: "Caderno", icon: "NotebookPen", requiresAuth: true },
+  {
+    href: "/historico",
+    label: "Histórico",
+    icon: "History",
+    requiresAuth: true,
+  },
+  {
+    href: "/anotacoes",
+    label: "Caderno",
+    icon: "NotebookPen",
+    requiresAuth: true,
+  },
   { href: "/desafio-relampago", label: "Desafio Relâmpago", icon: "Zap" },
-  { href: "/estatisticas", label: "Estatísticas", icon: "BarChart3", requiresAuth: true },
+  {
+    href: "/estatisticas",
+    label: "Estatísticas",
+    icon: "BarChart3",
+    requiresAuth: true,
+  },
   { href: "/live-rooms", label: "Aulas ao vivo", icon: "Radio" },
 ];
 
@@ -60,7 +89,10 @@ export default async function HomePage() {
   const [homeData, cosmetics, lightningStatus] = userId
     ? await Promise.all([
         getStudentHomeData(userId).catch((error) => {
-          console.error("[painel] Falha ao carregar dados do estudante:", error);
+          console.error(
+            "[painel] Falha ao carregar dados do estudante:",
+            error,
+          );
           return null;
         }),
         getProfileCosmetics(userId).catch((error) => {
@@ -74,8 +106,8 @@ export default async function HomePage() {
   const themeClass = cosmetics?.themeClassName ?? "theme-default";
   const hasHighlights = Boolean(
     homeData?.highlights?.nextGoal ||
-      homeData?.highlights?.lastCertificate ||
-      homeData?.highlights?.nextLiveEvent,
+    homeData?.highlights?.lastCertificate ||
+    homeData?.highlights?.nextLiveEvent,
   );
   const hasUnlockedAchievements = Boolean(
     homeData?.achievements?.some((a) => a.unlocked),
@@ -90,21 +122,78 @@ export default async function HomePage() {
           <ScrollReveal>
             <section className={styles.welcome}>
               <p className={styles.eyebrow}>Seu espaço de evolução</p>
-              <h1 className="font-black hx-text-title">Olá, {session.user.name?.split(" ")[0] ?? session.user.username}!</h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 hx-text-muted">Um novo passo, uma nova conquista. O que você vai aprender hoje?</p>
+              <h1 className="font-black hx-text-title">
+                Olá, {session.user.name?.split(" ")[0] ?? session.user.username}
+                !
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 hx-text-muted">
+                Um novo passo, uma nova conquista. O que você vai aprender hoje?
+              </p>
+              <div
+                className={styles.overview}
+                aria-label="Resumo dos seus estudos"
+              >
+                <div>
+                  <BookOpen size={18} />
+                  <span>
+                    <strong>{homeData.inProgress.length}</strong>
+                    <small>Cursos em andamento</small>
+                  </span>
+                </div>
+                <div>
+                  <Award size={18} />
+                  <span>
+                    <strong>{homeData.completedCount}</strong>
+                    <small>Cursos concluídos</small>
+                  </span>
+                </div>
+                <Link href="/plano-diario">
+                  <Target size={18} />
+                  <span>
+                    <strong>Seu próximo passo</strong>
+                    <small>Abrir meu plano de estudos →</small>
+                  </span>
+                </Link>
+              </div>
               <div className={styles.quickLinks}>
                 {[
-                  { href: "/plano-diario", title: "Meu plano do dia", detail: "Organize seu próximo passo" },
-                  { href: "/estatisticas", title: "Minha evolução", detail: "Veja o quanto já avançou" },
-                  { href: "/anotacoes", title: "Meu caderno", detail: "Suas ideias, sempre por perto" },
-                ].map((item) => <Link key={item.href} href={item.href} className={styles.quickLink}>
-                  <NavigationIcon href={item.href} /><span><strong>{item.title}</strong><small>{item.detail}</small></span>
-                </Link>)}
+                  {
+                    href: "/plano-diario",
+                    title: "Meu plano do dia",
+                    detail: "Organize seu próximo passo",
+                  },
+                  {
+                    href: "/estatisticas",
+                    title: "Minha evolução",
+                    detail: "Veja o quanto já avançou",
+                  },
+                  {
+                    href: "/anotacoes",
+                    title: "Meu caderno",
+                    detail: "Suas ideias, sempre por perto",
+                  },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={styles.quickLink}
+                  >
+                    <NavigationIcon href={item.href} />
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.detail}</small>
+                    </span>
+                  </Link>
+                ))}
               </div>
             </section>
           </ScrollReveal>
 
           <ScrollReveal delay={80}>
+            <div className={styles.sectionHeading}>
+              <span>01 / CONTINUAR APRENDENDO</span>
+              <p>Retome de onde parou</p>
+            </div>
             <StudyContinueHero continuation={homeData.continuation} />
           </ScrollReveal>
 
@@ -121,7 +210,10 @@ export default async function HomePage() {
               </ScrollReveal>
 
               <ScrollReveal delay={200}>
-                <Card padding="md" className="flex min-w-0 flex-col gap-4 border-amber-400/25 bg-amber-400/[0.06] sm:flex-row sm:items-center sm:justify-between">
+                <Card
+                  padding="md"
+                  className="flex min-w-0 flex-col gap-4 border-amber-400/25 bg-amber-400/[0.06] sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/10 text-amber-200">
                       <Zap className="h-5 w-5" />
@@ -149,7 +241,11 @@ export default async function HomePage() {
                     href="/desafio-relampago"
                     variant="outline"
                     className="shrink-0"
-                    aria-label={lightningStatus?.played ? "Ver resultado do Desafio Relâmpago" : "Jogar o Desafio Relâmpago de hoje"}
+                    aria-label={
+                      lightningStatus?.played
+                        ? "Ver resultado do Desafio Relâmpago"
+                        : "Jogar o Desafio Relâmpago de hoje"
+                    }
                   >
                     {lightningStatus?.played ? (
                       <>
@@ -173,15 +269,22 @@ export default async function HomePage() {
               )}
 
               <ScrollReveal delay={100}>
+                <div className={styles.sectionHeading}>
+                  <span>02 / EXPLORE NOVOS CAMINHOS</span>
+                </div>
                 <CourseRecommendations courses={homeData.recommendations} />
               </ScrollReveal>
 
               {hasUnlockedAchievements && (
                 <ScrollReveal delay={180}>
                   <section className="min-w-0">
-                    <h2 className="mb-4 text-lg font-bold hx-text-title">Conquistas recentes</h2>
+                    <h2 className="mb-4 text-lg font-bold hx-text-title">
+                      Conquistas recentes
+                    </h2>
                     <AchievementGrid
-                      achievements={homeData.achievements.filter((a) => a.unlocked).slice(0, 4)}
+                      achievements={homeData.achievements
+                        .filter((a) => a.unlocked)
+                        .slice(0, 4)}
                       compact
                     />
                   </section>
@@ -196,13 +299,18 @@ export default async function HomePage() {
                     ...homeData,
                     cosmetics: {
                       themeId: cosmetics?.themeId ?? null,
-                      themeClassName: cosmetics?.themeClassName ?? "theme-default",
-                      avatarBorderClassName: cosmetics?.avatarBorderClassName ?? null,
-                      profileBackgroundId: cosmetics?.profileBackgroundId ?? null,
+                      themeClassName:
+                        cosmetics?.themeClassName ?? "theme-default",
+                      avatarBorderClassName:
+                        cosmetics?.avatarBorderClassName ?? null,
+                      profileBackgroundId:
+                        cosmetics?.profileBackgroundId ?? null,
                       frameId: cosmetics?.frameId ?? null,
                     },
                   }}
-                  userName={session.user.name ?? session.user.username ?? "Estudante"}
+                  userName={
+                    session.user.name ?? session.user.username ?? "Estudante"
+                  }
                   userAvatar={session.user.image ?? null}
                 />
               </ScrollReveal>
@@ -211,16 +319,19 @@ export default async function HomePage() {
         </div>
       ) : session?.user ? (
         <ScrollReveal>
-          <section className="mx-auto w-full max-w-3xl py-8 text-center">
+          <section
+            className={`${styles.welcome} mx-auto w-full max-w-5xl py-8`}
+          >
             <Badge variant="sky">Seu espaço de estudos</Badge>
             <h1 className="mt-3 text-2xl font-black tracking-tight hx-text-title sm:text-3xl">
               Olá, {session.user.name?.split(" ")[0] ?? session.user.username}!
             </h1>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 hx-text-muted">
-              Não conseguimos carregar seus dados agora, mas você pode continuar estudando
-              pelos atalhos abaixo. Tente atualizar a página em instantes.
+            <p className="mt-3 max-w-xl text-sm leading-6 hx-text-muted">
+              Não conseguimos carregar seus dados agora, mas você pode continuar
+              estudando pelos atalhos abaixo. Tente atualizar a página em
+              instantes.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <div className="mt-6 flex flex-wrap gap-3">
               <LinkButton href="/courses">
                 <BookOpen className="h-4 w-4" />
                 Explorar cursos
@@ -242,15 +353,17 @@ export default async function HomePage() {
         </ScrollReveal>
       ) : (
         <ScrollReveal>
-          <section className={`${styles.welcome} grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8`}>
+          <section
+            className={`${styles.welcome} grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8`}
+          >
             <div className="min-w-0">
               <Badge variant="sky">Plataforma educacional Hexavante</Badge>
               <h1 className="mt-4 max-w-3xl text-3xl font-black tracking-tight text-white sm:mt-5 sm:text-4xl xl:text-5xl">
                 Aprenda, pratique e acompanhe seu progresso em um só lugar.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:mt-5 sm:text-base lg:text-lg">
-                Cursos, simulados, aulas ao vivo e gamificação para estudantes do ensino técnico,
-                universitários de TI e candidatos ao ENEM.
+                Cursos, simulados, aulas ao vivo e gamificação para estudantes
+                do ensino técnico, universitários de TI e candidatos ao ENEM.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -264,27 +377,43 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <Card padding="md" className="min-w-0 shadow-2xl shadow-black/30 backdrop-blur">
+            <Card
+              padding="md"
+              className="min-w-0 shadow-2xl shadow-black/30 backdrop-blur"
+            >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                  <p className="text-sm font-semibold text-white">Comece agora</p>
-                  <p className="mt-1 text-xs text-slate-400">Tudo em uma plataforma</p>
+                  <p className="text-sm font-semibold text-white">
+                    Comece agora
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Tudo em uma plataforma
+                  </p>
                 </div>
                 <Badge variant="teal">Gratuito</Badge>
               </div>
               <div className="mt-5 grid gap-3">
                 {highlights.map((item) => {
-                  const IconComponent = item.icon === "BookOpen" ? BookOpen : item.icon === "Target" ? Target : Award;
+                  const IconComponent =
+                    item.icon === "BookOpen"
+                      ? BookOpen
+                      : item.icon === "Target"
+                        ? Target
+                        : Award;
                   return (
                     <div
                       key={item.label}
                       className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.04] p-4"
                     >
-                      <span className={`grid h-10 w-10 place-items-center rounded-lg ${item.tone}`}>
+                      <span
+                        className={`grid h-10 w-10 place-items-center rounded-lg ${item.tone}`}
+                      >
                         <IconComponent className="h-5 w-5" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-white">{item.label}</p>
+                        <p className="text-sm font-semibold text-white">
+                          {item.label}
+                        </p>
                         <p className="text-xs text-slate-400">{item.value}</p>
                       </div>
                     </div>
@@ -310,7 +439,9 @@ export default async function HomePage() {
 
       {session?.user && (
         <ScrollReveal delay={100}>
-          <CertificateVortex hasCertificates={Boolean(homeData?.highlights?.lastCertificate)} />
+          <CertificateVortex
+            hasCertificates={Boolean(homeData?.highlights?.lastCertificate)}
+          />
         </ScrollReveal>
       )}
     </PageShell>
