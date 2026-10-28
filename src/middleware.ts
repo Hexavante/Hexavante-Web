@@ -1,3 +1,4 @@
+import { sessionCookieForApi } from "@/lib/session-cookie-for-api";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
@@ -76,7 +77,7 @@ async function getSessionUser(cookieHeader: string | null) {
   if (!cookieHeader) return null;
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/session`, {
-      headers: { cookie: cookieHeader },
+      headers: { cookie: sessionCookieForApi(cookieHeader) },
       cache: "no-store",
     });
     if (!res.ok) return null;

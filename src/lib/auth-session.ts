@@ -1,3 +1,4 @@
+import { sessionCookieForApi } from "@/lib/session-cookie-for-api";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { SERVER_API_URL } from "./api-url";
@@ -51,7 +52,7 @@ export const getApiSession = cache(async (): Promise<AuthSession | null> => {
       .join("; ");
 
     const res = await fetch(`${SERVER_API_URL}/api/v1/auth/session`, {
-      headers: { cookie: cookieHeader },
+      headers: { cookie: sessionCookieForApi(cookieHeader) },
       cache: "no-store",
     });
 
