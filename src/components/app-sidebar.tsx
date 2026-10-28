@@ -4,23 +4,8 @@ import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Award,
-  BarChart2,
-  BarChart3,
-  BookOpen,
-  Compass,
-  History,
-  NotebookPen,
-  Radio,
-  Settings,
-  ShoppingBag,
-  Package,
-  Target,
-  Video,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { NavigationIcon } from "@/components/brand/navigation-icon";
+import styles from "@/components/home/dashboard-design.module.css";
 import { ClientOnly } from "@/components/ui/client-only";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
@@ -43,8 +28,6 @@ import {
 } from "@/components/ui/sidebar";
 
 type NavItem = {
-  icon: LucideIcon;
-  iconSrc?: string;
   label: string;
   href: string;
   requiresAuth?: boolean;
@@ -61,40 +44,33 @@ const NAV_SECTIONS: NavSection[] = [
   {
     id: "home",
     label: "Início",
-    items: [{ icon: Compass, iconSrc: "/sidebar/painel.png", label: "Painel", href: "/app" }],
+    items: [{ label: "Painel", href: "/app" }],
   },
   {
     id: "study",
     label: "Estudos",
     items: [
-      { icon: BookOpen, iconSrc: "/sidebar/cursos.png", label: "Cursos", href: "/courses" },
+      { label: "Cursos", href: "/courses" },
       {
-        icon: History,
-        iconSrc: "/sidebar/historico-cursos.png",
         label: "Histórico",
         href: "/historico",
         requiresAuth: true,
       },
-      { icon: Video, label: "Tutoriais", href: "/tutorials" },
+      { label: "Tutoriais", href: "/tutorials" },
       {
-        icon: NotebookPen,
         label: "Caderno",
         href: "/anotacoes",
         requiresAuth: true,
       },
-      { icon: Target, iconSrc: "/sidebar/simulados.png", label: "Simulados", href: "/simulados" },
-      { icon: Zap, label: "Desafio Relâmpago", href: "/desafio-relampago" },
+      { label: "Simulados", href: "/simulados" },
+      { label: "Desafio Relâmpago", href: "/desafio-relampago" },
       {
-        icon: BarChart3,
-        iconSrc: "/sidebar/estatisticas.png",
         label: "Estatísticas",
         href: "/estatisticas",
         requiresAuth: true,
       },
-      { icon: ShoppingBag, iconSrc: "/sidebar/loja.png", label: "Loja", href: "/shop", requiresAuth: true },
+      { label: "Loja", href: "/shop", requiresAuth: true },
       {
-        icon: Package,
-        iconSrc: "/sidebar/inventario.png",
         label: "Inventário",
         href: "/inventario",
         requiresAuth: true,
@@ -105,11 +81,9 @@ const NAV_SECTIONS: NavSection[] = [
     id: "social",
     label: "Social",
     items: [
-      { icon: Radio, iconSrc: "/sidebar/ao-vivo.png", label: "Ao vivo", href: "/live-rooms", requiresAuth: true },
-      { icon: BarChart2, iconSrc: "/sidebar/ranking.png", label: "Ranking", href: "/ranking" },
+      { label: "Ao vivo", href: "/live-rooms", requiresAuth: true },
+      { label: "Ranking", href: "/ranking" },
       {
-        icon: Award,
-        iconSrc: "/sidebar/certificados.png",
         label: "Certificados",
         href: "/certificados",
         requiresAuth: true,
@@ -119,7 +93,7 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 const ACCOUNT_ITEMS: NavItem[] = [
-  { icon: Settings, label: "Gerenciar", href: "/instructor/gerenciar", requiresInstructor: true },
+  { label: "Gerenciar", href: "/instructor/gerenciar", requiresInstructor: true },
 ];
 
 type Props = {
@@ -200,7 +174,6 @@ function NavSectionBlock({
           {visible.map((item, itemIndex) => {
             const href = resolveNavHref(item, session);
             const active = isActive(pathname, item.href);
-            const Icon = item.icon;
 
             return (
               <SidebarMenuItem key={item.href} className="sidebar-item-animate" style={{ animationDelay: `${0.08 + sectionIndex * 0.12 + itemIndex * 0.05}s` }}>
@@ -212,18 +185,7 @@ function NavSectionBlock({
                 >
                   <Link href={href} title={item.label}>
                     <span className={cn("hx-sidebar-link-icon", active && "hx-sidebar-link-icon-active")}>
-                      {item.iconSrc ? (
-                        <Image
-                          src={item.iconSrc}
-                          alt=""
-                          aria-hidden
-                          width={24}
-                          height={24}
-                          className="h-6 w-6 object-contain"
-                        />
-                      ) : (
-                        <Icon className="h-4 w-4" />
-                      )}
+                      <NavigationIcon href={item.href} />
                     </span>
                     <span className="truncate">{item.label}</span>
                   </Link>
@@ -307,7 +269,7 @@ function SidebarUserFooter({ session }: { session: NavSession }) {
         </span>
       </Link>
       <Link href="/configuracoes" className="hx-sidebar-settings">
-        <Settings className="h-4 w-4" />
+        <NavigationIcon href="/configuracoes" className="h-5 w-5" />
         Configurações
       </Link>
     </div>
@@ -334,12 +296,12 @@ export function AppSidebar({ session }: Props) {
   }, [session, roles]);
 
   return (
-    <Sidebar collapsible="offcanvas" variant="sidebar" className="hx-sidebar-shell">
+    <Sidebar collapsible="offcanvas" variant="sidebar" className={cn("hx-sidebar-shell", styles.sidebar)}>
       <SidebarHeader className="hx-sidebar-header border-b border-sidebar-border px-3 py-3">
         <SidebarBrand />
       </SidebarHeader>
 
-      <SidebarContent className="hx-sidebar-content gap-1 py-2" data-tour="sidebar-nav">
+      <SidebarContent className={cn("hx-sidebar-content gap-1 py-2", styles.sidebar)} data-tour="sidebar-nav">
         <ClientOnly fallback={<SidebarNavSkeleton />}>
           <SidebarNav session={session} pathname={pathname} accountItems={accountItems} />
         </ClientOnly>

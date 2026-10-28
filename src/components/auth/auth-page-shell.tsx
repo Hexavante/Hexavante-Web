@@ -1,4 +1,5 @@
-import { BookOpenCheck, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, Sparkles, Target } from "lucide-react";
+import { SITE_URL } from "@/lib/site-url";
 import Image from "next/image";
 import styles from "./login-shell.module.css";
 
@@ -9,6 +10,9 @@ export function AuthPageShell({ children, variant = "login" }: Props) {
 
   return (
     <main className={styles.page}>
+      <a href={SITE_URL} className={styles.backToSite}>
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar ao site
+      </a>
       <div
         className={`${styles.card} ${isRegister ? styles.registerCard : ""}`}
       >

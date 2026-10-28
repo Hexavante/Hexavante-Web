@@ -1,5 +1,7 @@
+import { NavigationIcon } from "@/components/brand/navigation-icon";
+import styles from "@/components/home/dashboard-design.module.css";
 import { auth } from "@/auth";
-import { ArrowRight, Award, BarChart3, BookOpen, NotebookPen, RefreshCw, Target, Trophy, Zap } from "lucide-react";
+import { ArrowRight, Award, BookOpen, NotebookPen, RefreshCw, Target, Trophy, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -80,49 +82,24 @@ export default async function HomePage() {
   );
 
   return (
-    <PageShell className={themeClass}>
+    <PageShell className={`${themeClass} ${styles.dashboard}`}>
       {homeData?.showOnboardingTour && <TutorialVideoModal show />}
 
       {homeData && session?.user ? (
         <div className="mx-auto w-full min-w-0 max-w-6xl">
           <ScrollReveal>
-            <section className="relative mb-6 min-w-0">
-              <div
-                aria-hidden
-                className="animate-bg-breathe pointer-events-none absolute -top-12 right-0 h-48 w-48 rounded-full bg-[hsl(var(--sidebar-highlight)/0.1)] blur-[5rem]"
-              />
-              <div className="relative">
-                <Badge variant="sky">Seu espaço de estudos</Badge>
-                <h1 className="mt-2 text-2xl font-black tracking-tight hx-text-title sm:text-3xl">
-                  <span className="welcome-animated">
-                    {"Olá, ".split("").map((char, i) => (
-                      <span key={i} style={{ animationDelay: `${0.1 + i * 0.04}s` }}>
-                        {char === " " ? "\u00A0" : char}
-                      </span>
-                    ))}
-                    <span style={{ animationDelay: `${0.1 + "Olá, ".length * 0.04}s` }}>
-                      {session.user.name?.split(" ")[0] ?? session.user.username}
-                    </span>
-                  </span>
-                  !
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm hx-text-muted anim-enter anim-d3">
-                  Retome de onde parou, acompanhe suas estatísticas e descubra novos cursos.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2 anim-enter anim-d4">
-                  <Link href="/estatisticas" className="hx-intro-chip">
-                    <BarChart3 className="h-3.5 w-3.5" />
-                    Ver estatísticas
-                  </Link>
-                  <Link href="/plano-diario" className="hx-intro-chip">
-                    <span className="h-3.5 w-3.5">📋</span>
-                    Meu plano do dia
-                  </Link>
-                  <Link href="/anotacoes" className="hx-intro-chip">
-                    <NotebookPen className="h-3.5 w-3.5" />
-                    Meu caderno
-                  </Link>
-                </div>
+            <section className={styles.welcome}>
+              <p className={styles.eyebrow}>Seu espaço de evolução</p>
+              <h1 className="font-black hx-text-title">Olá, {session.user.name?.split(" ")[0] ?? session.user.username}!</h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 hx-text-muted">Um novo passo, uma nova conquista. O que você vai aprender hoje?</p>
+              <div className={styles.quickLinks}>
+                {[
+                  { href: "/plano-diario", title: "Meu plano do dia", detail: "Organize seu próximo passo" },
+                  { href: "/estatisticas", title: "Minha evolução", detail: "Veja o quanto já avançou" },
+                  { href: "/anotacoes", title: "Meu caderno", detail: "Suas ideias, sempre por perto" },
+                ].map((item) => <Link key={item.href} href={item.href} className={styles.quickLink}>
+                  <NavigationIcon href={item.href} /><span><strong>{item.title}</strong><small>{item.detail}</small></span>
+                </Link>)}
               </div>
             </section>
           </ScrollReveal>
@@ -265,7 +242,7 @@ export default async function HomePage() {
         </ScrollReveal>
       ) : (
         <ScrollReveal>
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8">
+          <section className={`${styles.welcome} grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-8`}>
             <div className="min-w-0">
               <Badge variant="sky">Plataforma educacional Hexavante</Badge>
               <h1 className="mt-4 max-w-3xl text-3xl font-black tracking-tight text-white sm:mt-5 sm:text-4xl xl:text-5xl">

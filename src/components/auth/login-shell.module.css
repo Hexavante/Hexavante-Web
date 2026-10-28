@@ -8,6 +8,7 @@
   display: grid;
   min-height: 100svh;
   place-items: center;
+  align-content: center;
   overflow: hidden;
   padding: 48px 28px;
   color: #f5f7ff;
@@ -28,6 +29,24 @@
   transform: rotate(-42deg);
   pointer-events: none;
 }
+.backToSite {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  margin-left: max(0px, calc((100% - 1120px) / 2));
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid #38bdf833;
+  border-radius: 12px;
+  color: #7dd3fc;
+  background: #111624;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background .2s, border-color .2s;
+}
+.backToSite:hover { background: #192b40; border-color: #38bdf8; }
+.backToSite:focus-visible { outline: 2px solid #7dd3fc; outline-offset: 4px; }
 .page::before {
   left: -270px;
   top: 5%;
