@@ -46,12 +46,14 @@ jobs:
             "$VPS_USER@$VPS_HOST" \
             "deploy web $GITHUB_SHA"
 
+      # A chave de deploy só aceita comandos da lista do forced command do servidor.
+      # "migrate web <sha>" roda `prisma migrate deploy` a partir do checkout
+      # /opt/hexavante/web (DATABASE_URL vem do container hexavante-app, sem segredo no GitHub).
       - name: Apply Prisma migrations (web)
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/id_ed25519 \
@@ -61,4 +63,4 @@ jobs:
             -o ConnectTimeout=15 \
             -p "${VPS_PORT:-22}" \
             "$VPS_USER@$VPS_HOST" \
-            "set -euo pipefail; cd /opt/hexavante && DATABASE_URL=\"\$DATABASE_URL\" npx --yes prisma migrate deploy" || true
+            "migrate web $GITHUB_SHA"
