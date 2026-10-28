@@ -57,7 +57,7 @@ export function HeaderBar({ session }: Props) {
               <Link
                 href="/anotacoes"
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400"
-                title="Meu Caderno de Estudos (Smart Notes)"
+                title="Meu Caderno de Estudos"
                 aria-label="Caderno de Estudos"
               >
                 <Award className="h-4 w-4 hidden" />

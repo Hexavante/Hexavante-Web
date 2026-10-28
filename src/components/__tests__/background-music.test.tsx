@@ -17,7 +17,7 @@ describe("player de estudos", () => {
   const { container } = render(<BackgroundMusic />);
   fireEvent.click(screen.getByRole("button", {name:"Música de foco"}));
   fireEvent.change(screen.getByLabelText("Sua música, seu ritmo"), {target:{value:"https://example.com/video"}});
-  fireEvent.click(screen.getByRole("button", {name:"Tocar",exact:true}));
+  fireEvent.click(screen.getByRole("button", {name:/^Tocar$/}));
   expect(screen.getByRole("alert")).toBeInTheDocument();
   expect(container.querySelector("iframe")).toBeNull();
  });

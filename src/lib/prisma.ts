@@ -4,7 +4,7 @@
 import { PrismaClient } from "@prisma/client";
 
 // Incremente ao alterar prisma/schema.prisma para invalidar cache em dev.
-const PRISMA_SINGLETON_KEY = "hexavante_prisma_exam_question_fields_v2";
+const PRISMA_SINGLETON_KEY = "hexavante_prisma_notebook_pages_v1";
 
 type PrismaGlobal = typeof globalThis & {
   [PRISMA_SINGLETON_KEY]?: PrismaClient;

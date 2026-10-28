@@ -66,6 +66,7 @@ model User {
   lessonProgresses   LessonProgress[]
   lessonFavorites    LessonFavorite[]
   lessonNotes        LessonNote[]
+  notebookPages      NotebookPage[]
   examAttempts           ExamAttempt[]
   examQuestionFavorites  ExamQuestionFavorite[]
   instructorApplications InstructorApplication[]
@@ -392,6 +393,7 @@ model CourseTag {
 }
 
 model Course {
+  notebookPages NotebookPage[]
   id               String          @id @default(cuid())
   categoryId       String          @map("category_id")
   title            String
@@ -1444,4 +1446,20 @@ model LightningChallengeAttempt {
   @@unique([userId, challengeDate]) // uma tentativa por dia por usuário
   @@index([userId])
   @@map("lightning_challenge_attempts")
+}
+
+// Páginas pessoais por curso, independentes das notas de aula.
+model NotebookPage {
+  id String @id @db.VarChar(36)
+  userId String @map("user_id")
+  courseId String @map("course_id")
+  title String @db.VarChar(120)
+  content String @db.LongText
+  version Int @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  @@index([userId, courseId, updatedAt])
+  @@map("notebook_pages")
 }
