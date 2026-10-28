@@ -8,7 +8,7 @@ import {
   Play,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
-import { VideoPlayer } from "@/components/courses/video-player";
+import { TutorialPlayer } from "./tutorial-player";
 import styles from "./tutorials.module.css";
 type Props = {
   tutorial: {
@@ -55,7 +55,7 @@ export function TutorialWatch({ tutorial }: Props) {
       <div className={styles.watchGrid}>
         <div className={styles.mainColumn}>
           <div className={styles.playerFrame}>
-            <VideoPlayer
+            <TutorialPlayer
               url={tutorial.videoUrl ?? ""}
               title={tutorial.title}
               poster={tutorial.thumbnailUrl}
