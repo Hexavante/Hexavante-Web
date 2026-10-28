@@ -1,6 +1,13 @@
 import { AUTH_SESSION_COOKIE_NAMES } from "@/lib/auth-env";
 import type { NextResponse } from "next/server";
 
+/** O prefixo __Secure- exige HTTPS; localhost usa a variante host-only. */
+export function getSessionCookieName(): string {
+  return process.env.NODE_ENV === "production"
+    ? "__Secure-hexavante.session_token"
+    : "hexavante.session_token";
+}
+
 const SESSION_COOKIE_PREFIXES = [
   "hexavante.session_token",
   "__Secure-hexavante.session_token",

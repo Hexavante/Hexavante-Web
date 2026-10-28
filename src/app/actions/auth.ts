@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { getSessionCookieName } from "@/lib/auth-cookies";
 import { registerSchema, loginSchema } from "@/lib/validations/auth";
 import type { ZodError } from "zod";
 import { getApiUrl } from "@/lib/auth-session";
@@ -167,7 +168,7 @@ export async function registerAction(
       };
       if (loginData.session) {
         const cookieStore = await cookies();
-        cookieStore.set("__Secure-hexavante.session_token", loginData.session.token, {
+        cookieStore.set(getSessionCookieName(), loginData.session.token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
@@ -270,7 +271,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
 
     if (data.session) {
       const cookieStore = await cookies();
-      cookieStore.set("__Secure-hexavante.session_token", data.session.token, {
+      cookieStore.set(getSessionCookieName(), data.session.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

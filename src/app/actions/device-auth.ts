@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { getSessionCookieName } from "@/lib/auth-cookies";
 import { getApiUrl } from "@/lib/auth-session";
 import { addAccount } from "@/lib/account-switcher";
 import { getClientDevice } from "@/lib/client-device";
@@ -70,7 +71,7 @@ export async function verifyDeviceAction(
     }
 
     const cookieStore = await cookies();
-    cookieStore.set("__Secure-hexavante.session_token", data.session.token, sessionCookieOpts());
+    cookieStore.set(getSessionCookieName(), data.session.token, sessionCookieOpts());
     // Multiconta é conveniência: nunca pode quebrar o login
     try {
       await addAccount(data.session.token);

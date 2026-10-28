@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { getSessionCookieName } from "@/lib/auth-cookies";
 import { getApiUrl } from "@/lib/auth-session";
 
 const ACCOUNTS_COOKIE = "hx_accounts";
@@ -136,7 +137,7 @@ export async function switchAccount(userId: string): Promise<boolean> {
     return false;
   }
   const cookieStore = await cookies();
-  cookieStore.set("__Secure-hexavante.session_token", target.token, {
+  cookieStore.set(getSessionCookieName(), target.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
