@@ -228,6 +228,12 @@
 [data-theme-mode="light"] .hx-live-chat-input::placeholder {
   color: rgb(15 23 42 / 0.45);
 }
+/* options: desfaz o escurecimento global (components.css) no tema claro */
+[data-theme-mode="light"] select option,
+[data-theme-mode="light"] select optgroup {
+  background-color: #ffffff;
+  color: #0f172a;
+}
 [data-theme-mode="light"] .hx-label {
   color: #0f172a;
 }

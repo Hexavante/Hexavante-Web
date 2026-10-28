@@ -194,6 +194,22 @@
   }
 
   /* Forms */
+  /* Tema escuro por padrão: sem color-scheme dark, o navegador pinta os
+     controles nativos (select, date, scrollbar) e as listas suspensas com o
+     esquema light — o texto branco do tema ficava invisível em cima do
+     branco ("seleção fica branca ao mexer"). O tema claro sobrescreve com
+     color-scheme: light em theme-light.css. */
+  :root {
+    color-scheme: dark;
+  }
+
+  /* Options herdam o fundo claro padrão do navegador; escurece a lista. */
+  select option,
+  select optgroup {
+    background-color: #0b1220;
+    color: #f8fafc;
+  }
+
   .hx-input {
     @apply w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white placeholder-white/40 transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary;
   }
