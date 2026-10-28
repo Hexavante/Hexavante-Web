@@ -10,7 +10,7 @@ import { NextLessonCard } from "@/components/courses/next-lesson-card";
 import { VideoPlayer } from "@/components/courses/video-player";
 import { AppLink } from "@/components/ui/app-link";
 import { LinkButton } from "@/components/ui/button";
-import { getLessonWithAccess } from "@/services/enrollment.service";
+import { getLessonWithAccess, LessonProgressionError } from "@/services/enrollment.service";
 import { notFound, redirect } from "next/navigation";
 
 type Props = {
@@ -26,10 +26,15 @@ export default async function LessonPage({ params }: Props) {
   try {
     data = await getLessonWithAccess(session.user.id, slug, lessonId);
   } catch (error) {
+    if (!(error instanceof LessonProgressionError)) {
+      console.error("[aula] Falha ao carregar aula:", error);
+    }
     return (
       <div className="mx-auto max-w-4xl px-4 py-10">
         <p className="rounded-lg bg-amber-900/20 p-4 text-amber-400">
-          {error instanceof Error ? error.message : "Acesso negado."}
+          {error instanceof LessonProgressionError
+            ? error.message
+            : "Não foi possível carregar a aula agora. Tente novamente em instantes."}
         </p>
         <AppLink href={`/courses/${slug}`} className="mt-4 inline-block">
           Voltar ao curso

@@ -9,6 +9,13 @@ import { issueCertificate } from "@/services/certificate.service"; // Serviço d
 import { recordStudyVisit } from "@/services/study-continuation.service";
 import { buildLessonProgressContext } from "@/services/lesson-learning.service";
 
+export class LessonProgressionError extends Error {
+  constructor() {
+    super("Conclua a aula anterior para desbloquear esta.");
+    this.name = "LessonProgressionError";
+  }
+}
+
 // Tipo para resultado de conclusão de aula
 export type LessonCompleteResult = {
   progress: number; // Progresso do curso em porcentagem
@@ -334,7 +341,7 @@ export async function getLessonWithAccess(userId: string, courseSlug: string, le
       (p) => p.lessonId === previous.id && p.completed,
     );
     if (!prevProgress) {
-      throw new Error("Conclua a aula anterior para desbloquear esta.");
+      throw new LessonProgressionError();
     }
   }
 

@@ -9,6 +9,8 @@ export async function recordStudyVisit(
 ): Promise<void> {
   await prisma.user.update({
     where: { id: userId },
+    // Não carregar campos de cadastro que não participam da visita à aula.
+    select: { id: true },
     data: {
       lastStudyCourseSlug: courseSlug,
       lastStudyLessonId: lessonId,
