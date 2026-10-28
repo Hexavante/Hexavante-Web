@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Eye, Clock } from "lucide-react";
+import { Eye, Play } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import styles from "./tutorials.module.css";
 
 type Props = {
   slug: string;
@@ -32,55 +33,39 @@ export function TutorialCard({
   viewCount,
 }: Props) {
   return (
-    <Link
-      href={`/tutorials/${slug}`}
-      className="group overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] transition hover:border-cyan-400/30 hover:bg-white/[0.04]"
-    >
-      <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+    <Link href={`/tutorials/${slug}`} className={styles.card}>
+      <div className={styles.cover}>
         {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={title}
-            className="h-full w-full object-cover transition group-hover:scale-105"
-          />
+          <img src={thumbnailUrl} alt={title} className={styles.coverImage} />
         ) : (
-          <img
-            src="/brand/icon-tutorial.png"
-            alt=""
-            aria-hidden
-            className="h-full w-full object-cover transition group-hover:scale-105"
-          />
+          <div className={styles.generatedCover} aria-hidden>
+            <span className={styles.coverLabel}>{categoryName ?? "Tutorial"}</span>
+            <strong className={styles.coverTitle}>{title}</strong>
+            <i className={styles.coverLines} />
+          </div>
         )}
-        {duration && (
-          <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white">
-            {formatDuration(duration)}
-          </span>
+        <span className={styles.playIcon} aria-hidden>
+          <Play size={15} fill="currentColor" />
+        </span>
+        {duration != null && duration > 0 && (
+          <span className={styles.duration}>{formatDuration(duration)}</span>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-cyan-300 transition">
-          {title}
-        </h3>
-        {description && (
-          <p className="mt-1 text-xs text-slate-400 line-clamp-2">{description}</p>
-        )}
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Avatar src={authorAvatar} alt={authorName} size="sm" />
-            <span className="text-xs text-slate-400">{authorName}</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              {viewCount}
-            </span>
-          </div>
-        </div>
-        {categoryName && (
-          <span className="mt-2 inline-block rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium text-cyan-300">
-            {categoryName}
+      <div className={styles.cardBody}>
+        {categoryName && <span className={styles.category}>{categoryName}</span>}
+        <h3>{title}</h3>
+        {description && <p>{description}</p>}
+        <div className={styles.author}>
+          <Avatar src={authorAvatar} alt={authorName} size="sm" />
+          <span>{authorName}</span>
+          <span className={styles.views}>
+            <Eye size={13} aria-hidden /> {viewCount}
           </span>
-        )}
+        </div>
+        <div className={styles.cardFooter}>
+          Assistir agora
+          <Play size={13} aria-hidden />
+        </div>
       </div>
     </Link>
   );

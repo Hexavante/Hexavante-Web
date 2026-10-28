@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/select";
 import { cn } from "@/lib/cn";
+import styles from "./tutorials.module.css";
 
 type Category = { id: string; name: string };
 
@@ -28,10 +28,10 @@ function buildHref(params: Record<string, string | undefined>) {
 
 export function TutorialFilters({ categories, current }: Props) {
   return (
-    <Card padding="md" className="mb-6 space-y-4">
-      <form method="get" className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <label htmlFor="q" className="mb-1.5 block text-sm font-semibold text-slate-200">
+    <form method="get" className={styles.filters}>
+      <div className={styles.filterTop}>
+        <div>
+          <label htmlFor="q" className={styles.filterLabel}>
             Buscar
           </label>
           <Input
@@ -41,8 +41,8 @@ export function TutorialFilters({ categories, current }: Props) {
             placeholder="Nome ou descrição do tutorial..."
           />
         </div>
-        <div className="w-full sm:w-44">
-          <label htmlFor="sort" className="mb-1.5 block text-sm font-semibold text-slate-200">
+        <div className={styles.sortWrap}>
+          <label htmlFor="sort" className={styles.filterLabel}>
             Ordenar
           </label>
           <NativeSelect id="sort" name="sort" defaultValue={current.sort ?? "recent"}>
@@ -51,14 +51,14 @@ export function TutorialFilters({ categories, current }: Props) {
           </NativeSelect>
         </div>
         {current.category && <input type="hidden" name="category" value={current.category} />}
-        <Button type="submit" className="sm:mb-0">
+        <Button type="submit">
           <Search className="h-4 w-4" />
           Filtrar
         </Button>
-      </form>
+      </div>
 
       {categories.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className={styles.pills}>
           <Link
             href={buildHref({ q: current.q, sort: current.sort })}
             className={cn(
@@ -82,6 +82,6 @@ export function TutorialFilters({ categories, current }: Props) {
           ))}
         </div>
       )}
-    </Card>
+    </form>
   );
 }
