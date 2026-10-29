@@ -25,8 +25,16 @@ export async function parseUploadResponse(response: Response): Promise<UploadRes
 
   const text = await response.text().catch(() => "");
   if (!response.ok) {
+    if (response.status === 413) {
+      throw new Error("Arquivo muito grande. O limite é de 5 MB.");
+    }
+    // Páginas de erro de infra (nginx/proxy) são HTML e nunca devem ir
+    // para a tela do usuário.
+    const looksLikeHtml = /^\s*<(!doctype|html)/i.test(text);
     throw new Error(
-      text.trim() || `Falha no upload (HTTP ${response.status}). Tente novamente.`,
+      looksLikeHtml || !text.trim()
+        ? `Falha no upload (HTTP ${response.status}). Tente novamente.`
+        : text.trim(),
     );
   }
   throw new Error("Resposta inválida do servidor. Tente novamente.");
