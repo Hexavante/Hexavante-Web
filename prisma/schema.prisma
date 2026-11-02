@@ -120,7 +120,7 @@ model DailyPlan {
   userId          String   @map("user_id")
   date            DateTime @db.Date @map("plan_date")
   tasks           Json     @default("[]")
-  completedTasks  Json     @default("[]")
+  completedTasks  Json     @default("[]") @map("completed_tasks")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
