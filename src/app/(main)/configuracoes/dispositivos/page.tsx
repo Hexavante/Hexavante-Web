@@ -11,7 +11,7 @@ export default async function DispositivosPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/configuracoes/dispositivos");
 
-  const { devices } = await getMyDevices();
+  const { devices, error } = await getMyDevices();
 
   return (
     <PageShell size="md">
@@ -24,7 +24,12 @@ export default async function DispositivosPage() {
         />
       </div>
 
-      {devices.length === 0 ? (
+      {error ? (
+        <div role="alert" className="rounded-xl border border-amber-400/30 p-5">
+          <p>{error}</p>
+          <a href="/configuracoes/dispositivos" className="mt-3 inline-block underline">Tentar novamente</a>
+        </div>
+      ) : devices.length === 0 ? (
         <div className="anim-enter-fade anim-d2">
           <EmptyState
             icon={MonitorSmartphone}
@@ -36,11 +41,11 @@ export default async function DispositivosPage() {
         <div className="space-y-3">
           {devices.map((device, i) => (
             <div key={device.id} className="anim-enter-fade" style={{ animationDelay: `${0.05 + i * 0.06}s` }}>
-              <DeviceRow device={device} isCurrent={i === 0} />
+              <DeviceRow device={device} isCurrent={false} />
             </div>
           ))}
           <p className="anim-enter-fade pt-2 text-xs text-slate-500">
-            O dispositivo mais recente aparece como atual. Ao desconectar um dispositivo, as
+            Os dispositivos estão ordenados pelo último acesso. Ao desconectar um dispositivo, as
             sessões dele são encerradas.
           </p>
         </div>

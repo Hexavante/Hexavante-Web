@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getApiUrl } from "@/lib/auth-session";
+import { sessionCookieForApi } from "@/lib/session-cookie-for-api";
+import { getClientDevice } from "@/lib/client-device";
 import {
   addAccount,
   getAccounts,
@@ -25,7 +27,8 @@ async function authedFetch(path: string, init?: RequestInit) {
     .join("; ");
   return fetch(`${API_URL}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", cookie: cookieHeader, ...init?.headers },
+    headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), cookie: sessionCookieForApi(cookieHeader), ...init?.headers },
+    signal: AbortSignal.timeout(10_000),
     cache: "no-store",
   });
 }
@@ -39,20 +42,20 @@ export type DeviceInfo = {
   createdAt: string;
 };
 
-export async function getMyDevices(): Promise<{ devices: DeviceInfo[]; currentFingerprintNote: string }> {
+export async function getMyDevices(): Promise<{ devices: DeviceInfo[]; error?: string }> {
   try {
     const res = await authedFetch("/api/v1/users/me/devices");
-    if (!res.ok) return { devices: [], currentFingerprintNote: "" };
+    if (!res.ok) return { devices: [], error: "Não foi possível carregar os dispositivos. Tente novamente." };
     const data = (await res.json()) as { devices: DeviceInfo[] };
-    return { devices: data.devices ?? [], currentFingerprintNote: "" };
+    return { devices: (data.devices ?? []).filter((device) => !device.revoked) };
   } catch {
-    return { devices: [], currentFingerprintNote: "" };
+    return { devices: [], error: "Não foi possível conectar ao serviço de dispositivos. Tente novamente." };
   }
 }
 
 export async function revokeDeviceAction(deviceId: string): Promise<SecurityResult & { signedOut?: boolean }> {
   try {
-    const res = await authedFetch(`/api/v1/users/me/devices/${deviceId}`, { method: "DELETE" });
+    const res = await authedFetch(`/api/v1/users/me/devices/${encodeURIComponent(deviceId)}`, { method: "DELETE", body: JSON.stringify(await getClientDevice()) });
     if (!res.ok) return { ok: false, error: "Não foi possível remover o dispositivo." };
     const data = (await res.json()) as { currentRevoked?: boolean };
     revalidatePath("/configuracoes/dispositivos");
@@ -60,6 +63,11 @@ export async function revokeDeviceAction(deviceId: string): Promise<SecurityResu
       const cookieStore = await cookies();
       cookieStore.delete("__Secure-hexavante.session_token");
       cookieStore.delete("hexavante.session_token");
+      if (process.env.NODE_ENV === "production") {
+        for (const name of ["__Secure-hexavante.session_token", "hexavante.session_token"]) {
+          cookieStore.set(name, "", { path: "/", domain: ".hexavante.com.br", maxAge: 0, secure: true, httpOnly: true });
+        }
+      }
       return { ok: true, signedOut: true };
     }
     return { ok: true };

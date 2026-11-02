@@ -23,6 +23,7 @@ export function DeviceRow({ device, isCurrent }: { device: DeviceInfo; isCurrent
     if (!confirm(`Desconectar "${device.name}"?`)) return;
     setPending(true);
     setError(null);
+    try {
     const result = await revokeDeviceAction(device.id);
     if (!result.ok) {
       setError(result.error ?? "Erro ao remover.");
@@ -34,10 +35,14 @@ export function DeviceRow({ device, isCurrent }: { device: DeviceInfo; isCurrent
       return;
     }
     window.location.reload();
+    } catch {
+      setError("Não foi possível desconectar. Tente novamente.");
+      setPending(false);
+    }
   };
 
   return (
-    <div className="anim-enter-fade flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+    <div className="anim-enter-fade flex flex-wrap items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300">
         <MonitorSmartphone className="h-5 w-5" />
       </span>
@@ -59,11 +64,12 @@ export function DeviceRow({ device, isCurrent }: { device: DeviceInfo; isCurrent
         onClick={() => void onRevoke()}
         disabled={pending}
         title="Desconectar dispositivo"
+        aria-label={`Desconectar ${device.name}`}
         className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-red-500/25 text-slate-500 transition hover:border-red-500/60 hover:text-red-400 disabled:opacity-50"
       >
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
       </button>
-      {error && <p className="w-full text-xs text-red-300">{error}</p>}
+      {error && <p role="alert" className="w-full text-xs text-red-300">{error}</p>}
     </div>
   );
 }

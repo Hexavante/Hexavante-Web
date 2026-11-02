@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getApiUrl } from "@/lib/auth-session";
 import { getAccounts, removeAccount } from "@/lib/account-switcher";
+import { sessionCookieForApi } from "@/lib/session-cookie-for-api";
 
 const API_URL = getApiUrl();
 
@@ -23,7 +24,8 @@ export async function signOutAction() {
   try {
     await fetch(`${API_URL}/api/v1/auth/logout`, {
       method: "POST",
-      headers: { cookie: cookieHeader },
+      headers: { cookie: sessionCookieForApi(cookieHeader) },
+      signal: AbortSignal.timeout(10_000),
     });
   } catch {
     // Ignore errors — we'll clear the cookie locally regardless
@@ -54,16 +56,18 @@ export async function signOutAction() {
   }
 
   // Se restou outra conta vinculada, ativa ela em vez de deslogar tudo
+  let switchedAccount = false;
   try {
     const remaining = await getAccounts();
     if (remaining.length > 0) {
       const { switchAccount } = await import("@/lib/account-switcher");
-      const ok = await switchAccount(remaining[0].userId);
-      if (ok) redirect("/app");
+      switchedAccount = await switchAccount(remaining[0].userId);
     }
   } catch {
     // segue para logout total
   }
+  // redirect lança uma exceção de controle do Next; não deve ser capturada.
+  if (switchedAccount) redirect("/app");
 
   const { clearAccounts } = await import("@/lib/account-switcher");
   await clearAccounts();

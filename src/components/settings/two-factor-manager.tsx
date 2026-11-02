@@ -23,6 +23,7 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
     setPending(true);
     setError(null);
     setSuccess(null);
+    try {
     const result = await enableTwoFactorAction();
     setPending(false);
     if (!result.ok || !result.verificationId) {
@@ -30,12 +31,14 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
       return;
     }
     setVid(result.verificationId);
+    } catch { setError("Não foi possível conectar. Tente novamente."); } finally { setPending(false); }
   };
 
   const confirmEnable = async () => {
     if (!vid) return;
     setPending(true);
     setError(null);
+    try {
     const result = await confirmTwoFactorAction(vid, code);
     setPending(false);
     if (!result.ok) {
@@ -46,12 +49,14 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
     setVid(null);
     setCode("");
     setSuccess("Verificação em duas etapas ativada!");
+    } catch { setError("Não foi possível conectar. Tente novamente."); } finally { setPending(false); }
   };
 
   const disable = async () => {
     if (!confirm("Desativar a verificação em duas etapas?")) return;
     setPending(true);
     setError(null);
+    try {
     const result = await disableTwoFactorAction();
     setPending(false);
     if (!result.ok) {
@@ -60,6 +65,7 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
     }
     setEnabled(false);
     setSuccess("Verificação em duas etapas desativada.");
+    } catch { setError("Não foi possível conectar. Tente novamente."); } finally { setPending(false); }
   };
 
   return (
@@ -104,6 +110,7 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
             <Label htmlFor="tfa-code">Código de 6 dígitos</Label>
             <Input
               id="tfa-code"
+              autoComplete="one-time-code"
               inputMode="numeric"
               maxLength={6}
               value={code}
@@ -124,8 +131,8 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
         </Button>
       )}
 
-      {error && <p className="mt-3 text-xs text-red-300">{error}</p>}
-      {success && <p className="mt-3 text-xs text-emerald-300">{success}</p>}
+      {error && <p role="alert" className="mt-3 text-xs text-red-300">{error}</p>}
+      {success && <p role="status" className="mt-3 text-xs text-emerald-300">{success}</p>}
     </div>
   );
 }
