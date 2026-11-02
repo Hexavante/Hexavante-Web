@@ -6,7 +6,6 @@ import {
   Award,
   BookOpen,
   NotebookPen,
-  RefreshCw,
   Target,
   Trophy,
   Zap,
@@ -343,10 +342,6 @@ export default async function HomePage() {
               <LinkButton href="/anotacoes" variant="outline">
                 <NotebookPen className="h-4 w-4" />
                 Meu caderno
-              </LinkButton>
-              <LinkButton href="/app" variant="ghost">
-                <RefreshCw className="h-4 w-4" />
-                Tentar novamente
               </LinkButton>
             </div>
           </section>
