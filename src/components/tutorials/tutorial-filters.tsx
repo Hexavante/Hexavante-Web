@@ -57,6 +57,10 @@ export function TutorialFilters({ categories, current }: Props) {
         </Button>
       </div>
 
+      {(current.q || current.category || (current.sort && current.sort !== "recent")) && (
+        <Link href="/tutorials" className="inline-block py-2 text-sm font-medium underline underline-offset-4">Limpar filtros</Link>
+      )}
+
       {categories.length > 0 && (
         <div className={styles.pills}>
           <Link

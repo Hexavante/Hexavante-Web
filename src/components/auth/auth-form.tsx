@@ -96,6 +96,7 @@ export function AuthForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+  const [values, setValues] = useState<Record<string, string>>({});
 
   const fieldErrors = { ...clientErrors, ...state.fieldErrors };
   const pendingLabel = formKind === "login" ? "Entrando..." : "Aguarde...";
@@ -120,6 +121,11 @@ export function AuthForm({
         if (key && !errors[key]) errors[key] = issue.message;
       }
       setClientErrors(errors);
+      const firstInvalid = fields.find((field) => errors[field.name]);
+      if (firstInvalid) {
+        const control = event.currentTarget.elements.namedItem(firstInvalid.name);
+        if (control instanceof HTMLElement) control.focus();
+      }
       return;
     }
 
@@ -165,10 +171,14 @@ export function AuthForm({
           <Input
             id={field.name}
             name={field.name}
+            value={values[field.name] ?? ""}
+            onChange={(event) => setValues((previous) => ({ ...previous, [field.name]: event.target.value }))}
+            autoComplete={isPassword ? (formKind === "login" ? "current-password" : "new-password") : field.name === "email" ? "email" : field.name === "username" ? "username" : undefined}
             type={isPassword && showPassword ? "text" : (field.type ?? "text")}
             required={field.required ?? true}
             placeholder={field.placeholder}
             aria-invalid={Boolean(fieldErrors[field.name])}
+            aria-describedby={fieldErrors[field.name] ? `${field.name}-error` : undefined}
             className={cn(
               "h-11 transition",
               Icon && "pl-10",
@@ -181,7 +191,7 @@ export function AuthForm({
           ) : null}
         </div>
         {fieldErrors[field.name] && (
-          <p className="mt-1 text-xs text-red-300">{fieldErrors[field.name]}</p>
+          <p id={`${field.name}-error`} role="alert" className="mt-1 text-xs text-red-300">{fieldErrors[field.name]}</p>
         )}
         {formKind === "login" && field.name === "password" && (
           <p className="mt-2 text-right text-sm">

@@ -33,8 +33,8 @@ export function SearchBar() {
         });
         if (!res.ok) return;
         const data = (await res.json()) as { results: Suggestion[] };
+        if (controller.signal.aborted) return;
         setSuggestions(data.results ?? []);
-        setIsOpen(true);
       } catch {
         if (!controller.signal.aborted) setSuggestions([]);
       } finally {
@@ -63,18 +63,13 @@ export function SearchBar() {
     const trimmed = query.trim();
     if (!trimmed) return;
 
-    if (suggestions.length > 0) {
-      router.push(suggestions[0].href);
-      setIsOpen(false);
-      return;
-    }
-
     router.push(`/courses?q=${encodeURIComponent(trimmed)}`);
     setIsOpen(false);
   };
 
   const clearQuery = () => {
     setQuery("");
+    setLoading(false);
     setSuggestions([]);
     setIsOpen(false);
   };
@@ -89,6 +84,9 @@ export function SearchBar() {
           onChange={(event) => {
             const next = event.target.value;
             setQuery(next);
+            setSuggestions([]);
+            setLoading(next.trim().length >= 2);
+            setIsOpen(next.trim().length >= 2);
             if (next.trim().length < 2) {
               setSuggestions([]);
               setIsOpen(false);
@@ -96,6 +94,9 @@ export function SearchBar() {
           }}
           onFocus={() => {
             if (suggestions.length > 0) setIsOpen(true);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setIsOpen(false);
           }}
           placeholder="Buscar cursos, simulados, aulas..."
           aria-label="Buscar cursos, simulados e aulas"

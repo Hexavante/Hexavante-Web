@@ -29,10 +29,11 @@ function postYoutubeCommand(frame: HTMLIFrameElement | null, func: string) {
  * Player dos tutoriais: reprodução e pausa apenas.
  * Sem barra de progresso, sem pular, sem vídeos sugeridos e sem teclado.
  */
-export function TutorialPlayer({ url, provider, title, poster }: Props) {
+export function TutorialPlayer({ url, title, poster }: Props) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   if (!url) {
     return <div className={styles.noVideo}>Vídeo indisponível no momento.</div>;
@@ -55,7 +56,7 @@ export function TutorialPlayer({ url, provider, title, poster }: Props) {
   }
 
   const youtube = getYoutubeEmbedUrl(url);
-  const vimeo = provider === "vimeo" ? getVimeoEmbedUrl(url) : null;
+  const vimeo = getVimeoEmbedUrl(url);
 
   if (youtube || vimeo) {
     let src: string;
@@ -79,7 +80,14 @@ export function TutorialPlayer({ url, provider, title, poster }: Props) {
     }
 
     const toggle = () => {
-      postYoutubeCommand(frameRef.current, playing ? "pauseVideo" : "playVideo");
+      if (youtube) {
+        postYoutubeCommand(frameRef.current, playing ? "pauseVideo" : "playVideo");
+      } else {
+        frameRef.current?.contentWindow?.postMessage(
+          JSON.stringify({ method: playing ? "pause" : "play" }),
+          "https://player.vimeo.com",
+        );
+      }
       setPlaying((current) => !current);
     };
 
@@ -89,7 +97,7 @@ export function TutorialPlayer({ url, provider, title, poster }: Props) {
           ref={frameRef}
           src={src}
           title={title}
-          allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+          allow="autoplay; accelerometer; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen={false}
         />
         <div className={styles.lockedBar}>
@@ -115,7 +123,10 @@ export function TutorialPlayer({ url, provider, title, poster }: Props) {
     const toggle = () => {
       const video = videoRef.current;
       if (!video) return;
-      if (video.paused) void video.play();
+      if (video.paused) {
+        setFailed(false);
+        void video.play().catch(() => setFailed(true));
+      }
       else video.pause();
     };
 
@@ -130,10 +141,15 @@ export function TutorialPlayer({ url, provider, title, poster }: Props) {
           playsInline
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
+          onError={() => { setFailed(true); setPlaying(false); }}
           onContextMenu={(event) => event.preventDefault()}
         >
           {title} — seu navegador não suporta vídeos.
         </video>
+        {failed && <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950 p-5 text-center text-sm text-slate-200">
+          <p>Não foi possível reproduzir o vídeo. Verifique sua conexão ou tente novamente.</p>
+          <button type="button" className="rounded-lg bg-cyan-500/15 px-4 py-2 text-cyan-300" onClick={() => { setFailed(false); videoRef.current?.load(); }}>Tentar novamente</button>
+        </div>}
         <div className={styles.lockedBar}>
           <button
             type="button"

@@ -67,6 +67,9 @@ export function CourseFilters({ categories, current }: Props) {
           <Search className="h-4 w-4" />
           Filtrar
         </Button>
+        {(current.q || current.category || current.level || (current.sort && current.sort !== "recent")) && (
+          <Link href="/courses" className="px-3 py-2 text-sm font-medium underline underline-offset-4">Limpar filtros</Link>
+        )}
       </form>
 
       <div className="flex flex-wrap gap-2">
