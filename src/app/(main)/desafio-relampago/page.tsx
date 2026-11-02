@@ -65,7 +65,8 @@ export default async function DesafioRelampagoPage() {
   // Só sorteia questões se ainda não jogou hoje (economiza query e evita
   // expor questões à toa). Retorna [] quando não há elegíveis — estado vazio
   // amigável, sem perguntas fictícias.
-  const questions = status.played || migrationPending ? [] : await getLightningQuestions();
+  migrationPending ||= Boolean(status.migrationPending);
+  const questions = status.played || migrationPending ? [] : await getLightningQuestions(session.user.id);
 
   return (
     <PageShell>
@@ -168,7 +169,7 @@ export default async function DesafioRelampagoPage() {
           </span>
           <CardTitle className="mt-3 text-base">Como funciona</CardTitle>
           <CardDescription>
-            5 questões de múltipla escolha sorteadas de simulados publicados. 60 segundos no
+            5 questões de simulados publicados, priorizando outras perguntas dos assuntos em que você mais erra. Sem histórico, o sorteio é geral. 60 segundos no
             relógio — o tempo esgotado envia automaticamente.
           </CardDescription>
         </Card>

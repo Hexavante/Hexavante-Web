@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { selectLightningIds } from "@/lib/lightning-selection";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { isPrismaMissingTable } from "@/lib/prisma-errors";
@@ -144,7 +145,7 @@ export async function getLightningDailyStatus(userId: string): Promise<DailyStat
  * de simulados publicados. Retorna sem o campo isCorrect nas alternativas
  * (gabarito não é exposto ao cliente).
  */
-export async function getLightningQuestions(): Promise<LightningQuestion[]> {
+export async function getLightningQuestions(userId?: string): Promise<LightningQuestion[]> {
   try {
     // Conta o total de questões elegíveis para montar o offset aleatório
     const total = await prisma.examQuestion.count({
@@ -163,11 +164,21 @@ export async function getLightningQuestions(): Promise<LightningQuestion[]> {
       return [];
     }
 
-    // Offset aleatório para variar as questões sorteadas
-    const skip = Math.max(0, Math.floor(Math.random() * (total - LIGHTNING_QUESTION_COUNT)));
+    const mistakes = userId ? await prisma.examAnswer.findMany({
+      where: { isCorrect: false, alternativeId: { not: null }, attempt: { userId, finishedAt: { not: null } }, question: { type: "MULTIPLE_CHOICE" } },
+      select: { questionId: true, question: { select: { subject: true } } },
+      orderBy: { attempt: { finishedAt: "desc" } },
+      take: 500,
+    }) : [];
+    const candidates = await prisma.examQuestion.findMany({
+      where: { type: "MULTIPLE_CHOICE", exam: { isPublished: true }, alternatives: { some: { isCorrect: true } } },
+      select: { id: true, subject: true },
+    });
+    const selectedIds = selectLightningIds(candidates, mistakes, LIGHTNING_QUESTION_COUNT);
 
     const rows = await prisma.examQuestion.findMany({
       where: {
+        id: { in: selectedIds },
         type: "MULTIPLE_CHOICE",
         exam: { isPublished: true },
         alternatives: { some: { isCorrect: true } },
@@ -186,11 +197,9 @@ export async function getLightningQuestions(): Promise<LightningQuestion[]> {
           },
         },
       },
-      skip,
-      take: LIGHTNING_QUESTION_COUNT,
     });
 
-    return rows;
+    return selectedIds.flatMap((id) => rows.filter((row) => row.id === id));
   } catch (error) {
     if (isPrismaMissingTable(error)) {
       logger.error("LIGHTNING_TABLE_MISSING", error instanceof Error ? error : undefined);

@@ -30,7 +30,7 @@ type Props = {
   timeLimitSeconds?: number;
 };
 
-type Phase = "ready" | "playing" | "submitting" | "done";
+type Phase = "ready" | "playing" | "submitting" | "failed" | "done";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
@@ -101,23 +101,17 @@ export function LightningGame({ questions, timeLimitSeconds = LIGHTNING_TIME_LIM
 
       // Sem respostas: evita chamada inútil ao servidor.
       if (payload.length === 0) {
-        const res = await submitLightningAction([], elapsed);
-        if (res.played) {
-          setAlreadyPlayed(true);
-          setPhase("done");
-          router.refresh();
-          return;
-        }
-        setSubmitError(res.error ?? "Responda ao menos uma questão para enviar.");
-        setPhase("playing");
+        setSubmitError("Nenhuma resposta foi marcada. Inicie uma nova rodada para tentar novamente.");
+        setPhase("failed");
         submittedRef.current = false;
         return;
       }
 
+      try {
       const res = await submitLightningAction(payload, elapsed);
       if (!res.success) {
         setSubmitError(res.error ?? "Erro ao enviar o desafio.");
-        setPhase("playing");
+        setPhase("failed");
         submittedRef.current = false;
         return;
       }
@@ -133,6 +127,11 @@ export function LightningGame({ questions, timeLimitSeconds = LIGHTNING_TIME_LIM
         dispatchAchievementUnlocked(res.newAchievementKeys);
       }
       router.refresh();
+      } catch {
+        setSubmitError("Não foi possível enviar. Suas respostas foram mantidas. Tente novamente.");
+        setPhase("failed");
+        submittedRef.current = false;
+      }
     },
     [questions, router],
   );
@@ -148,11 +147,15 @@ export function LightningGame({ questions, timeLimitSeconds = LIGHTNING_TIME_LIM
       void doSubmit(answers, elapsed);
       return;
     }
-    const id = window.setTimeout(() => setRemaining((r) => r - 1), 1000);
-    return () => window.clearTimeout(id);
+    const id = window.setInterval(() => setRemaining(Math.max(0, timeLimitSeconds - Math.floor((Date.now() - startedAtRef.current) / 1000))), 250);
+    return () => window.clearInterval(id);
   }, [phase, remaining, answers, doSubmit, timeLimitSeconds]);
 
   const start = () => {
+    submittedRef.current = false;
+    setSubmitError(null);
+    setAnswers({});
+    setIndex(0);
     startedAtRef.current = Date.now();
     setRemaining(timeLimitSeconds);
     setPhase("playing");
@@ -430,6 +433,7 @@ export function LightningGame({ questions, timeLimitSeconds = LIGHTNING_TIME_LIM
                 }}
                 type="button"
                 role="radio"
+                disabled={phase !== "playing"}
                 aria-checked={isSelected}
                 onClick={() => selectAlternative(active.id, alt.id)}
                 className={cn(
@@ -460,6 +464,14 @@ export function LightningGame({ questions, timeLimitSeconds = LIGHTNING_TIME_LIM
         {submitError && (
           <div className="mt-4">
             <Alert variant="danger">{submitError}</Alert>
+            {phase === "failed" && (
+              <Button className="mt-3" onClick={() => {
+                if (answeredCount === 0) start();
+                else void doSubmit(answers, Math.min(timeLimitSeconds, Math.floor((Date.now() - startedAtRef.current) / 1000)));
+              }}>
+                {answeredCount === 0 ? "Iniciar nova rodada" : "Tentar enviar novamente"}
+              </Button>
+            )}
           </div>
         )}
 

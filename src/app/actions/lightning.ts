@@ -52,7 +52,7 @@ export async function getLightningQuestionsAction(): Promise<LightningLoadResult
 
     let questions: LightningQuestion[];
     try {
-      questions = await getLightningQuestions();
+      questions = await getLightningQuestions(session.user.id);
     } catch (error) {
       if (isPrismaMissingTable(error)) {
         logger.error("LIGHTNING_TABLE_MISSING");
