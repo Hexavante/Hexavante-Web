@@ -246,7 +246,13 @@ export async function listInstructorCourses(userId: string) {
 
 // Função para criar novo curso
 // Cria curso com slug único e status PENDING_REVIEW
-export async function createCourse(userId: string, data: CourseInput) {
+function courseCategory(categoryId: string, name: string | undefined, userId: string) {
+  return name
+    ? { connectOrCreate: { where: { name }, create: { name, isApproved: false, suggestedById: userId } } }
+    : { connect: { id: categoryId } };
+}
+
+export async function createCourse(userId: string, data: CourseInput, newCategory?: string) {
   await validateCourseText(userId, [
     { label: "título", text: data.title },
     { label: "descrição curta", text: data.shortDescription },
@@ -259,7 +265,7 @@ export async function createCourse(userId: string, data: CourseInput) {
     data: {
       title: data.title,
       slug,
-      categoryId: data.categoryId,
+      category: courseCategory(data.categoryId, newCategory, userId),
       shortDescription: data.shortDescription || null,
       description: data.description || null,
       thumbnailUrl: data.coverImage || data.thumbnailUrl || null,
@@ -279,7 +285,7 @@ export async function createCourse(userId: string, data: CourseInput) {
 
 // Função para atualizar curso
 // Atualiza apenas campos fornecidos, verifica permissão de instrutor
-export async function updateCourse(courseId: string, userId: string, data: Partial<CourseInput>) {
+export async function updateCourse(courseId: string, userId: string, data: Partial<CourseInput>, newCategory?: string) {
   // Verifica se o usuário é instrutor do curso
   const course = await prisma.course.findFirst({
     where: {
@@ -317,7 +323,7 @@ export async function updateCourse(courseId: string, userId: string, data: Parti
     where: { id: courseId },
     data: {
       ...(data.title ? { title: data.title } : {}),
-      ...(data.categoryId ? { categoryId: data.categoryId } : {}),
+      ...(data.categoryId ? { category: courseCategory(data.categoryId, newCategory, userId) } : {}),
       ...(data.shortDescription !== undefined
         ? { shortDescription: data.shortDescription || null }
         : {}),

@@ -1,3 +1,4 @@
+import { splitMindMap } from "@/lib/mind-map";
 import Link from "next/link";
 import { Eye, Play } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -54,7 +55,7 @@ export function TutorialCard({
       <div className={styles.cardBody}>
         {categoryName && <span className={styles.category}>{categoryName}</span>}
         <h3>{title}</h3>
-        {description && <p>{description}</p>}
+        {splitMindMap(description).description && <p>{splitMindMap(description).description}</p>}
         <div className={styles.author}>
           <Avatar src={authorAvatar} alt={authorName} size="sm" />
           <span>{authorName}</span>

@@ -56,3 +56,18 @@ export function getVideoEmbedUrl(url: string, provider?: string | null): string 
   if (vimeo) return vimeo;
   return null;
 }
+
+export function canPublishTutorialVideo(value: string): boolean {
+  if (/^\/uploads\/(?!\/)/.test(value)) return isDirectVideoUrl(value);
+  let url: URL;
+  try { url = new URL(value); } catch { return false; }
+  if (!["https:", "http:"].includes(url.protocol)) return false;
+  const host = url.hostname.toLowerCase();
+  if (/(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/.test(host)) {
+    const embed = getYoutubeEmbedUrl(value);
+    return !!embed && /^\/embed\/[\w-]{11}\/?$/.test(new URL(embed).pathname);
+  }
+  if (/(^|\.)vimeo\.com$/.test(host)) return /^\/(?:.*\/)?\d+\/?$/.test(url.pathname);
+  if (/(^|\.)(1024terabox|terabox)\.com$/.test(host)) return url.pathname.length > 1;
+  return isDirectVideoUrl(value);
+}

@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { CreationSection } from "@/components/ui/creation-section";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { Video, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
 import { Button } from "@/components/ui/button";
 import { createTutorialAction, type ActionResult } from "@/app/actions/tutorial";
+import { MindMapField } from "@/components/courses/mind-map-field";
 import { VideoUploadInput } from "@/components/tutorials/video-upload-input";
 import {
   TutorialThumbnailUpload,
@@ -39,7 +41,7 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
       } else if (url) {
         formData.set("thumbnailUrl", url);
       }
-      formAction(formData);
+      startTransition(() => formAction(formData));
     } catch (submitError) {
       if (
         submitError instanceof Error &&
@@ -75,6 +77,7 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
       />
 
       <form ref={formRef} onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-5">
+        <CreationSection number="01" title="Sobre o tutorial" hint="Apresente a técnica que o aluno vai aprender.">
         <div>
           <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-300">
             Título *
@@ -120,6 +123,9 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
           />
         </div>
 
+        <MindMapField />
+        </CreationSection>
+        <CreationSection number="02" title="Vídeo e capa" hint="Adicione o vídeo da demonstração e escolha a imagem que aparece no catálogo.">
         <VideoUploadInput />
 
         <TutorialThumbnailUpload ref={thumbRef} />
@@ -138,6 +144,8 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
           />
         </div>
 
+        </CreationSection>
+        <CreationSection number="03" title="Publicação" hint="Deixe a publicação desmarcada para guardar como rascunho.">
         <div>
           <label htmlFor="tags" className="mb-1.5 block text-sm font-medium text-slate-300">
             Tags (separadas por vírgula)
@@ -151,7 +159,6 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
         </div>
 
         <div className="flex items-center gap-3">
-          <input type="hidden" name="isPublished" value="false" />
           <label className="flex items-center gap-2 text-sm text-slate-300">
             <input
               type="checkbox"
@@ -163,6 +170,7 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
           </label>
         </div>
 
+        </CreationSection>
         {state.error && (
           <p className="text-sm text-red-400">{state.error}</p>
         )}

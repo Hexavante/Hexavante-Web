@@ -1,3 +1,5 @@
+import { MindMap } from "@/components/courses/visual-learning-viewer";
+import { splitMindMap } from "@/lib/mind-map";
 import { auth } from "@/auth";
 import { CertificateButton } from "@/components/courses/certificate-button";
 import { CompleteLessonButton } from "@/components/courses/complete-lesson-button";
@@ -46,6 +48,7 @@ export default async function LessonPage({ params }: Props) {
   if (!data) notFound();
 
   const { course, enrollment, lesson, module, allLessons, progresses, learning } = data;
+  const { description, topics } = splitMindMap(lesson.description);
   const completedIds = new Set(progresses.filter((p) => p.completed).map((p) => p.lessonId));
   const favoriteIds = new Set(learning.favoriteLessonIds);
   const isCompleted = completedIds.has(lesson.id);
@@ -99,7 +102,8 @@ export default async function LessonPage({ params }: Props) {
               initialFavorite={learning.isFavorite}
             />
           </div>
-          {lesson.description && <p className="mt-2 text-slate-300">{lesson.description}</p>}
+          {description && <p className="mt-2 text-slate-300">{description}</p>}
+          <MindMap title={lesson.title} topics={topics} />
         </div>
 
         {lesson.videoUrl && (

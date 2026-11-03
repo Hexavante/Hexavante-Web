@@ -1,3 +1,4 @@
+import { MindMap } from "@/components/courses/visual-learning-viewer";
 import { auth } from "@/auth";
 import { enrollAction } from "@/app/actions/enrollment";
 import { CertificateButton } from "@/components/courses/certificate-button";
@@ -89,6 +90,10 @@ export default async function CourseDetailPage({ params }: Props) {
         </Card>
       )}
 
+      {totalLessons > 0 && <details className="my-5 rounded-xl border border-[var(--border)] p-4">
+        <summary className="hx-accent-link cursor-pointer font-semibold">Explorar mapa mental do curso</summary>
+        <MindMap title={course.title} topics={course.modules.map(mod => [mod.title, mod.lessons.map(lesson => lesson.title).join(" · ")].filter(Boolean).join(": "))} />
+      </details>}
       <Card padding="lg" className="mt-8">
         <h2 className="font-semibold text-white">Conteúdo</h2>
         <ul className="mt-4 space-y-4">

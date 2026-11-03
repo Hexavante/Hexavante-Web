@@ -1,3 +1,5 @@
+import { MindMap } from "@/components/courses/visual-learning-viewer";
+import { splitMindMap } from "@/lib/mind-map";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -28,6 +30,7 @@ type Props = {
   };
 };
 export function TutorialWatch({ tutorial }: Props) {
+  const { description, topics } = splitMindMap(tutorial.description);
   return (
     <div className={styles.watch}>
       <Link href="/tutorials" className={styles.back}>
@@ -51,6 +54,7 @@ export function TutorialWatch({ tutorial }: Props) {
             {tutorial.viewCount} visualizações
           </span>
         </div>
+        {topics.length > 0 && <a className="hx-accent-link" href="#mapa-mental">Ver mapa mental ↓</a>}
       </header>
       <div className={styles.watchGrid}>
         <div className={styles.mainColumn}>
@@ -61,11 +65,12 @@ export function TutorialWatch({ tutorial }: Props) {
               poster={tutorial.thumbnailUrl}
             />
           </div>
+          {topics.length > 0 && <div className="scroll-mt-28" id="mapa-mental"><MindMap title={tutorial.title} topics={topics} /></div>}
           <section className={styles.about}>
             <span className={styles.eyebrow}>ENTENDA E COLOQUE EM PRÁTICA</span>
             <h2>Sobre este tutorial</h2>
             <p>
-              {tutorial.description ||
+              {description ||
                 "Assista ao tutorial e coloque o que aprendeu em prática."}
             </p>
             {tutorial.tags.length > 0 && (

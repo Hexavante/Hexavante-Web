@@ -1,5 +1,7 @@
 "use client";
 
+import { CreationSection } from "@/components/ui/creation-section";
+
 import { useRef, useState } from "react";
 import type { ActionResult } from "@/app/actions/exam-admin";
 import { ExamCoverUpload, type ExamCoverUploadHandle } from "@/components/exams/exam-cover-upload";
@@ -70,11 +72,11 @@ export function ExamFormShell({ action, initial, submitLabel, cancelHref }: Prop
     <>
       <SuccessPopup show={success} message="Simulado criado com sucesso!" />
       <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl space-y-4">
-        <ExamCoverUpload ref={coverRef} initialUrl={initial?.coverImage} />
+        <CreationSection number="01" title="Apresentação do simulado" hint="Dê um nome à prova e explique quais conteúdos serão avaliados.">
 
         <div>
           <Label htmlFor="title">Título</Label>
-          <Input id="title" name="title" required defaultValue={initial?.title} />
+          <Input id="title" name="title" placeholder="Ex.: Matemática do ENEM · Geometria" required defaultValue={initial?.title} />
         </div>
         <div>
           <Label htmlFor="examType">Tipo</Label>
@@ -97,6 +99,9 @@ export function ExamFormShell({ action, initial, submitLabel, cancelHref }: Prop
             defaultValue={initial?.description ?? ""}
           />
         </div>
+        <ExamCoverUpload ref={coverRef} initialUrl={initial?.coverImage} />
+        </CreationSection>
+        <CreationSection number="02" title="Regras da prova" hint="Escolha quem pode participar. Deixe o tempo em branco para uma prova sem limite.">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="timeLimit">Tempo limite (min)</Label>
@@ -133,6 +138,7 @@ export function ExamFormShell({ action, initial, submitLabel, cancelHref }: Prop
             </NativeSelect>
           </div>
         </div>
+        </CreationSection>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-3">
           <Button type="submit" disabled={pending}>

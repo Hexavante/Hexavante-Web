@@ -1,3 +1,4 @@
+import { splitMindMap } from "@/lib/mind-map";
 import { auth } from "@/auth";
 import {
   addLessonAction,
@@ -169,6 +170,7 @@ export default async function EditCoursePage({ params }: Props) {
                   </div>
                   <div className="mt-3">
                     <InlineForm
+                      initialMindMap={splitMindMap(lesson.description).topics.join("\n")}
                       title="Editar aula"
                       submitLabel="Salvar aula"
                       action={updateLessonAction.bind(null, id, lesson.id)}
@@ -200,7 +202,7 @@ export default async function EditCoursePage({ params }: Props) {
                           name: "description",
                           label: "Descrição",
                           type: "textarea",
-                          defaultValue: lesson.description ?? "",
+                          defaultValue: splitMindMap(lesson.description).description,
                           required: false,
                         },
                       ]}
@@ -225,6 +227,7 @@ export default async function EditCoursePage({ params }: Props) {
 
             <div className="mt-4 space-y-4">
               <InlineForm
+                initialMindMap=""
                 title="Adicionar aula"
                 submitLabel="Adicionar aula"
                 action={addLessonAction.bind(null, id, mod.id)}

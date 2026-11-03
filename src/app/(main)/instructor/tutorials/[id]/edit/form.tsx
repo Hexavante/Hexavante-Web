@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { Video, ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,8 @@ import {
   deleteTutorialAction,
   type ActionResult,
 } from "@/app/actions/tutorial";
+import { MindMapField } from "@/components/courses/mind-map-field";
+import { splitMindMap } from "@/lib/mind-map";
 import { VideoUploadInput } from "@/components/tutorials/video-upload-input";
 import {
   TutorialThumbnailUpload,
@@ -68,7 +70,7 @@ export default function EditTutorialForm({
         formData.set("removeThumbnail", "false");
         if (url) formData.set("thumbnailUrl", url);
       }
-      formAction(formData);
+      startTransition(() => formAction(formData));
     } catch (submitError) {
       if (
         submitError instanceof Error &&
@@ -159,11 +161,12 @@ export default function EditTutorialForm({
             id="description"
             name="description"
             rows={3}
-            defaultValue={tutorial.description ?? ""}
+            defaultValue={splitMindMap(tutorial.description).description}
             className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/30"
           />
         </div>
 
+        <MindMapField initial={splitMindMap(tutorial.description).topics.join("\n")} />
         <VideoUploadInput initialUrl={tutorial.videoUrl ?? ""} />
 
         <TutorialThumbnailUpload ref={thumbRef} initialUrl={tutorial.thumbnailUrl ?? null} />
@@ -195,7 +198,6 @@ export default function EditTutorialForm({
         </div>
 
         <div className="flex items-center gap-3">
-          <input type="hidden" name="isPublished" value="false" />
           <label className="flex items-center gap-2 text-sm text-slate-300">
             <input
               type="checkbox"

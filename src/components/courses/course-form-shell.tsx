@@ -1,5 +1,7 @@
 "use client";
 
+import { CreationSection } from "@/components/ui/creation-section";
+
 import { useRef, useState } from "react";
 import type { ActionResult } from "@/app/actions/course";
 import {
@@ -35,6 +37,7 @@ type Props = {
 };
 
 export function CourseFormShell({ categories, action, initial, submitLabel, cancelHref }: Props) {
+  const [newCategory, setNewCategory] = useState("");
   const coverRef = useRef<CourseCoverUploadHandle>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
@@ -78,18 +81,19 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
     <>
       <SuccessPopup show={success} message="Curso criado com sucesso!" />
       <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl space-y-4">
-        <CourseCoverUpload ref={coverRef} initialUrl={initial?.coverImage ?? initial?.thumbnailUrl} />
+        <CreationSection number="01" title="Apresentação do curso" hint="Conte o que o aluno vai aprender e escolha a categoria.">
 
         <div>
           <Label htmlFor="title">Título</Label>
-          <Input id="title" name="title" required defaultValue={initial?.title} />
+          <Input id="title" name="title" placeholder="Ex.: Java do primeiro programa às classes" required defaultValue={initial?.title} />
         </div>
         <div>
           <Label htmlFor="categoryId">Categoria</Label>
             <NativeSelect
               id="categoryId"
               name="categoryId"
-              required
+              disabled={Boolean(newCategory.trim())}
+              required={!newCategory.trim()}
               defaultValue={initial?.categoryId ?? ""}
             >
               <option value="">Selecione...</option>
@@ -109,7 +113,8 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
                 id="newCategory"
                 name="newCategory"
                 placeholder="Ex: Inteligência Artificial"
-                defaultValue=""
+                value={newCategory}
+                onChange={event => setNewCategory(event.target.value)}
               />
             </div>
           </div>
@@ -142,6 +147,9 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
               Ajudam a categorizar e recomendar seu curso.
             </p>
           </div>
+        <CourseCoverUpload ref={coverRef} initialUrl={initial?.coverImage ?? initial?.thumbnailUrl} />
+        </CreationSection>
+        <CreationSection number="02" title="Ritmo de estudo" hint="Defina o nível e se as aulas devem ser seguidas em ordem.">
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="level">Nível</Label>
@@ -189,8 +197,9 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
           )}
         </div>
         <p className="text-sm text-slate-500">
-          Todos os cursos são gratuitos por enquanto. Pagamentos serão habilitados em versão futura.
+          Na progressão livre, o aluno escolhe a próxima aula. Na progressiva, segue a sequência do curso.
         </p>
+        </CreationSection>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-3">
           <Button type="submit" disabled={pending}>

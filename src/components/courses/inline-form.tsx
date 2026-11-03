@@ -1,5 +1,6 @@
 "use client";
 
+import { MindMapField } from "./mind-map-field";
 import { useActionState } from "react";
 import type { ActionResult } from "@/app/actions/course";
 import { Button } from "@/components/ui/button";
@@ -22,13 +23,14 @@ type Field = {
 type InlineFormProps = {
   title: string;
   fields: Field[];
+  initialMindMap?: string;
   submitLabel: string;
   action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>;
 };
 
 const initialState: ActionResult = { success: false };
 
-export function InlineForm({ title, fields, submitLabel, action }: InlineFormProps) {
+export function InlineForm({ title, fields, submitLabel, action, initialMindMap }: InlineFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
@@ -70,6 +72,7 @@ export function InlineForm({ title, fields, submitLabel, action }: InlineFormPro
             </div>
           ))}
         </div>
+        {initialMindMap !== undefined && <MindMapField initial={initialMindMap} />}
         {state.error && <p className="text-sm text-red-400">{state.error}</p>}
         {state.success && <p className="text-sm text-emerald-400">Salvo com sucesso!</p>}
         <Button type="submit" disabled={pending} size="sm">

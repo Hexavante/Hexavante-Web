@@ -1,5 +1,6 @@
 "use server";
 
+import { lessonContent } from "@/lib/mind-map";
 import { auth } from "@/auth";
 import { canModerate, isInstructor } from "@/lib/permissions";
 import { courseSchema, lessonSchema, materialSchema, moduleSchema } from "@/lib/validations/course";
@@ -14,7 +15,6 @@ import {
   updateCourse,
   updateLesson,
   updateModule,
-  upsertCategoryByName,
   setCourseTags,
 } from "@/services/course.service";
 import { revalidatePath } from "next/cache";
@@ -52,16 +52,10 @@ export async function createCourseAction(
 
   try {
     const newCategory = formData.get("newCategory")?.toString().trim();
-    let finalCategoryId = formData.get("categoryId")?.toString().trim() || "";
-
-    if (newCategory) {
-      const created = await upsertCategoryByName(newCategory, user.id);
-      finalCategoryId = created.id;
-    }
 
     const parsed = courseSchema.safeParse({
       title: formData.get("title"),
-      categoryId: finalCategoryId,
+      categoryId: newCategory || formData.get("categoryId")?.toString().trim() || "",
       shortDescription: formData.get("shortDescription") || undefined,
       description: formData.get("description") || undefined,
       thumbnailUrl: formData.get("thumbnailUrl") || undefined,
@@ -80,7 +74,7 @@ export async function createCourseAction(
     const course = await createCourse(user.id, {
       ...parsed.data,
       coverImage: parsed.data.removeCover ? undefined : parsed.data.coverImage,
-    });
+    }, newCategory);
 
     const tagNames = (formData.get("tags")?.toString() ?? "")
       .split(",")
@@ -109,21 +103,16 @@ export async function updateCourseAction(
   try {
     const user = await requireInstructor();
     const newCategory = formData.get("newCategory")?.toString().trim();
-    let finalCategoryId = formData.get("categoryId")?.toString().trim() || "";
-
-    if (newCategory) {
-      const created = await upsertCategoryByName(newCategory, user.id);
-      finalCategoryId = created.id;
-    }
 
     const parsed = courseSchema.safeParse({
       title: formData.get("title"),
-      categoryId: finalCategoryId,
+      categoryId: newCategory || formData.get("categoryId")?.toString().trim() || "",
       shortDescription: formData.get("shortDescription") || undefined,
       description: formData.get("description") || undefined,
       thumbnailUrl: formData.get("thumbnailUrl") || undefined,
       coverImage: formData.get("coverImage") || undefined,
       removeCover: formData.get("removeCover") || "false",
+      isPublished: formData.get("isPublished") ?? undefined,
       courseType: "FREE",
       level: formData.get("level") || "BEGINNER",
       estimatedHours: formData.get("estimatedHours") || undefined,
@@ -150,12 +139,12 @@ export async function updateCourseAction(
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    await setCourseTags(courseId, tagNames);
 
     await updateCourse(courseId, user.id, {
       ...parsed.data,
       coverImage: parsed.data.removeCover ? undefined : parsed.data.coverImage,
-    });
+    }, newCategory);
+    await setCourseTags(courseId, tagNames);
     revalidatePath("/courses");
     revalidatePath("/instructor/courses");
     revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -206,7 +195,7 @@ export async function addLessonAction(
     const user = await requireInstructor();
     const parsed = lessonSchema.safeParse({
       title: formData.get("title"),
-      description: formData.get("description") || undefined,
+      description: lessonContent(formData),
       videoUrl: formData.get("videoUrl") || undefined,
       videoProvider: formData.get("videoProvider") || "youtube",
       duration: formData.get("duration") || undefined,
@@ -302,7 +291,7 @@ export async function updateLessonAction(
     const user = await requireInstructor();
     const parsed = lessonSchema.safeParse({
       title: formData.get("title"),
-      description: formData.get("description") || undefined,
+      description: lessonContent(formData),
       videoUrl: formData.get("videoUrl") || undefined,
       videoProvider: formData.get("videoProvider") || "youtube",
       duration: formData.get("duration") || undefined,

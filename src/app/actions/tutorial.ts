@@ -1,5 +1,7 @@
 "use server";
 
+import { canPublishTutorialVideo } from "@/lib/video";
+import { lessonContent } from "@/lib/mind-map";
 import { auth } from "@/auth";
 import { isInstructor } from "@/lib/permissions";
 import {
@@ -46,6 +48,12 @@ export async function createTutorialAction(
       return { success: false, error: "Título muito curto (mínimo 3 caracteres)" };
     }
 
+    const videoUrl = formData.get("videoUrl")?.toString().trim() ?? "";
+    const isPublished = formData.get("isPublished") === "true";
+    if (isPublished && !canPublishTutorialVideo(videoUrl)) {
+      return { success: false, error: "Para publicar, informe um link de vídeo do YouTube, Vimeo, TeraBox ou um arquivo de vídeo. Você também pode salvar um rascunho." };
+    }
+
     const durationRaw = formData.get("duration")?.toString().trim();
     const duration = durationRaw ? Number(durationRaw) : undefined;
     if (duration !== undefined && (isNaN(duration) || duration < 1)) {
@@ -55,11 +63,11 @@ export async function createTutorialAction(
     const tutorial = await createTutorial(user.id, {
       title,
       categoryId: formData.get("categoryId")?.toString().trim() || undefined,
-      description: formData.get("description")?.toString() || undefined,
-      videoUrl: formData.get("videoUrl")?.toString() || undefined,
+      description: lessonContent(formData),
+      videoUrl,
       thumbnailUrl: formData.get("thumbnailUrl")?.toString() || undefined,
       duration,
-      isPublished: formData.get("isPublished") === "true",
+      isPublished,
     });
 
     const tagNames = (formData.get("tags")?.toString() ?? "")
@@ -102,6 +110,12 @@ export async function updateTutorialAction(
       return { success: false, error: "Título muito curto (mínimo 3 caracteres)" };
     }
 
+    const videoUrl = formData.get("videoUrl")?.toString().trim() ?? "";
+    const isPublished = formData.get("isPublished") === "true";
+    if (isPublished && !canPublishTutorialVideo(videoUrl)) {
+      return { success: false, error: "Para publicar, informe um link de vídeo do YouTube, Vimeo, TeraBox ou um arquivo de vídeo. Você também pode salvar um rascunho." };
+    }
+
     const durationRaw = formData.get("duration")?.toString().trim();
     const duration = durationRaw ? Number(durationRaw) : undefined;
     if (duration !== undefined && (isNaN(duration) || duration < 1)) {
@@ -111,14 +125,14 @@ export async function updateTutorialAction(
     await updateTutorial(tutorialId, user.id, {
       title,
       categoryId: formData.get("categoryId")?.toString().trim() || undefined,
-      description: formData.get("description")?.toString() || undefined,
-      videoUrl: formData.get("videoUrl")?.toString() || undefined,
+      description: lessonContent(formData),
+      videoUrl,
       thumbnailUrl:
         formData.get("removeThumbnail") === "true"
           ? null
           : formData.get("thumbnailUrl")?.toString() || undefined,
       duration,
-      isPublished: formData.get("isPublished") === "true",
+      isPublished,
     });
 
     const tagNames = (formData.get("tags")?.toString() ?? "")
