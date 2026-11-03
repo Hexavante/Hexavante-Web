@@ -27,15 +27,16 @@ export function ShopProfilePreview({ fullName, username, avatarUrl, cosmetics }:
   const background = resolveProfileBackground(cosmetics.profileBackgroundId);
   const frameStyle = frame?.style ?? null;
   const backgroundStyle = background?.style ?? null;
-  const cardStyle = { ...(backgroundStyle ?? {}), ...(frameStyle ?? {}) };
+  const cardStyle = frameStyle ?? {};
   const bgAnimationClass = background?.animationClass ?? "";
   const frameAnimationClass = frame?.animationClass ?? "";
 
   return (
     <section
-      className={`hx-panel !p-4 ${bgAnimationClass} ${frameAnimationClass}`}
+      className={`hx-panel !p-4 ${frameAnimationClass}`}
       style={Object.keys(cardStyle).length ? cardStyle : undefined}
     >
+      {backgroundStyle && <div aria-hidden className={`mb-4 h-20 rounded-xl ${bgAnimationClass}`} style={backgroundStyle} />}
       <p className="text-sm font-semibold hx-text-body">Prévia do perfil</p>
       <p className="mt-1 text-xs hx-text-muted">Veja como sua vitrine aparece para outros.</p>
 

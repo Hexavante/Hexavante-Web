@@ -192,3 +192,29 @@ html.theme-hexavante-reverso ::selection {
 html.theme-hexavante-reverso .hx-btn-primary {
   box-shadow: 0 6px 18px rgb(193 18 31 / 0.3);
 }
+
+/* Carry the equipped palette into the shell without changing text contrast. */
+.hx-header-bar {
+  background-image: linear-gradient(100deg, hsl(var(--sidebar-highlight) / .09), transparent 55%);
+  box-shadow: inset 0 -1px hsl(var(--sidebar-highlight) / .17);
+}
+.hx-profile-banner {
+  background-image: radial-gradient(ellipse at 80% 30%, hsl(var(--sidebar-highlight) / .27), transparent 62%),
+    repeating-linear-gradient(125deg, transparent 0 25px, hsl(var(--sidebar-highlight) / .09) 26px 27px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hx-profile-card, .hx-profile-banner { animation: none !important; }
+}
+
+/* Static patterns keep each workspace recognizable without moving behind reading material. */
+html.theme-ocean .hx-header-bar {
+  background-image: repeating-radial-gradient(ellipse at 85% -90%, transparent 0 26px, hsl(var(--sidebar-highlight) / .12) 27px 28px);
+}
+html.theme-hacker .hx-header-bar, html.theme-cyberpunk .hx-header-bar {
+  background-image: linear-gradient(90deg, hsl(var(--sidebar-highlight) / .09) 1px, transparent 1px),
+    linear-gradient(hsl(var(--sidebar-highlight) / .07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+html.theme-sunset .hx-header-bar, html.theme-daylight .hx-header-bar {
+  background-image: radial-gradient(ellipse at 80% 110%, hsl(var(--sidebar-highlight) / .2), transparent 57%);
+}

@@ -63,30 +63,31 @@ export function PublicProfileView({ profile, viewerId, viewerUsername }: Props) 
   const background = cosmetics ? resolveProfileBackground(cosmetics.profileBackgroundId) : null;
   const frameStyle = frame?.style ?? null;
   const backgroundStyle = background?.style ?? null;
-  const cardStyle = { ...(backgroundStyle ?? {}), ...(frameStyle ?? {}) };
+  const cardStyle = frameStyle ?? {};
   const bgAnimationClass = background?.animationClass ?? "";
   const frameAnimationClass = frame?.animationClass ?? "";
 
   return (
     <>
-      <section className={`hx-profile-card ${bgAnimationClass} ${frameAnimationClass}`} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
+      <section className={`hx-profile-card ${frameAnimationClass}`} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
         <div className="relative">
           <div
-            className="hx-profile-banner"
+            className={`hx-profile-banner min-h-32 sm:min-h-44 ${user.bannerUrl ? "" : bgAnimationClass}`}
             style={user.bannerUrl ? {
               backgroundImage: `url(${user.bannerUrl})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               minHeight: 180,
-            } : undefined}
+            } : backgroundStyle ?? undefined}
           />
+          {user.bannerUrl && backgroundStyle && <div aria-hidden className="h-3 rounded-b-xl" style={backgroundStyle} />}
           {isOwner && (
             <Link
               href="/configuracoes/perfil"
               className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-black/80"
             >
               <Pencil className="h-3 w-3" />
-              Banner
+              Editar capa
             </Link>
           )}
         </div>
@@ -184,7 +185,7 @@ export function PublicProfileView({ profile, viewerId, viewerUsername }: Props) 
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-4 text-sm text-slate-300">
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-[var(--border)] pt-4 text-sm text-slate-300">
               <span>
                 <strong className="text-white">{followCounts.followers}</strong> seguidores
               </span>

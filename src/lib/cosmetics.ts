@@ -793,61 +793,61 @@ export type ProfileBackgroundDef = {
 export const PROFILE_BACKGROUNDS: Record<string, ProfileBackgroundDef> = {
   "bg-galaxy": {
     id: "bg-galaxy", label: "Fundo Galaxy", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 20% 0%, rgba(88,101,242,0.3) 0%, rgba(88,101,242,0.05) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/galaxy.svg') center / cover" },
     animationClass: "animate-bg-glow",
   },
   "bg-sunset-gradient": {
     id: "bg-sunset-gradient", label: "Fundo Sunset", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 30% 10%, rgba(235,69,158,0.25) 0%, rgba(254,231,92,0.08) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/sunset-gradient.svg') center / cover" },
   },
   "bg-matrix": {
     id: "bg-matrix", label: "Fundo Matrix", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 50% 0%, rgba(87,242,135,0.15) 0%, rgba(87,242,135,0.03) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/matrix.svg') center / cover" },
     animationClass: "animate-bg-glow",
   },
   "bg-aurora": {
     id: "bg-aurora", label: "Fundo Aurora", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 25% 0%, rgba(87,242,135,0.2) 0%, rgba(88,101,242,0.15) 40%, #1a1b1e 75%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/aurora.svg') center / cover" },
     animationClass: "animate-bg-aurora",
   },
   "bg-rain": {
     id: "bg-rain", label: "Fundo Chuva", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 60% 10%, rgba(88,101,242,0.12) 0%, rgba(88,101,242,0.02) 60%, #1a1b1e 90%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/rain.svg') center / cover" },
   },
   "bg-beach": {
     id: "bg-beach", label: "Fundo Praia", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 40% 0%, rgba(254,231,92,0.15) 0%, rgba(87,242,135,0.05) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/beach.svg') center / cover" },
   },
   "bg-mountain": {
     id: "bg-mountain", label: "Fundo Montanha", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 50% 0%, rgba(139,145,160,0.2) 0%, rgba(88,101,242,0.08) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/mountain.svg') center / cover" },
     animationClass: "animate-bg-breathe",
   },
   "bg-city": {
     id: "bg-city", label: "Fundo Cidade", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 50% 100%, rgba(88,101,242,0.15) 0%, rgba(30,31,34,0.5) 50%, #1a1b1e 90%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/city.svg') center / cover" },
   },
   "bg-forest": {
     id: "bg-forest", label: "Fundo Floresta", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 30% 0%, rgba(87,242,135,0.15) 0%, rgba(34,197,94,0.05) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/forest.svg') center / cover" },
   },
   "bg-space": {
     id: "bg-space", label: "Fundo Espaço", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 40% 20%, rgba(88,101,242,0.25) 0%, rgba(139,92,246,0.1) 40%, #1a1b1e 75%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/space.svg') center / cover" },
     animationClass: "animate-bg-shift",
   },
   "bg-electric": {
     id: "bg-electric", label: "Fundo Elétrico", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 35% 10%, rgba(88,101,242,0.3) 0%, rgba(59,130,246,0.08) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/electric.svg') center / cover" },
     animationClass: "animate-bg-glow",
   },
   "bg-desert": {
     id: "bg-desert", label: "Fundo Deserto", rarity: "common",
-    style: { background: "radial-gradient(ellipse at 50% 10%, rgba(254,231,92,0.12) 0%, rgba(245,158,11,0.05) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/desert.svg') center / cover" },
   },
   "bg-underwater": {
     id: "bg-underwater", label: "Fundo Subaquático", rarity: "rare",
-    style: { background: "radial-gradient(ellipse at 45% 0%, rgba(6,182,212,0.2) 0%, rgba(88,101,242,0.08) 50%, #1a1b1e 80%)" },
+    style: { background: "linear-gradient(90deg, #07152455, transparent), url('/profile-scenes/underwater.svg') center / cover" },
     animationClass: "animate-bg-breathe",
   },
 };

@@ -26,16 +26,14 @@ export function ThemeSwatch({ themeId, size = "md", className }: Props) {
       title={theme.label}
       aria-hidden
     >
-      <div
-        className="absolute inset-0 opacity-80"
-        style={{
-          background: `linear-gradient(135deg, ${primary}55 0%, transparent 55%, ${accent}44 100%)`,
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1/3 border-t border-white/10"
-        style={{ background: `linear-gradient(90deg, ${primary}, ${accent})` }}
-      />
+      <div className="absolute inset-1.5 grid grid-cols-[18%_1fr] gap-1" aria-hidden>
+        <div className="rounded-sm" style={{ backgroundColor: primary, opacity: 0.75 }} />
+        <div className="flex flex-col justify-center gap-1">
+          <div className="h-1 w-2/3 rounded-full" style={{ backgroundColor: accent }} />
+          <div className="h-2 rounded-sm" style={{ background: `linear-gradient(110deg, ${primary}, ${accent})` }} />
+          <div className="h-1 w-1/2 rounded-full" style={{ backgroundColor: primary }} />
+        </div>
+      </div>
     </div>
   );
 }
