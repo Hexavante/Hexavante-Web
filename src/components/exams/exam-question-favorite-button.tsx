@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Star } from "lucide-react";
-import { toggleExamQuestionFavoriteAction } from "@/app/actions/exam-learning";
+import { setExamQuestionFavoriteAction } from "@/app/actions/exam-learning";
 import { useToast } from "@/components/ui/toast";
 
 type Props = {
@@ -30,7 +30,8 @@ export function ExamQuestionFavoriteButton({
       disabled={pending}
       onClick={() => {
         startTransition(async () => {
-          const result = await toggleExamQuestionFavoriteAction(examSlug, questionId, attemptId);
+          const result = await setExamQuestionFavoriteAction(examSlug, questionId, !isFavorite, attemptId)
+            .catch(() => ({ success: false, isFavorite: undefined, error: "Falha de conexão. Tente novamente." }));
           if (result.success && result.isFavorite != null) {
             setIsFavorite(result.isFavorite);
             toast(

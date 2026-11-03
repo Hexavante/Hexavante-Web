@@ -58,19 +58,30 @@ export function ExamForm({
   // Restaura rascunhos do sessionStorage após hidratação (sem branch window no render).
   useEffect(() => {
     const drafts: Record<string, string> = {};
+    const choices: Record<string, string> = {};
     const map: Record<string, boolean> = {};
+    try {
     for (const question of questions) {
-      if (question.type !== "ESSAY") continue;
+      if (question.type !== "ESSAY") {
+        const choice = sessionStorage.getItem(`exam-choice-${attemptId}-${question.id}`);
+        if (choice && question.alternatives.some((alt) => alt.id === choice)) {
+          choices[question.id] = choice;
+          map[question.id] = true;
+        }
+        continue;
+      }
       const saved = sessionStorage.getItem(`exam-essay-${attemptId}-${question.id}`);
       if (saved) {
         drafts[question.id] = saved;
         map[question.id] = saved.trim().length > 0;
       }
     }
-    if (Object.keys(drafts).length === 0) return;
+    } catch { return; }
+    if (Object.keys(map).length === 0) return;
 
     const id = window.setTimeout(() => {
       setEssayDrafts(drafts);
+      setMcAnswers(choices);
       setAnswered((prev) => ({ ...prev, ...map }));
     }, 0);
     return () => window.clearTimeout(id);
@@ -121,7 +132,7 @@ export function ExamForm({
   const handleEssayChange = (questionId: string, value: string) => {
     const trimmed = value.slice(0, ESSAY_MAX);
     setEssayDrafts((prev) => ({ ...prev, [questionId]: trimmed }));
-    sessionStorage.setItem(`exam-essay-${attemptId}-${questionId}`, trimmed);
+    try { sessionStorage.setItem(`exam-essay-${attemptId}-${questionId}`, trimmed); } catch { /* A resposta continua em memória. */ }
     setAnswered((prev) => ({ ...prev, [questionId]: trimmed.trim().length > 0 }));
     if (isPaginated) {
       const idx = questions.findIndex((q) => q.id === questionId);
@@ -131,6 +142,7 @@ export function ExamForm({
 
   const handleMcChange = (questionId: string, alternativeId: string) => {
     setMcAnswers((prev) => ({ ...prev, [questionId]: alternativeId }));
+    try { sessionStorage.setItem(`exam-choice-${attemptId}-${questionId}`, alternativeId); } catch { /* A resposta continua em memória. */ }
     markAnswered(questionId);
     if (isPaginated) {
       const idx = questions.findIndex((q) => q.id === questionId);
@@ -395,7 +407,7 @@ function QuestionField({
                 type="radio"
                 name={useNativeInputs ? `q_${question.id}` : undefined}
                 value={alt.id}
-                checked={useNativeInputs ? undefined : mcAnswers[question.id] === alt.id}
+                checked={mcAnswers[question.id] === alt.id}
                 required={useNativeInputs}
                 className="mt-1.5 h-5 w-5 shrink-0 accent-teal-400"
                 onChange={() => onMcChange(question.id, alt.id)}

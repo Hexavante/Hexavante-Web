@@ -246,7 +246,7 @@ export default async function ExamDetailPage({ params, searchParams }: Props) {
                   </div>
                   <p className="mb-4 flex-1 text-sm text-slate-400">
                     Revise apenas as questões que você marcou como favoritas neste simulado (
-                    {favoriteCount} salvas).
+                    {favoriteCount} {favoriteCount === 1 ? "salva" : "salvas"}).
                   </p>
                   <form action={startExamAction.bind(null, exam.id, slug, "FAVORITES")}>
                     <Button type="submit" variant="outline" disabled={favoriteCount === 0}>

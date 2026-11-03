@@ -220,3 +220,12 @@ export async function getCoinsForSource(userId: string, source: CoinSource, sour
     },
   });
 }
+
+export async function sumCoinsForSources(userId: string, source: CoinSource, sourceIds: string[]) {
+  if (sourceIds.length === 0) return 0;
+  const result = await prisma.coinTransaction.aggregate({
+    where: { userId, source, sourceId: { in: sourceIds } },
+    _sum: { amount: true },
+  });
+  return result._sum.amount ?? 0;
+}

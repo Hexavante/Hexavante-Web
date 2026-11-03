@@ -13,7 +13,7 @@ export function ExamAttemptComparisonPanel({ comparison }: Props) {
   if (!previous) {
     return (
       <Card padding="md" className="border-sky-400/20 bg-sky-400/5">
-        <p className="text-sm text-sky-200">Primeira tentativa registrada neste simulado.</p>
+        <p className="text-sm text-sky-200">Primeira tentativa neste modo do simulado.</p>
         <p className="mt-1 text-xs text-slate-400">
           Modo: {EXAM_STUDY_MODE_LABELS[current.studyMode as ExamStudyMode] ?? current.studyMode}
         </p>
@@ -23,7 +23,7 @@ export function ExamAttemptComparisonPanel({ comparison }: Props) {
 
   return (
     <Card padding="md">
-      <h2 className="font-semibold text-white">Comparado à tentativa anterior</h2>
+      <h2 className="font-semibold text-white">Comparação com a tentativa anterior no mesmo modo</h2>
       <p className="mt-1 text-xs text-slate-400">
         {previous.finishedAt?.toLocaleDateString("pt-BR")} →{" "}
         {current.finishedAt?.toLocaleDateString("pt-BR")}
@@ -47,7 +47,7 @@ export function ExamAttemptComparisonPanel({ comparison }: Props) {
                 ) : scoreDelta < 0 ? (
                   <TrendingDown className="h-4 w-4" />
                 ) : null}
-                {scoreDelta > 0 ? `+${scoreDelta}` : scoreDelta}%
+                {scoreDelta > 0 ? `+${scoreDelta}` : scoreDelta} p.p.
               </span>
             )}
           </div>

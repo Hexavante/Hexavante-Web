@@ -1,10 +1,12 @@
 import { auth } from "@/auth";
 import { getAttemptResult } from "@/services/exam.service";
-import { getCoinsForSource } from "@/services/wallet.service";
+import { startExamAction } from "@/app/actions/exam";
+import { sumCoinsForSources } from "@/services/wallet.service";
 import { getXpForSource } from "@/services/xp.service";
 import {
   compareWithPreviousAttempt,
   getExamQuestionFavoriteIds,
+  getFavoriteQuestionCount,
   getUserSubjectStats,
 } from "@/services/exam-learning.service";
 import { AppLink } from "@/components/ui/app-link";
@@ -12,7 +14,7 @@ import { ConclusionBrandLogo } from "@/components/conclusion-brand-logo";
 import { PanteraMascote } from "@/components/pantera-mascote";
 import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
-import { LinkButton } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { PageShell } from "@/components/ui/page-shell";
 import { ExamQuestionImage } from "@/components/exams/exam-question-image";
 import { ExamQuestionFavoriteButton } from "@/components/exams/exam-question-favorite-button";
@@ -50,13 +52,18 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
   const attempt = await getAttemptResult(session.user.id, attemptId);
   if (!attempt || !attempt.finishedAt || attempt.exam.slug !== slug) notFound();
 
-  const [comparison, subjectStats, favoriteIds] = await Promise.all([
-    compareWithPreviousAttempt(session.user.id, attempt.examId, attemptId),
+  const [comparison, subjectStats, favoriteIds, favoriteCount] = await Promise.all([
+    compareWithPreviousAttempt(session.user.id, attempt.examId, {
+      id: attempt.id, finishedAt: attempt.finishedAt, studyMode: attempt.studyMode,
+      score: attempt.score, correctAnswers: attempt.correctAnswers,
+    }),
     getUserSubjectStats(session.user.id, attempt.examId),
+    // A tentativa pode conter só parte das questões salvas deste simulado.
     getExamQuestionFavoriteIds(
       session.user.id,
       attempt.answers.map((a) => a.questionId),
     ),
+    getFavoriteQuestionCount(session.user.id, attempt.examId),
   ]);
   const shouldCelebrateMarathon =
     query.conquista === "maratona_100" &&
@@ -84,14 +91,8 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
   const passed = attempt.score >= EXAM_PASS_SCORE && pendingEssays === 0;
 
   const correctAnswers = attempt.answers.filter((a) => a.isCorrect && a.alternativeId);
-  const coinEntries = await Promise.all(
-    correctAnswers.map((answer) =>
-      getCoinsForSource(session.user!.id, "EXAM_CORRECT", `${attemptId}-q-${answer.questionId}`),
-    ),
-  );
-  const totalCoinsEarned = coinEntries.reduce((sum, entry) => sum + (entry?.amount ?? 0), 0);
-
-  const [baseXp, passXp] = await Promise.all([
+  const [totalCoinsEarned, baseXp, passXp] = await Promise.all([
+    sumCoinsForSources(session.user.id, "EXAM_CORRECT", correctAnswers.map((answer) => `${attemptId}-q-${answer.questionId}`)),
     getXpForSource(session.user.id, "EXAM", attemptId),
     getXpForSource(session.user.id, "EXAM", `${attemptId}-pass`),
   ]);
@@ -100,7 +101,10 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
     attempt.dailyAttemptIndex != null ? getDailyRewardTierLabel(attempt.dailyAttemptIndex) : null;
 
   const answeredQuestionIds = new Set(attempt.answers.map((a) => a.questionId));
-  const unanswered = attempt.exam.questions.filter((q) => !answeredQuestionIds.has(q.id));
+  const unanswered = attempt.studyMode === "FULL" ? attempt.exam.questions.filter((q) => !answeredQuestionIds.has(q.id)) : [];
+  const needsReview = (answer: (typeof attempt.answers)[number]) =>
+    answer.question.type === "ESSAY" ? answer.essayStatus === "INCORRECT" || answer.essayStatus === "PARTIAL" : !answer.isCorrect;
+  const reviewCount = attempt.answers.filter(needsReview).length;
 
   const modeLabel =
     EXAM_STUDY_MODE_LABELS[attempt.studyMode as ExamStudyMode] ?? attempt.studyMode;
@@ -170,6 +174,9 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
           </div>
         )}
       </Alert>
+      <a href="#revisao" className="mt-4 inline-block underline underline-offset-4">
+        {reviewCount ? `Revisar questões que precisam de atenção (${reviewCount})` : "Ver gabarito e explicações"}
+      </a>
 
       {comparison && (
         <div className="mt-6">
@@ -183,10 +190,10 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
         </div>
       )}
 
-      <div className="mt-8 space-y-4">
+      <div id="revisao" className="mt-8 scroll-mt-24 space-y-4">
         <h2 className="font-semibold text-white">Revisão com gabarito e explicações</h2>
-        {attempt.answers
-          .sort((a, b) => a.question.orderNumber - b.question.orderNumber)
+        {[...attempt.answers]
+          .sort((a, b) => Number(needsReview(b)) - Number(needsReview(a)) || a.question.orderNumber - b.question.orderNumber)
           .map((answer) => {
             if (answer.question.type === "ESSAY") {
               return (
@@ -324,6 +331,14 @@ export default async function ExamResultPage({ params, searchParams }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
+        <form action={startExamAction.bind(null, attempt.examId, slug, "REINFORCEMENT")}>
+          <Button type="submit">Iniciar reforço</Button>
+        </form>
+        <form action={startExamAction.bind(null, attempt.examId, slug, "FAVORITES")}>
+          <Button type="submit" variant="outline" disabled={!favoriteCount}>
+            {favoriteCount ? `Estudar favoritas (${favoriteCount})` : "Marque uma estrela para estudar favoritas"}
+          </Button>
+        </form>
         <LinkButton href={`/simulados/${slug}`} variant="outline" aria-label="Refazer simulado">
           Refazer simulado
         </LinkButton>

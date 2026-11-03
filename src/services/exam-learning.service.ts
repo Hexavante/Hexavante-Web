@@ -52,6 +52,14 @@ export async function getExamQuestionFavoriteIds(
   return new Set(favorites.map((f) => f.questionId));
 }
 
+export async function setExamQuestionFavorite(userId: string, questionId: string, favorite: boolean) {
+  if (favorite) {
+    await prisma.examQuestionFavorite.createMany({ data: [{ userId, questionId }], skipDuplicates: true });
+  } else {
+    await prisma.examQuestionFavorite.deleteMany({ where: { userId, questionId } });
+  }
+}
+
 export async function toggleExamQuestionFavorite(
   userId: string,
   questionId: string,
@@ -255,17 +263,29 @@ export async function resolveAttemptQuestionIds(
 }
 
 export function filterQuestionsByIds<T extends { id: string }>(questions: T[], ids: string[]): T[] {
-  const idSet = new Set(ids);
-  return questions.filter((q) => idSet.has(q.id));
+  const byId = new Map(questions.map((question) => [question.id, question]));
+  const ordered: T[] = [];
+  for (const id of new Set(ids)) {
+    const question = byId.get(id);
+    if (question) ordered.push(question);
+  }
+  return ordered;
 }
 
 export async function compareWithPreviousAttempt(
   userId: string,
   examId: string,
-  attemptId: string,
+  current: AttemptComparison["current"],
 ): Promise<AttemptComparison | null> {
-  const attempts = await prisma.examAttempt.findMany({
-    where: { userId, examId, finishedAt: { not: null } },
+  if (!current.finishedAt) return null;
+  const previous = await prisma.examAttempt.findFirst({
+    where: {
+      userId, examId, studyMode: current.studyMode,
+      OR: [
+        { finishedAt: { lt: current.finishedAt } },
+        { finishedAt: current.finishedAt, id: { lt: current.id } },
+      ],
+    },
     select: {
       id: true,
       score: true,
@@ -273,15 +293,8 @@ export async function compareWithPreviousAttempt(
       finishedAt: true,
       studyMode: true,
     },
-    orderBy: { finishedAt: "desc" },
-    take: 10,
+    orderBy: [{ finishedAt: "desc" }, { id: "desc" }],
   });
-
-  const currentIndex = attempts.findIndex((a) => a.id === attemptId);
-  if (currentIndex === -1) return null;
-
-  const current = attempts[currentIndex];
-  const previous = attempts[currentIndex + 1] ?? null;
 
   return {
     current,
