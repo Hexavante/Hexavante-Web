@@ -1,6 +1,4 @@
-"use client";
-
-import { getApiUrl } from "@/lib/api-url";
+import { SERVER_API_URL } from "@/lib/api-url";
 import { cn } from "@/lib/cn";
 
 type Props = {
@@ -11,7 +9,8 @@ type Props = {
 };
 
 export function OAuthSignInButton({ provider, callbackUrl, children, className }: Props) {
-  const API_URL = getApiUrl();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ||
+    (process.env.NODE_ENV === "production" ? "https://api.hexavante.com.br" : SERVER_API_URL);
   const href = `${API_URL}/oauth/${provider}?callbackURL=${encodeURIComponent(callbackUrl)}`;
 
   return (

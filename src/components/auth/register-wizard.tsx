@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/cn";
+import { siteUrl } from "@/lib/site-url";
 import styles from "./login-shell.module.css";
 
 type Props = {
@@ -36,12 +37,19 @@ const interests = [
 ];
 
 export function RegisterWizard({ action, callbackUrl, socialOptions }: Props) {
-  const [state, formAction, pending] = useActionState(action, initialState);
   const [step, setStep] = useState(1);
+  const [state, formAction, pending] = useActionState(async (prev: ActionResult, data: FormData) => {
+    const result = await action(prev, data);
+    const profileFields = ["username", "fullName", "email", "birthDate"];
+    if (profileFields.some((name) => result.fieldErrors?.[name])) setStep(1);
+    return result;
+  }, initialState);
   const [accountType, setAccountType] = useState<"STUDENT" | "INSTRUCTOR">(
     "STUDENT",
   );
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [studyGoal, setStudyGoal] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     if (state.success && state.redirectTo)
@@ -173,6 +181,8 @@ export function RegisterWizard({ action, callbackUrl, socialOptions }: Props) {
             <select
               id="studyGoal"
               name="studyGoal"
+              value={studyGoal}
+              onChange={(event) => setStudyGoal(event.target.value)}
               className="mt-1 h-11 w-full rounded-lg border border-white/10 bg-slate-900 px-3 text-sm text-white outline-none transition focus:border-sky-400"
             >
               <option value="">Selecione uma opção</option>
@@ -247,19 +257,27 @@ export function RegisterWizard({ action, callbackUrl, socialOptions }: Props) {
             placeholder="SP"
           />
           <div className="flex items-start gap-2 pt-1">
-            <Checkbox id="terms" name="terms" className="mt-0.5" />
+            <Checkbox id="terms" name="terms" required checked={acceptedTerms}
+              onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-0.5" />
             <Label
               htmlFor="terms"
               className="cursor-pointer text-xs font-normal leading-5 text-slate-300"
             >
               Li e aceito os{" "}
-              <AppLink href="/privacidade">Termos de Uso</AppLink> e a{" "}
-              <AppLink href="/privacidade">Política de Privacidade</AppLink>.
+              <AppLink href={siteUrl("/termos")} target="_blank" rel="noopener noreferrer">Termos de Uso</AppLink> e a{" "}
+              <AppLink href="/privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</AppLink>.
             </Label>
           </div>
         </div>
 
-        {state.error && <Alert variant="danger">{state.error}</Alert>}
+        {state.error && <Alert variant="danger">
+          {state.error}
+          {state.fieldErrors && <ul className="mt-1 list-disc pl-4">
+            {Object.entries(state.fieldErrors).map(([name, message]) => (
+              <li key={name}>{fieldLabels[name] ?? name}: {message}</li>
+            ))}
+          </ul>}
+        </Alert>}
         <div className="flex gap-3 pt-2">
           {step > 1 && (
             <Button
@@ -312,6 +330,12 @@ export function RegisterWizard({ action, callbackUrl, socialOptions }: Props) {
   );
 }
 
+const fieldLabels: Record<string, string> = {
+  username: "Nome de usuário", fullName: "Nome completo", email: "E-mail", birthDate: "Nascimento",
+  password: "Senha", confirmPassword: "Confirmação de senha", terms: "Termos de uso",
+  phone: "Telefone", city: "Cidade", state: "Estado",
+};
+
 function Field({
   name,
   label,
@@ -327,18 +351,24 @@ function Field({
   required?: boolean;
   minLength?: number;
 }) {
+  const [value, setValue] = useState("");
   return (
     <div>
       <Label htmlFor={name}>{label}</Label>
       <Input
         id={name}
         name={name}
+        pattern={name === "username" ? "[a-zA-Z0-9_]{3,30}" : undefined}
+        aria-describedby={name === "username" ? "username-help" : undefined}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
         type={type}
         required={required}
         minLength={minLength}
         placeholder={placeholder}
         className="mt-1 h-11"
       />
+      {name === "username" && <p id="username-help" className="mt-1 text-xs text-slate-400">Use de 3 a 30 letras sem acento, números ou sublinhado (_).</p>}
     </div>
   );
 }

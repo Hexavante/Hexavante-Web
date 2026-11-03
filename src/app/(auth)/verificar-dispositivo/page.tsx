@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resendDeviceCodeAction, verifyDeviceAction } from "@/app/actions/device-auth";
+import { getSafeCallbackUrl } from "@/lib/auth-routes";
 
 type Props = {
   searchParams: Promise<{ vid?: string; callbackUrl?: string; motivo?: string }>;
@@ -22,9 +23,9 @@ import { useEffect } from "react";
 
 function VerificarDispositivoForm({ searchParams }: Props) {
   const { vid = "", callbackUrl = "/app", motivo = "" } = use(searchParams);
-  const isEmail = motivo === "email";
   const [step, setStep] = useState<"device" | "2fa">(motivo === "2fa" ? "2fa" : "device");
   const is2fa = step === "2fa";
+  const isEmail = motivo === "email" && !is2fa;
   const [code, setCode] = useState("");
   const [vid2, setVid2] = useState(vid);
   const [state, action, pending] = useActionState(
@@ -56,7 +57,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
 
   useEffect(() => {
     if (state?.ok) {
-      window.location.assign(callbackUrl.startsWith("/") ? callbackUrl : "/app");
+      window.location.assign(getSafeCallbackUrl(callbackUrl));
     }
   }, [state?.ok, callbackUrl]);
 
@@ -99,6 +100,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
             name="code"
             type="text"
             inputMode="numeric"
+            autoComplete="one-time-code"
             maxLength={6}
             required
             placeholder="000000"
@@ -111,7 +113,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
 
         {state?.error && <p className="text-sm text-red-300">{state.error}</p>}
 
-        <Button type="submit" disabled={pending || code.length !== 6} className="hx-lift h-11 w-full" size="lg">
+        <Button type="submit" disabled={pending || resending || code.length !== 6} className="hx-lift h-11 w-full" size="lg">
           {pending ? "Verificando..." : is2fa ? "Confirmar código" : "Confirmar dispositivo"}
         </Button>
       </form>
@@ -126,7 +128,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
       )}
 
       <form action={resendAction} className="mt-2">
-        <Button type="submit" variant="ghost" disabled={resending} className="w-full">
+        <Button type="submit" variant="ghost" disabled={resending || pending} className="w-full">
           {resending ? "Enviando..." : "Não recebeu? Reenviar código"}
         </Button>
       </form>

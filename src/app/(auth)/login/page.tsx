@@ -8,11 +8,11 @@ import { fetchOAuthProviders, oauthErrorMessages } from "@/lib/oauth";
 import { Alert } from "@/components/ui/alert";
 
 type Props = {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string; registered?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { callbackUrl, error } = await searchParams;
+  const { callbackUrl, error, registered } = await searchParams;
   const safeCallback = getSafeCallbackUrl(callbackUrl);
   const providers = await fetchOAuthProviders();
 
@@ -22,6 +22,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <AuthPageShell variant="login">
+      {registered === "1" && <Alert variant="info">Sua conta foi criada. Entre com seu e-mail e senha para continuar.</Alert>}
       {oauthError && (
         <Alert variant="danger" className="mt-4">
           {oauthError}

@@ -2,11 +2,13 @@
 
 import { cookies } from "next/headers";
 import { getSessionCookieName } from "@/lib/auth-cookies";
+import { getSafeCallbackUrl } from "@/lib/auth-routes";
 import { registerSchema, loginSchema } from "@/lib/validations/auth";
 import type { ZodError } from "zod";
 import { getApiUrl } from "@/lib/auth-session";
 import { addAccount } from "@/lib/account-switcher";
 import { getClientDevice } from "@/lib/client-device";
+import { authProxyHeaders } from "@/lib/auth-proxy-headers";
 import { saveRegistrationProfile } from "@/services/registration-profile.service";
 
 const WEB_ORIGIN =
@@ -24,9 +26,11 @@ const ALLOWED_REDIRECT_HOSTS = [
 ];
 
 function isSafeRedirect(url: string): boolean {
-  if (!url.startsWith("http")) return true;
+  if (url.startsWith("/")) return Boolean(getSafeCallbackUrl(url, ""));
   try {
-    return ALLOWED_REDIRECT_HOSTS.includes(new URL(url).hostname);
+    const target = new URL(url);
+    return (target.protocol === "https:" || (process.env.NODE_ENV !== "production" && target.protocol === "http:"))
+      && ALLOWED_REDIRECT_HOSTS.includes(target.hostname);
   } catch {
     return false;
   }
@@ -97,10 +101,13 @@ export async function registerAction(
     };
   }
 
+  const resumeLogin = { success: true, redirectTo: "/login?" + new URLSearchParams({ registered: "1", callbackUrl }).toString() };
+  let created = false;
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/register`, {
       method: "POST",
       headers: {
+        ...(await authProxyHeaders()),
         "Content-Type": "application/json",
         Origin: WEB_ORIGIN,
       },
@@ -116,6 +123,7 @@ export async function registerAction(
       }),
     });
 
+    if (res.status === 429) return { success: false, error: "Muitas tentativas. Aguarde um minuto e tente novamente." };
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       const message =
@@ -132,12 +140,13 @@ export async function registerAction(
       return { success: false, error: message };
     }
 
-    await clearStaleSessionCookies();
+    created = true;
 
     // After registration, login to get the session cookie
     const loginRes = await fetch(`${API_URL}/api/v1/auth/login`, {
       method: "POST",
       headers: {
+        ...(await authProxyHeaders()),
         "Content-Type": "application/json",
         Origin: WEB_ORIGIN,
       },
@@ -158,7 +167,7 @@ export async function registerAction(
           redirectTo: `/verificar-dispositivo?vid=${encodeURIComponent(data.verificationId)}${motivo}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
         };
       }
-      return { success: false, error: "Não foi possível iniciar a verificação. Tente novamente." };
+      return resumeLogin;
     }
 
     if (loginRes.ok) {
@@ -166,42 +175,42 @@ export async function registerAction(
         user?: { id: string };
         session?: { token: string; expiresAt: string };
       };
-      if (loginData.session) {
-        const cookieStore = await cookies();
-        cookieStore.set(getSessionCookieName(), loginData.session.token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 7 * 24 * 60 * 60, // 7 days
-          domain: process.env.NODE_ENV === "production" ? ".hexavante.com.br" : undefined,
-        });
-        try {
-          await addAccount(loginData.session.token);
-        } catch (e) {
-          console.error("[auth] addAccount falhou (não bloqueante):", e);
-        }
-
-        if (loginData.user?.id) {
-          try {
-            await saveRegistrationProfile(loginData.user.id, parsed.data);
-          } catch (e) {
-            // A conta continua válida mesmo se a personalização falhar; evita
-            // registrar duas vezes quando o usuário tentar novamente.
-            console.error("[auth] não foi possível salvar escolhas do cadastro:", e);
-          }
-        } else {
-          console.warn("[auth] login sem user.id — escolhas do cadastro não foram salvas");
-        }
+      if (!loginData.session?.token) return resumeLogin;
+      await clearStaleSessionCookies();
+      const cookieStore = await cookies();
+      cookieStore.set(getSessionCookieName(), loginData.session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        domain: process.env.NODE_ENV === "production" ? ".hexavante.com.br" : undefined,
+      });
+      try {
+        await addAccount(loginData.session.token);
+      } catch (e) {
+        console.error("[auth] addAccount falhou (não bloqueante):", e);
       }
+
+      if (loginData.user?.id) {
+        try {
+          await saveRegistrationProfile(loginData.user.id, parsed.data);
+        } catch (e) {
+          // A conta continua válida mesmo se a personalização falhar; evita
+          // registrar duas vezes quando o usuário tentar novamente.
+          console.error("[auth] não foi possível salvar escolhas do cadastro:", e);
+        }
+      } else {
+        console.warn("[auth] login sem user.id — escolhas do cadastro não foram salvas");
+      }
+    } else {
+      return resumeLogin;
     }
 
     return { success: true, redirectTo: callbackUrl };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao cadastrar",
-    };
+  } catch {
+    if (created) return resumeLogin;
+    return { success: false, error: "Não foi possível confirmar o cadastro. Tente entrar antes de cadastrar novamente." };
   }
 }
 
@@ -223,12 +232,11 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
     };
   }
 
-  await clearStaleSessionCookies();
-
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/login`, {
       method: "POST",
       headers: {
+        ...(await authProxyHeaders()),
         "Content-Type": "application/json",
         Origin: WEB_ORIGIN,
       },
@@ -238,6 +246,8 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
         ...(await getClientDevice()),
       }),
     });
+
+    if (res.status === 429) return { success: false, error: "Muitas tentativas. Aguarde um minuto e tente novamente." };
 
     // NOTE: Response.ok é true para 202 — checar o status ANTES de !res.ok
     if (res.status === 202) {
@@ -260,7 +270,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
       // 401 = credenciais; demais erros mostram a mensagem real da API
       return {
         success: false,
-        error: res.status === 401 || !message ? "E-mail ou senha incorretos." : message,
+        error: res.status === 401 ? "E-mail ou senha incorretos." : (typeof message === "string" ? message : "Não foi possível entrar agora. Tente novamente."),
       };
     }
 
@@ -269,22 +279,22 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
       session?: { token: string; expiresAt: string };
     };
 
-    if (data.session) {
-      const cookieStore = await cookies();
-      cookieStore.set(getSessionCookieName(), data.session.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        // Sem "Lembrar-me": cookie de sessão (morre ao fechar o navegador)
-        ...(rememberMe ? { maxAge: 7 * 24 * 60 * 60 } : {}),
-        domain: process.env.NODE_ENV === "production" ? ".hexavante.com.br" : undefined,
-      });
-      try {
-        await addAccount(data.session.token);
-      } catch (e) {
-        console.error("[auth] addAccount falhou (não bloqueante):", e);
-      }
+    if (!data.session?.token) return { success: false, error: "O servidor não confirmou a sessão. Tente entrar novamente." };
+    await clearStaleSessionCookies();
+    const cookieStore = await cookies();
+    cookieStore.set(getSessionCookieName(), data.session.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      // Sem "Lembrar-me": cookie de sessão (morre ao fechar o navegador)
+      ...(rememberMe ? { maxAge: 7 * 24 * 60 * 60 } : {}),
+      domain: process.env.NODE_ENV === "production" ? ".hexavante.com.br" : undefined,
+    });
+    try {
+      await addAccount(data.session.token);
+    } catch (e) {
+      console.error("[auth] addAccount falhou (não bloqueante):", e);
     }
 
     return { success: true, redirectTo: callbackUrl };
@@ -297,7 +307,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
       success: false,
       error: offline
         ? "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente."
-        : "E-mail ou senha incorretos.",
+        : "Não foi possível concluir o login. Tente novamente.",
     };
   }
 }

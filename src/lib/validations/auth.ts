@@ -10,7 +10,7 @@ export const registerSchema = z.object({
     .max(30, "Máximo 30 caracteres")
     .regex(/^[a-zA-Z0-9_]+$/, "Use apenas letras, números e _"),
   fullName: z.string().min(2, "Nome muito curto"),
-  email: z.email("E-mail inválido").transform((value) => value.trim().toLowerCase()),
+  email: z.string().trim().pipe(z.email("E-mail inválido")).transform((value) => value.toLowerCase()),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string().min(1, "Confirme a senha"),
   birthDate: z.coerce.date({
@@ -74,7 +74,7 @@ export const registerSchema = z.object({
 // Schema de validação para login
 // Define regras para email e senha
 export const loginSchema = z.object({
-  email: z.email("E-mail inválido").transform((value) => value.trim().toLowerCase()),
+  email: z.string().trim().pipe(z.email("E-mail inválido")).transform((value) => value.toLowerCase()),
   password: z.string().min(1, "Informe a senha"),
 });
 
