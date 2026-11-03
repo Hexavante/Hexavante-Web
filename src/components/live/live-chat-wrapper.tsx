@@ -1,12 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { TASK_PREFIX, readLiveTask } from "@/lib/live-task";
+import { ClipboardList } from "lucide-react";
 import { LiveChat, type ChatMessage } from "./live-chat";
 import { sendChatMessageAction } from "@/app/actions/live-room";
 import { useToast } from "@/components/ui/toast";
 import { usePollFeedback } from "@/hooks/use-poll-feedback";
 
 type Props = {
+  instructorId: string;
+  initialTask: string | null;
   roomId: string;
   currentUserId: string;
   initialMessages: ChatMessage[];
@@ -15,9 +19,11 @@ type Props = {
 
 const POLL_INTERVAL_MS = 4000;
 
-export function LiveChatWrapper({ roomId, currentUserId, initialMessages, disabled }: Props) {
+export function LiveChatWrapper({ roomId, currentUserId, instructorId, initialTask, initialMessages, disabled }: Props) {
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState(initialMessages);
+  const [draft, setDraft] = useState("");
+  const task = messages.reduce<string | null>((latest, entry) => readLiveTask(entry, instructorId) ?? latest, initialTask);
   const messagesRef = useRef(messages);
   const { toast } = useToast();
   const { onSuccess, onFailure } = usePollFeedback("atualização do chat ao vivo");
@@ -89,7 +95,8 @@ export function LiveChatWrapper({ roomId, currentUserId, initialMessages, disabl
     try {
       const result = await sendChatMessageAction(roomId, message);
       if (result.success && result.message) {
-        setMessages((current) => [...current, result.message!]);
+        mergeMessages([result.message]);
+        return true;
       } else {
         toast(result.error || "Erro ao enviar mensagem", "error");
       }
@@ -101,13 +108,26 @@ export function LiveChatWrapper({ roomId, currentUserId, initialMessages, disabl
   };
 
   return (
-    <LiveChat
+    <div className="flex h-full flex-col gap-3">
+      <section aria-label="Tarefa da aula" className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] p-4">
+        <h2 className="flex items-center gap-2 font-bold"><ClipboardList size={17} className="hx-accent-soft" /> Tarefa da aula</h2>
+        <p aria-live="polite" className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-words text-sm">{task ?? "As instruções do professor aparecerão aqui."}</p>
+        {currentUserId === instructorId && !disabled && <form className="mt-3 grid gap-2" onSubmit={async event => {
+          event.preventDefault();
+          if (!draft.trim() || isSending) return;
+          if (await handleSendMessage(TASK_PREFIX + draft.trim())) setDraft("");
+        }}>
+          <textarea aria-label="Instruções da nova tarefa" placeholder="O que a turma deve fazer?" rows={2} maxLength={500 - TASK_PREFIX.length} value={draft} disabled={isSending} onChange={e => setDraft(e.target.value)} className="rounded-lg border border-[var(--border)] bg-transparent p-2 text-sm" />
+          <button className="hx-btn-primary justify-self-start disabled:opacity-50" disabled={isSending || !draft.trim()}>Enviar tarefa à turma</button>
+        </form>}
+      </section>
+      <div className="min-h-64 flex-1"><LiveChat
       roomId={roomId}
       currentUserId={currentUserId}
       messages={messages}
       onSendMessage={handleSendMessage}
       disabled={disabled || isSending}
       isSending={isSending}
-    />
+    /></div></div>
   );
 }

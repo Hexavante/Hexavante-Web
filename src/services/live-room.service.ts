@@ -4,6 +4,7 @@ import {
   enforceCleanMessageSequence,
   filterProfanity,
 } from "@/services/content-policy.service";
+import { TASK_PREFIX } from "@/lib/live-task";
 import { prisma } from "@/lib/prisma"; // Cliente Prisma para banco de dados
 import type { LiveRoomStatus } from "@prisma/client"; // Tipo de status de sala ao vivo
 
@@ -335,16 +336,24 @@ export async function leaveLiveRoom(roomId: string, userId: string) {
 
 // Função para obter mensagens do chat
 // Retorna mensagens da sala ao vivo
+export async function getLatestLiveTask(roomId: string, instructorId: string) {
+  return prisma.liveChatMessage.findFirst({
+    where: { roomId, userId: instructorId, message: { startsWith: TASK_PREFIX } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { userId: true, message: true },
+  });
+}
+
 export async function getLiveChatMessages(roomId: string, limit = 50) {
   const rows = await prisma.liveChatMessage.findMany({
     where: { roomId },
     include: {
       user: { select: { id: true, username: true, fullName: true } },
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: limit,
   });
-  return rows.map((row) => ({ ...row, message: filterProfanity(row.message) }));
+  return rows.reverse().map((row) => ({ ...row, message: filterProfanity(row.message) }));
 }
 
 export async function canAccessLiveChat(roomId: string, userId: string) {

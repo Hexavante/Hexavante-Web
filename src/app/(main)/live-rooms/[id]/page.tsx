@@ -20,7 +20,8 @@ import { LinkButton, Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getVideoEmbedUrl } from "@/lib/video";
 import { LIVE_ROOM_STATUS_LABELS } from "@/lib/validations/live-room";
-import { getLiveChatMessages, getLiveRoom, joinLiveRoom } from "@/services/live-room.service";
+import { readLiveTask } from "@/lib/live-task";
+import { getLatestLiveTask, getLiveChatMessages, getLiveRoom, joinLiveRoom } from "@/services/live-room.service";
 
 export default async function LiveRoomPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -68,7 +69,7 @@ export default async function LiveRoomPage({ params }: { params: Promise<{ id: s
     }
   }
 
-  const messages = await getLiveChatMessages(id);
+  const [messages, latestTask] = await Promise.all([getLiveChatMessages(id), getLatestLiveTask(id, room.instructorId)]);
   const embedUrl = room.videoUrl ? getVideoEmbedUrl(room.videoUrl, room.videoProvider) : null;
 
   const isLive = room.status === "LIVE";
@@ -253,6 +254,8 @@ export default async function LiveRoomPage({ params }: { params: Promise<{ id: s
           <LiveChatWrapper
             roomId={id}
             currentUserId={session.user.id}
+            instructorId={room.instructorId}
+            initialTask={latestTask ? readLiveTask(latestTask, room.instructorId) : null}
             initialMessages={messages.map((msg) => ({
               id: msg.id,
               userId: msg.userId,
