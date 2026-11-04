@@ -5,7 +5,7 @@
 | Papel | Código | Descrição |
 |-------|--------|-----------|
 | Estudante | `USER` | Acesso padrão: cursos, simulados, perfil, XP |
-| Instrutor | `INSTRUCTOR` | Cria e edita cursos (após aprovação) |
+| Instrutor | `INSTRUCTOR` | Cria cursos, tutoriais e salas. Envia simulados próprios para publicação pela moderação. |
 | Moderador | `MODERATOR` | Aprova instrutores, cursos e simulados; corrige dissertativas |
 | Administrador | `ADMIN` | Administração geral; herda capacidades de instrutor e moderador |
 
@@ -32,7 +32,8 @@ Helpers no código (`src/lib/permissions.ts`):
 | Upload capa de curso | — | ✓ | ✓ | ✓ |
 | Solicitar papel instrutor | ✓ | — | — | — |
 | Aprovar instrutores/cursos | — | — | ✓ | ✓ |
-| Criar/editar simulados | — | — | ✓ | ✓ |
+| Enviar simulado próprio para revisão | — | ✓ | — | ✓ |
+| Editar/publicar simulados na moderação | — | — | ✓ | ✓ |
 | Upload capa/imagem de simulado | — | — | ✓ | ✓ |
 | Corrigir questões dissertativas | — | — | ✓ | ✓ |
 | Painel `/moderacao/*` | — | — | ✓ | ✓ |

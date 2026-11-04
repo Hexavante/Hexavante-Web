@@ -43,13 +43,16 @@ export default async function GerenciarPage() {
         })
       : Promise.resolve([]),
     instructor ? listInstructorLiveRooms(session.user.id) : Promise.resolve([]),
-    moderator ? listExamsForAdmin() : Promise.resolve([]),
+    moderator ? listExamsForAdmin() : prisma.exam.findMany({
+      where: { submission: { authorId: session.user.id } }, orderBy: { createdAt: "desc" },
+      select: { id: true, title: true, isPublished: true },
+    }),
   ]);
 
   const courseItems: ManageItem[] = courses.slice(0, 4).map((c) => ({
     id: c.id,
     name: c.title,
-    status: c.status === "APPROVED" ? "Publicado" : c.status === "PENDING_REVIEW" ? "Pendente" : "Rascunho",
+    status: c.status === "APPROVED" ? (c.isPublished ? "Publicado" : "Aprovado") : c.status === "PENDING_REVIEW" ? "Pendente" : "Rascunho",
     statusColor: c.status === "APPROVED" ? "bg-emerald-500/15 text-emerald-400" : c.status === "PENDING_REVIEW" ? "bg-amber-500/15 text-amber-400" : "bg-slate-500/15 text-slate-400",
     href: `/instructor/courses/${c.id}/edit`,
     onDelete: deleteCourseAction.bind(null, c.id),
@@ -67,10 +70,10 @@ export default async function GerenciarPage() {
   const examItems: ManageItem[] = exams.slice(0, 4).map((e) => ({
     id: e.id,
     name: e.title,
-    status: e.isPublished ? "Publicado" : "Rascunho",
+    status: e.isPublished ? "Publicado" : moderator ? "Rascunho" : "Na moderação",
     statusColor: e.isPublished ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400",
-    href: `/admin/simulados/${e.id}/edit`,
-    onDelete: deleteExamByIdAction.bind(null, e.id),
+    href: moderator ? `/admin/simulados/${e.id}/edit` : "/instructor/simulados",
+    onDelete: moderator ? deleteExamByIdAction.bind(null, e.id) : undefined,
   }));
 
   return (
@@ -79,11 +82,23 @@ export default async function GerenciarPage() {
         <PageHeader
           badge="Instrutor"
           icon={Settings}
-          title="Gerenciar conteúdo"
-          description="Crie, edite e exclua todo seu conteúdo em um só lugar."
+          title="Painel do instrutor"
+          description="Prepare suas aulas, acompanhe seus simulados e organize as próximas transmissões."
+          action={<Link href="/app?modo=estudo" className="hx-btn-secondary">Abrir meu painel de estudos</Link>}
         />
       </ScrollReveal>
 
+      {instructor && (
+        <section aria-label="Resumo do professor" className="mb-6 rounded-2xl border border-cyan-400/25 bg-[var(--surface)] p-5">
+          <p className="hx-accent-text text-xs font-bold uppercase tracking-wide">Mesa de trabalho</p>
+          <h2 className="mt-2 text-xl font-bold">O que você vai ensinar hoje?</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Link className="hx-btn-secondary" href="/instructor/courses">Cursos em análise · {courses.filter(c => c.status === "PENDING_REVIEW").length}</Link>
+            <Link className="hx-btn-secondary" href="/instructor/tutorials">Tutoriais em rascunho · {tutorials.filter(t => !t.isPublished).length}</Link>
+            <Link className="hx-btn-secondary" href="/instructor/live-rooms">Salas agendadas · {rooms.filter(r => r.status === "SCHEDULED").length}</Link>
+          </div>
+        </section>
+      )}
       <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {instructor && (
           <ScrollReveal delay={0}>
@@ -115,15 +130,15 @@ export default async function GerenciarPage() {
           </ScrollReveal>
         )}
 
-        {moderator && (
+        {(moderator || instructor) && (
           <ScrollReveal delay={instructor ? 200 : 0}>
             <SectionCard
               icon={Target}
               title="Simulados"
               count={exams.length}
               color="text-teal-400 bg-teal-400/10 border-teal-400/20"
-              href="/admin/simulados"
-              createHref="/admin/simulados/new"
+              href={moderator ? "/admin/simulados" : "/instructor/simulados"}
+              createHref={moderator ? "/admin/simulados/new" : "/instructor/simulados/new"}
               createLabel="Novo simulado"
               items={examItems}
             />

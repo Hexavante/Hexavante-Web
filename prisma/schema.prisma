@@ -661,7 +661,17 @@ enum ExamQuestionImageSize {
   FULL
 }
 
+model InstructorExamSubmission {
+  examId String @id @map("exam_id")
+  authorId String @map("author_id")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  @@index([authorId])
+  @@map("instructor_exam_submissions")
+}
+
 model Exam {
+  submission InstructorExamSubmission?
   id          String   @id @default(cuid())
   title       String
   slug        String   @unique
