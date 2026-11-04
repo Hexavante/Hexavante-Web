@@ -59,7 +59,7 @@ export default async function CourseDetailPage({ params }: Props) {
       <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-400">
         <span className="flex items-center gap-1.5">
           <Layers3 className="h-4 w-4 text-teal-300" />
-          {course.modules.length} módulos
+          {course.modules.length} {course.modules.length === 1 ? "módulo" : "módulos"}
         </span>
         <span className="flex items-center gap-1.5">
           <BookOpen className="h-4 w-4 text-sky-300" />

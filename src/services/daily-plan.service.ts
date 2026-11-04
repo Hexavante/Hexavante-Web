@@ -322,7 +322,7 @@ async function generateStreakTask(userId: string) {
   return {
     id: generateTaskId("streak", "maintain"),
     type: "streak" as const,
-    title: `Manter sequência de ${stats.studyStreakDays} dias`,
+    title: `Manter sequência de ${stats.studyStreakDays} ${stats.studyStreakDays === 1 ? "dia" : "dias"}`,
     description: "Estude hoje para não quebrar a sequência",
     href: "/courses",
     icon: "Flame",

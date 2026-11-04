@@ -32,7 +32,7 @@ export function CourseCard({
   return (
     <InteractiveCard
       href={`/courses/${slug}`}
-      ariaLabel={`Ver curso: ${title}. Categoria: ${categoryName}. ${moduleCount} módulos, ${enrollmentCount} alunos matriculados.`}
+      ariaLabel={`Ver curso: ${title}. Categoria: ${categoryName}. ${moduleCount} ${moduleCount === 1 ? "módulo" : "módulos"}, ${enrollmentCount} ${enrollmentCount === 1 ? "aluno matriculado" : "alunos matriculados"}.`}
       className="overflow-hidden"
     >
       <CourseThumbnail
@@ -57,11 +57,11 @@ export function CourseCard({
         <CardFooter className="text-xs font-medium text-slate-400">
           <span className="flex items-center gap-1.5">
             <Layers3 className="h-4 w-4 text-teal-300" />
-            {moduleCount} módulos
+            {moduleCount} {moduleCount === 1 ? "módulo" : "módulos"}
           </span>
           <span className="flex items-center gap-1.5">
             <Users className="h-4 w-4 text-sky-300" />
-            {enrollmentCount} alunos
+            {enrollmentCount} {enrollmentCount === 1 ? "aluno" : "alunos"}
           </span>
           {estimatedHours != null && estimatedHours > 0 && (
             <span className="flex items-center gap-1.5">
