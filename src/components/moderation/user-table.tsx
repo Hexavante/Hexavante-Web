@@ -17,6 +17,8 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem } from "@/components/ui/select";
+import { allowedRoleChanges, canManageTarget } from "@/lib/moderation/permissions";
+import { isAdmin, isStaff } from "@/lib/permissions";
 import { UserActionModals, type ModUser, type ModalType } from "./action-modals";
 import { impersonateUser } from "@/app/actions/impersonate";
 
@@ -28,6 +30,10 @@ export function UserTable() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ModUser | null>(null);
   const [modal, setModal] = useState<ModalType>(null);
+  const [viewer, setViewer] = useState<{ id: string; roles: string[] }>({id:"", roles:[]});
+  const targetRoles = (user: ModUser) => [...user.roles, (user.legacyRole ?? "").toUpperCase()];
+  const manageable = (user: ModUser) => canManageTarget(viewer.roles, targetRoles(user), viewer.id === user.id);
+  const mayLift = isAdmin(viewer.roles);
   const [canImpersonate, setCanImpersonate] = useState(false);
 
   const load = useCallback(async () => {
@@ -50,7 +56,10 @@ export function UserTable() {
   useEffect(() => {
     void fetch("/api/moderation/settings")
       .then((res) => res.json())
-      .then((data: { canImpersonate?: boolean }) => setCanImpersonate(Boolean(data.canImpersonate)))
+      .then((data: { canImpersonate?: boolean; viewer?: typeof viewer }) => {
+        setCanImpersonate(Boolean(data.canImpersonate));
+        if (data.viewer) setViewer(data.viewer);
+      })
       .catch(() => undefined);
   }, []);
 
@@ -151,7 +160,7 @@ export function UserTable() {
                         onClick={() => window.open(`/perfil/${user.username}`, "_blank")}
                       />
                       {canImpersonate &&
-                      !user.roles.some((r) => ["MODERATOR", "ADMIN", "SUPERADMIN"].includes(r)) ? (
+                      !isStaff(targetRoles(user)) ? (
                         <ActionBtn
                           icon={UserRound}
                           label="Ver como"
@@ -159,11 +168,11 @@ export function UserTable() {
                         />
                       ) : null}
                       <ActionBtn icon={Plus} label="XP" onClick={() => openModal(user, "addxp")} />
-                      <ActionBtn
+                      {manageable(user) && <ActionBtn
                         icon={Shield}
                         label="Cargo"
                         onClick={() => openModal(user, "cargo")}
-                      />
+                      />}
                       <ActionBtn
                         icon={AlertTriangle}
                         label="Aviso"
@@ -171,7 +180,7 @@ export function UserTable() {
                       />
 
                       {user.isMuted ? (
-                        <ActionBtn
+                        mayLift && <ActionBtn
                           icon={Volume2}
                           label="Remover silêncio"
                           onClick={() => openModal(user, "unmute")}
@@ -185,7 +194,7 @@ export function UserTable() {
                       )}
 
                       {user.isBanned ? (
-                        <ActionBtn
+                        mayLift && <ActionBtn
                           icon={CheckCircle}
                           label="Desbanir"
                           onClick={() => openModal(user, "unban")}
@@ -203,12 +212,12 @@ export function UserTable() {
                         label="Limpar perfil"
                         onClick={() => openModal(user, "deleteProfile")}
                       />
-                      <ActionBtn
+                      {manageable(user) && <ActionBtn
                         icon={XCircle}
                         label="Excluir conta"
                         danger
                         onClick={() => openModal(user, "deleteUser")}
-                      />
+                      />}
                     </div>
                   </td>
                 </tr>
@@ -219,6 +228,7 @@ export function UserTable() {
       </div>
 
       <UserActionModals
+        assignableRoles={selected ? allowedRoleChanges(viewer.roles, targetRoles(selected), viewer.id === selected.id) : []}
         user={selected}
         modal={modal}
         onClose={() => {

@@ -16,6 +16,7 @@ import {
 } from "@/app/actions/moderation-users";
 
 export type ModUser = {
+  legacyRole?: string;
   id: string;
   username: string | null;
   fullName: string;
@@ -42,6 +43,7 @@ export type ModalType =
   | null;
 
 type Props = {
+  assignableRoles: readonly string[];
   user: ModUser | null;
   modal: ModalType;
   onClose: () => void;
@@ -60,11 +62,11 @@ const titles: Record<string, string> = {
   deleteProfile: "Limpar perfil",
 };
 
-export function UserActionModals({ user, modal, onClose, onSuccess }: Props) {
+export function UserActionModals({ user, modal, onClose, onSuccess, assignableRoles }: Props) {
   const [amount, setAmount] = useState("100");
   const [reason, setReason] = useState("");
   const [duration, setDuration] = useState("24h");
-  const [role, setRole] = useState("MODERATOR");
+  const [role, setRole] = useState("USER");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -157,8 +159,8 @@ export function UserActionModals({ user, modal, onClose, onSuccess }: Props) {
             <Select value={role} onValueChange={setRole}>
               <SelectItem value="USER">Usuário</SelectItem>
               <SelectItem value="INSTRUCTOR">Instrutor</SelectItem>
-              <SelectItem value="MODERATOR">Moderador</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
+              {assignableRoles.includes("MODERATOR") && <SelectItem value="MODERATOR">Moderador</SelectItem>}
+              {assignableRoles.includes("ADMIN") && <SelectItem value="ADMIN">Admin</SelectItem>}
             </Select>
           )}
           {modal === "mute" && (

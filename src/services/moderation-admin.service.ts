@@ -1,5 +1,5 @@
 import { applyXp, xpRequiredForLevel } from "@/lib/gamification";
-import { requireModAction } from "@/lib/moderation/permissions";
+import { allowedRoleChanges, requireModAction } from "@/lib/moderation/permissions";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/services/notification.service";
 import { invalidatePlatformSettingsCache } from "@/services/platform-settings.service";
@@ -261,6 +261,7 @@ export async function listModerationUsers(options: {
     xp: u.xp?.totalXp ?? 0,
     coins: u.coins,
     roles: u.roles.map((r) => r.role.name),
+      legacyRole: u.role,
     isBanned: u.bansReceived.length > 0,
     isMuted: u.mutesReceived.length > 0,
     warnings: u._count.warningsReceived,
@@ -566,28 +567,35 @@ export async function executeModerationCommand(
       case "/removecargo": {
         const isAdd = cmd === "/addcargo";
         requireModAction(isAdd ? "addcargo" : "removecargo", roles);
-        const user = await findUserByUsername(parseUsername(tokens[1]));
+        const username = parseUsername(tokens[1]);
         const roleName = ROLE_ALIASES[tokens[2]?.toLowerCase()] ?? tokens[2]?.toUpperCase();
-        const role = await prisma.role.findUnique({ where: { name: roleName } });
-        if (!role) throw new Error(`Cargo inválido: ${tokens[2]}`);
-        if (isAdd) {
-          await prisma.userRole.upsert({
-            where: { userId_roleId: { userId: user.id, roleId: role.id } },
-            create: { userId: user.id, roleId: role.id, assignedBy: moderatorId },
-            update: { assignedBy: moderatorId },
-          });
-        } else {
-          await prisma.userRole.deleteMany({ where: { userId: user.id, roleId: role.id } });
-        }
-        await writeModerationLog({
-          moderatorId,
-          targetUserId: user.id,
-          action: isAdd ? "ROLE_ADD" : "ROLE_REMOVE",
-          description: `${isAdd ? "Adicionou" : "Removeu"} cargo ${roleName} de @${user.username}`,
-        });
+        await prisma.$transaction(async tx => {
+          const target = await tx.user.findUnique({ where: { username }, select: {
+            id: true, role: true, roles: { select: { role: { select: { name: true } } } },
+          } });
+          if (!target) throw new Error("Usuário não encontrado.");
+          const targetRoles = [target.role.toUpperCase(), ...target.roles.map(r => r.role.name)];
+          const current = await tx.userRole.findMany({ where: { userId: moderatorId }, select: { role: { select: { name: true } } } });
+          const actorRoles = current.map(r => r.role.name).filter(name => roles.includes(name));
+          if (!allowedRoleChanges(actorRoles, targetRoles, target.id === moderatorId).includes(roleName)) {
+            throw new Error("Sem permissão para alterar esse cargo nessa conta.");
+          }
+          const role = await tx.role.findUnique({ where: { name: roleName } });
+          if (!role) throw new Error("Cargo não cadastrado.");
+          const key = { userId: target.id, roleId: role.id };
+          if (isAdd) {
+            await tx.userRole.upsert({ where: { userId_roleId: key }, create: { ...key, assignedBy: moderatorId }, update: {} });
+          } else {
+            await tx.userRole.deleteMany({ where: key });
+          }
+          await tx.moderationLog.create({ data: {
+            moderatorId, targetUserId: target.id, action: isAdd ? "ROLE_ADD" : "ROLE_REMOVE",
+            description: `${isAdd ? "Atribuiu" : "Removeu"} cargo ${roleName} de @${username}`,
+          } });
+        }, { isolationLevel: "Serializable" });
         return {
           status: "success",
-          message: `✅ Cargo ${roleName} ${isAdd ? "atribuído a" : "removido de"} @${user.username}`,
+          message: `✅ Cargo ${roleName} ${isAdd ? "atribuído a" : "removido de"} @${username}`,
         };
       }
       case "/ban": {
@@ -940,7 +948,7 @@ export async function executeModerationCommand(
       case "/impersonate": {
         requireModAction("impersonate", roles);
         const user = await findUserByUsername(parseUsername(tokens[1]));
-        const targetRoles = user.roles.map((r) => r.role.name);
+        const targetRoles = [user.role.toUpperCase(), ...user.roles.map((r) => r.role.name)];
         if (targetRoles.some((r) => ["MODERATOR", "ADMIN", "SUPERADMIN"].includes(r))) {
           throw new Error("Não é permitido impersonar staff.");
         }

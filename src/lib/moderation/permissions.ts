@@ -15,7 +15,7 @@ const PERMISSIONS: Record<string, ModRole[]> = {
   ban: ["moderador", "admin", "superadmin"],
   unban: ["admin", "superadmin"],
   mute: ["moderador", "admin", "superadmin"],
-  unmute: ["moderador", "admin", "superadmin"],
+  unmute: ["admin", "superadmin"],
   warn: ["moderador", "admin", "superadmin"],
   broadcast: ["admin", "superadmin"],
   manutencao: ["superadmin"],
@@ -53,4 +53,22 @@ export function requireModAction(action: string, roles: string[] | undefined): v
   if (!canDo(action, roles)) {
     throw new Error(`Sem permissão para executar: ${action}`);
   }
+}
+
+const managedRoles = ["USER", "TEACHER", "INSTRUCTOR", "MODERATOR", "ADMIN"] as const;
+function authority(roles: readonly string[]) {
+  if (roles.includes("SUPERADMIN")) return 3;
+  if (roles.includes("ADMIN")) return 2;
+  if (roles.includes("MODERATOR")) return 1;
+  return 0;
+}
+
+export function canManageTarget(actor: string[], target: string[], self: boolean) {
+  return !self && authority(actor) > authority(target);
+}
+
+export function allowedRoleChanges(actor: string[], target: string[], self: boolean): readonly string[] {
+  const level = authority(actor);
+  if (!canManageTarget(actor, target, self)) return [];
+  return managedRoles.filter(role => authority([role]) < level);
 }

@@ -2,6 +2,8 @@
 
 import { auth } from "@/auth";
 import { canModerate } from "@/lib/permissions";
+import { requireAdminAccount } from "@/lib/moderation/guards";
+import { canManageTarget } from "@/lib/moderation/permissions";
 import { prisma } from "@/lib/prisma";
 import { updateUserWithRetry } from "@/lib/retry-update";
 import { revalidatePath } from "next/cache";
@@ -60,7 +62,7 @@ export async function banUser(userId: string, reason: string): Promise<ModAction
 // ── UNBAN ────────────────────────────────────────────────
 export async function unbanUser(userId: string): Promise<ModActionResult> {
   try {
-    const mod = await requireModerator();
+    const mod = await requireAdminAccount();
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return { success: false, error: "Usuário não encontrado." };
@@ -121,7 +123,7 @@ export async function muteUser(userId: string, reason: string, duration: string)
 // ── UNMUTE ───────────────────────────────────────────────
 export async function unmuteUser(userId: string): Promise<ModActionResult> {
   try {
-    const mod = await requireModerator();
+    const mod = await requireAdminAccount();
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return { success: false, error: "Usuário não encontrado." };
@@ -179,23 +181,23 @@ export async function deleteUserByAdmin(userId: string): Promise<ModActionResult
   try {
     const mod = await requireModerator();
 
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, username: true, role: true } });
-    if (!user) return { success: false, error: "Usuário não encontrado." };
-    if (user.role === "SUPERADMIN") return { success: false, error: "Não é possível excluir superadmin." };
-
-    await prisma.moderationLog.create({
-      data: {
-        moderatorId: mod.id,
-        targetUserId: userId,
-        action: "DELETE_USER",
-        description: `Excluiu conta de @${user.username}`,
-      },
-    });
-
-    await prisma.user.delete({ where: { id: userId } });
+    const username = await prisma.$transaction(async tx => {
+      const user = await tx.user.findUnique({ where: { id: userId }, select: {
+        username: true, role: true, roles: { select: { role: { select: { name: true } } } },
+      } });
+      if (!user) throw new Error("Usuário não encontrado.");
+      const targetRoles = [user.role.toUpperCase(), ...user.roles.map(r => r.role.name)];
+      if (!canManageTarget(mod.roles, targetRoles, mod.id === userId)) {
+        throw new Error("Não é permitido excluir essa conta.");
+      }
+      await tx.moderationLog.create({ data: { moderatorId: mod.id, targetUserId: userId,
+        action: "DELETE_USER", description: `Excluiu conta de @${user.username}` } });
+      await tx.user.delete({ where: { id: userId } });
+      return user.username;
+    }, { isolationLevel: "Serializable" });
 
     revalidatePath("/admin/usuarios");
-    return { success: true, message: `Conta de @${user.username} excluída.` };
+    return { success: true, message: `Conta de @${username} excluída.` };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : "Erro ao excluir conta" };
   }

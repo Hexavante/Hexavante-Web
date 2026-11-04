@@ -10,8 +10,12 @@ export function isSuperAdmin(roles: string[] | undefined): boolean {
 
 // Função para verificar se usuário é instrutor
 // Retorna true se usuário for INSTRUCTOR ou ADMIN
+export function hasTeachingRole(roles: string[] | undefined): boolean {
+  return hasRole(roles, "INSTRUCTOR") || hasRole(roles, "TEACHER");
+}
+
 export function isInstructor(roles: string[] | undefined): boolean {
-  return hasRole(roles, "INSTRUCTOR") || hasRole(roles, "ADMIN") || isSuperAdmin(roles);
+  return hasTeachingRole(roles) || hasRole(roles, "ADMIN") || isSuperAdmin(roles);
 }
 
 // Função para verificar se usuário pode moderar

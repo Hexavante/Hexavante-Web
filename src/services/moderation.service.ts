@@ -38,7 +38,7 @@ export async function submitInstructorApplication(
   });
 
   // Verifica se usuário já é instrutor
-  if (userRoles.some((r) => r.role.name === "INSTRUCTOR")) {
+  if (userRoles.some((r) => ["INSTRUCTOR", "TEACHER"].includes(r.role.name))) {
     throw new Error("Você já é instrutor na plataforma.");
   }
 
@@ -96,7 +96,8 @@ export async function reviewInstructorApplication(
   }
 
   // Busca papel de instrutor
-  const instructorRole = await prisma.role.findUnique({ where: { name: "INSTRUCTOR" } });
+  const instructorRole = await prisma.role.findUnique({ where: { name: "INSTRUCTOR" } })
+    ?? await prisma.role.findUnique({ where: { name: "TEACHER" } });
   if (!instructorRole) throw new Error("Papel INSTRUCTOR não encontrado.");
 
   if (approve) {
@@ -360,5 +361,5 @@ export async function userHasInstructorRole(userId: string) {
     where: { userId },
     include: { role: true },
   });
-  return roles.some((r) => r.role.name === "INSTRUCTOR" || r.role.name === "ADMIN");
+  return roles.some((r) => ["INSTRUCTOR", "TEACHER", "ADMIN"].includes(r.role.name));
 }
