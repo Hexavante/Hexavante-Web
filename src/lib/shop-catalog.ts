@@ -479,7 +479,7 @@ export const SHOP_CATALOG: ShopCatalogItem[] = [
   { slug: "badge-diamante", name: "Distintivo Diamante", description: "Inquebrável e reluzente.", cost: 200, category: "BADGE", metadata: { badgeId: "badge-diamante", rarity: "legendary" } },
   { slug: "badge-cientista", name: "Distintivo Cientista", description: "Paixão pela descoberta.", cost: 100, category: "BADGE", metadata: { badgeId: "badge-cientista", rarity: "rare" } },
   { slug: "badge-artista", name: "Distintivo Artista", description: "Criatividade sem limites.", cost: 90, category: "BADGE", metadata: { badgeId: "badge-artista", rarity: "common" } },
-  { slug: "badge-lider", name: "Distintivo Líder", description: "Inspira e comanda com EXAMPLE.", cost: 140, category: "BADGE", metadata: { badgeId: "badge-lider", rarity: "rare" } },
+  { slug: "badge-lider", name: "Distintivo Líder", description: "Inspira a equipe e lidera pelo exemplo.", cost: 140, category: "BADGE", metadata: { badgeId: "badge-lider", rarity: "rare" } },
 
   // ── Pack de emojis extra ─────────────────────────────────────────────
   { slug: "emoji-pack-esportes", name: "Pack Emojis Esportes", description: "Emojis de esportes e atividades físicas.", cost: 55, category: "EMOJI_PACK", metadata: { emojiPackId: "emoji-pack-esportes", emojis: ["⚽", "🏀", "🏈", "🎾", "🏊"] } },

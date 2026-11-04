@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { Award, BookOpen, Crown, Frame, Image as ImageIcon, Palette, Smile, Sparkles, Tag, Ticket, Zap } from "lucide-react";
+import { SHOP_ITEM_ICONS } from "@/lib/shop-item-icons";
+import { SHOP_CATEGORY_ICONS } from "@/lib/shop-ui";
 import { equipItemAction, type ShopActionResult } from "@/app/actions/shop";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,27 +27,12 @@ type Props = {
   inventory: InventoryItem[];
 };
 
-const CATEGORY_ICONS: Record<StoreItemCategory, typeof Sparkles> = {
-  TITLE: Tag,
-  AVATAR_BORDER: Crown,
-  THEME: Palette,
-  COSMETIC: Sparkles,
-  BOOSTER: Zap,
-  PASS: Ticket,
-  REVIEW_PACK: BookOpen,
-  PET: Sparkles,
-  PET_COSMETIC: Sparkles,
-  BADGE: Award,
-  FRAME: Frame,
-  EMOJI_PACK: Smile,
-  PROFILE_BACKGROUND: ImageIcon,
-};
 
 const initial: ShopActionResult = { success: false };
 
 function EquipRow({ item }: { item: InventoryItem }) {
   const [state, action, pending] = useActionState(equipItemAction, initial);
-  const Icon = CATEGORY_ICONS[item.storeItem.category] ?? Sparkles;
+  const Icon = SHOP_ITEM_ICONS[item.storeItem.slug] ?? SHOP_CATEGORY_ICONS[item.storeItem.category];
   const expired = item.expiresAt ? new Date(item.expiresAt) <= new Date() : false;
 
   return (

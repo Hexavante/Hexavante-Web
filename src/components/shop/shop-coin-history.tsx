@@ -38,10 +38,10 @@ export function ShopCoinHistory({ transactions }: Props) {
                 </p>
               </div>
               <span
-                className={`shrink-0 text-sm font-bold ${tx.amount >= 0 ? "text-emerald-300" : "text-rose-300"}`}
+                className={`shrink-0 text-sm font-bold ${tx.type === "SPEND" ? "text-rose-300" : "text-emerald-300"}`}
               >
-                {tx.amount >= 0 ? "+" : ""}
-                {tx.amount}
+                {tx.amount !== 0 && (tx.type === "SPEND" ? "−" : "+")}
+                {Math.abs(tx.amount).toLocaleString("pt-BR")}
               </span>
             </li>
           ))}

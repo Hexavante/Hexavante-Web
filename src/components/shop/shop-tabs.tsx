@@ -44,6 +44,10 @@ const TAB_DESCRIPTIONS: Partial<Record<TabId, string>> = {
   review_packs: "Questões selecionadas para revisão focada.",
 };
 
+function searchText(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+}
+
 export function ShopTabs({
   items,
   inventory,
@@ -52,6 +56,7 @@ export function ShopTabs({
   coinMultiplier,
   activeBooster,
 }: Props) {
+  const [query, setQuery] = useState("");
   const [tab, setTab] = useState<TabId>("personalize");
   const [categoryFilter, setCategoryFilter] = useState<StoreItemCategory | "all">("all");
 
@@ -72,8 +77,9 @@ export function ShopTabs({
       list = list.filter((item) => item.category === categoryFilter);
     }
 
-    return list;
-  }, [categoryFilter, items, tab]);
+    const term = searchText(query);
+    return term ? list.filter(item => searchText(item.name + " " + item.description).includes(term)) : list;
+  }, [categoryFilter, items, tab, query]);
 
   const ownedInTab = filteredItems.filter(
     (item) => item.ownershipStatus === "owned_permanent" || item.ownershipStatus === "active_temporary",
@@ -87,10 +93,12 @@ export function ShopTabs({
           const active = tab === entry.id;
           return (
             <button
+              aria-pressed={active}
               key={entry.id}
               type="button"
               onClick={() => {
                 setTab(entry.id);
+                setQuery("");
                 setCategoryFilter("all");
               }}
               className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition hx-filter-pill ${
@@ -108,8 +116,12 @@ export function ShopTabs({
         <p className="mt-3 text-sm hx-text-muted">{TAB_DESCRIPTIONS[tab]}</p>
       )}
 
+      {tab !== "premium" && <label className="mt-4 block text-sm font-medium hx-text-body">
+        Buscar nesta aba
+        <input type="search" className="hx-input mt-1 w-full" value={query} onChange={event => setQuery(event.target.value)} placeholder="Nome ou descrição do item" />
+      </label>}
       <div className="mt-4 flex flex-wrap gap-3 text-sm hx-text-muted">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 font-medium text-amber-900">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 font-medium hx-text-body">
           <Gem className="h-4 w-4" />
           Saldo: {coins.toLocaleString("pt-BR")} moedas
         </span>
@@ -120,13 +132,13 @@ export function ShopTabs({
           </span>
         )}
         {coinMultiplier > 1 && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 font-medium text-emerald-800">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 font-medium hx-text-body">
             <Sparkles className="h-4 w-4" />
             Multiplicador ativo: x{coinMultiplier}
           </span>
         )}
         {activeBooster && (
-          <span className="rounded-full border border-violet-500/25 bg-violet-500/10 px-3 py-1 text-violet-800">
+          <span className="rounded-full border border-violet-500/25 bg-violet-500/10 px-3 py-1 hx-text-body">
             Booster ativo
           </span>
         )}
@@ -165,7 +177,7 @@ export function ShopTabs({
             coins={coins}
           />
         </div>
-      ) : tab === "personalize" && categoryFilter === "all" ? (
+      ) : tab === "personalize" && categoryFilter === "all" && filteredItems.length > 0 ? (
         <div className="mt-6 space-y-8">
           {PERSONALIZE_SECTIONS.map((section) => {
             const sectionItems = filteredItems.filter((item) => item.category === section.category);
@@ -206,7 +218,7 @@ export function ShopTabs({
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {filteredItems.length === 0 ? (
             <div className="col-span-full rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-8 text-center">
-              <p className="font-semibold hx-text-body">Nenhum item nesta categoria.</p>
+              <p className="font-semibold hx-text-body">{query.trim() ? "Nenhum item corresponde à busca." : "Nenhum item nesta categoria."}</p>
             </div>
           ) : (
             filteredItems.map((item) => {
@@ -243,6 +255,7 @@ function FilterChip({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={`rounded-full px-3 py-1.5 text-xs font-semibold transition hx-filter-pill ${
         active ? "hx-filter-pill-active" : "hx-filter-pill-inactive"
@@ -256,11 +269,11 @@ function FilterChip({
 function categoryLabelShort(category: StoreItemCategory): string {
   const labels: Partial<Record<StoreItemCategory, string>> = {
     TITLE: "Títulos",
-    AVATAR_BORDER: "Molduras",
+    AVATAR_BORDER: "Bordas de avatar",
     THEME: "Temas",
     COSMETIC: "Ícones",
     BADGE: "Distintivos",
-    FRAME: "Molduras dec.",
+    FRAME: "Molduras decorativas",
     EMOJI_PACK: "Emojis",
     PROFILE_BACKGROUND: "Fundos",
   };

@@ -8,6 +8,7 @@ import { Package, Rocket } from "lucide-react";
 import { equipItemAction, type ShopActionResult } from "@/app/actions/shop";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { shopItemIcon } from "@/lib/shop-item-icons";
 import { ThemeSwatch } from "@/components/shop/theme-swatch";
 import { notifyThemeEquipped } from "@/lib/theme-equip-event";
 import { STORE_CATEGORY_LABELS } from "@/lib/shop-catalog";
@@ -38,7 +39,7 @@ function isActive(entry: InventoryEntry): boolean {
 
 function EquipRow({ item }: { item: InventoryEntry }) {
   const [state, action, pending] = useActionState(equipItemAction, initial);
-  const Icon = SHOP_CATEGORY_ICONS[item.storeItem.category] ?? Package;
+  const Icon = shopItemIcon(item.storeItem);
   const expired = !isActive(item);
   const themeId =
     item.storeItem.category === "THEME"
@@ -60,7 +61,7 @@ function EquipRow({ item }: { item: InventoryEntry }) {
       icon={Icon}
       preview={
         item.storeItem.category === "THEME" ? (
-          <ThemeSwatch themeId={themeId} size="sm" />
+          <ThemeSwatch icon={Icon} themeId={themeId} size="sm" />
         ) : undefined
       }
       action={
@@ -94,7 +95,7 @@ function EquipRow({ item }: { item: InventoryEntry }) {
 }
 
 function BoosterRow({ item, globalActive }: { item: InventoryEntry; globalActive: boolean }) {
-  const Icon = SHOP_CATEGORY_ICONS.BOOSTER;
+  const Icon = shopItemIcon(item.storeItem);
   const active = isActive(item);
   const meta = item.storeItem.metadata as { affects?: string[]; multiplier?: number } | null;
 
@@ -135,7 +136,7 @@ function BoosterRow({ item, globalActive }: { item: InventoryEntry; globalActive
 }
 
 function PassRow({ item }: { item: InventoryEntry }) {
-  const Icon = SHOP_CATEGORY_ICONS.PASS;
+  const Icon = shopItemIcon(item.storeItem);
   const active = isActive(item);
   const meta = item.storeItem.metadata as {
     passType?: "premium_exams" | "early_exam";
@@ -174,7 +175,7 @@ function PassRow({ item }: { item: InventoryEntry }) {
 }
 
 function ReviewPackRow({ item }: { item: InventoryEntry }) {
-  const Icon = SHOP_CATEGORY_ICONS.REVIEW_PACK;
+  const Icon = shopItemIcon(item.storeItem);
   const active = isActive(item);
   const meta = item.storeItem.metadata as { topic?: string; questionCount?: number } | null;
 

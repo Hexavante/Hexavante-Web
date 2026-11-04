@@ -10,6 +10,7 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RARITY_LABELS } from "@/lib/cosmetics";
 import { STORE_CATEGORY_LABELS } from "@/lib/shop-catalog";
+import { SHOP_ITEM_ICONS } from "@/lib/shop-item-icons";
 import { SHOP_CATEGORY_ICONS } from "@/lib/shop-ui";
 import {
   formatExpirationDate,
@@ -77,7 +78,7 @@ export function ShopItemCard({
   const [equipState, equip, equipping] = useActionState(equipItemAction, initial);
   const notified = useRef(false);
 
-  const Icon = SHOP_CATEGORY_ICONS[item.category];
+  const Icon = SHOP_ITEM_ICONS[item.slug] ?? SHOP_CATEGORY_ICONS[item.category];
   const themeId =
     item.category === "THEME" && typeof item.metadata?.themeId === "string"
       ? item.metadata.themeId
@@ -124,10 +125,10 @@ export function ShopItemCard({
     >
       <div className="flex items-start justify-between gap-3">
         {item.category === "THEME" ? (
-          <ThemeSwatch themeId={themeId} size="sm" />
+          <ThemeSwatch icon={Icon} themeId={themeId} size="sm" />
         ) : (
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-700">
-            <Icon className="h-5 w-5" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[hsl(var(--sidebar-highlight)/0.1)] hx-accent-soft">
+            <Icon aria-hidden className="h-6 w-6" />
           </div>
         )}
         <div className="flex flex-col items-end gap-1.5">
@@ -157,7 +158,7 @@ export function ShopItemCard({
           </span>
         )}
         {boosterAffects && (
-          <span className="rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+          <span className="rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold hx-text-body">
             {boosterAffects}
           </span>
         )}
@@ -171,19 +172,19 @@ export function ShopItemCard({
       <p className="mt-2 flex-1 text-sm leading-6 hx-text-muted">{item.description}</p>
 
       {ownershipStatus === "active_temporary" && expiresAt && (
-        <p className="mt-2 text-xs text-violet-700">Válido até {formatExpirationDate(expiresAt)}</p>
+        <p className="mt-2 text-xs hx-text-body">Válido até {formatExpirationDate(expiresAt)}</p>
       )}
       {ownershipStatus === "expired_temporary" && (
-        <p className="mt-2 text-xs text-amber-700">Expirado — você pode renovar a compra.</p>
+        <p className="mt-2 text-xs hx-text-body">Expirado — você pode renovar a compra.</p>
       )}
 
       <div className="mt-4 flex flex-col gap-3 border-t border-[hsl(var(--sidebar-border))] pt-4 sm:flex-row sm:items-center sm:justify-between">
         {item.isPremiumOnly ? (
-          <span className="text-sm font-semibold text-fuchsia-700">
+          <span className="text-sm font-semibold hx-text-body">
             {isPremium ? "Grátis para Premium" : "Exclusivo Premium"}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700">
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold hx-text-body">
             <Coins className="h-4 w-4" />
             {item.cost.toLocaleString("pt-BR")}
           </span>
@@ -195,11 +196,11 @@ export function ShopItemCard({
             Acessar pacote
           </LinkButton>
         ) : isOwned && item.category === "BOOSTER" ? (
-          <span className="text-sm font-semibold text-emerald-700">
+          <span className="text-sm font-semibold hx-text-body">
             {ownershipStatus === "active_temporary" ? "Booster ativo" : "No inventário"}
           </span>
         ) : isOwned && item.category === "PASS" ? (
-          <span className="text-sm font-semibold text-emerald-700">
+          <span className="text-sm font-semibold hx-text-body">
             {ownershipStatus === "active_temporary" ? "Passe ativo" : "Passe expirado"}
           </span>
         ) : isOwned && isEquippable ? (
@@ -233,14 +234,14 @@ export function ShopItemCard({
             </form>
           )
         ) : (
-          <span className="text-sm font-semibold text-emerald-700">Adquirido</span>
+          <span className="text-sm font-semibold hx-text-body">Adquirido</span>
         )}
         </div>
       </div>
 
       {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
       {canBuy && !item.isPremiumOnly && !canAfford && (
-        <p className="mt-2 text-xs text-amber-700">Moedas insuficientes.</p>
+        <p className="mt-2 text-xs hx-text-body">Moedas insuficientes.</p>
       )}
     </Card>
   );
