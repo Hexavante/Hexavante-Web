@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { ArrowRight, Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Loader2, Lock, Mail } from "lucide-react";
 import type { ActionResult } from "@/app/actions/auth";
+import { PasswordToggle } from "./password-toggle";
 import { AppLink } from "@/components/ui/app-link";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -48,20 +49,6 @@ const fieldIcons: Record<string, typeof Mail> = {
   email: Mail,
   password: Lock,
 };
-
-function PasswordToggle({ visible, onToggle }: { visible: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
-      title={visible ? "Ocultar senha" : "Mostrar senha"}
-      className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-500 transition hover:text-white"
-    >
-      {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-    </button>
-  );
-}
 
 function groupFields(fields: Field[]): { field: Field; index: number }[][] {
   const rows: { field: Field; index: number }[][] = [];
@@ -182,12 +169,12 @@ export function AuthForm({
             className={cn(
               "h-11 transition",
               Icon && "pl-10",
-              isPassword && "pr-10",
+              isPassword && "pr-12",
               fieldErrors[field.name] && "border-red-400/50 focus-visible:border-red-400/60",
             )}
           />
           {isPassword ? (
-            <PasswordToggle visible={showPassword} onToggle={() => togglePassword(field.name)} />
+            <PasswordToggle inputId={field.name} visible={showPassword} onToggle={() => togglePassword(field.name)} />
           ) : null}
         </div>
         {fieldErrors[field.name] && (

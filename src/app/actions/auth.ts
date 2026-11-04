@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { getSessionCookieName } from "@/lib/auth-cookies";
+import { hasTeachingRole } from "@/lib/permissions";
 import { getSafeCallbackUrl } from "@/lib/auth-routes";
 import { registerSchema, loginSchema } from "@/lib/validations/auth";
 import type { ZodError } from "zod";
@@ -87,7 +88,9 @@ export async function registerAction(
     instructorMotivation: formData.get("instructorMotivation") || undefined,
     instructorExperience: formData.get("instructorExperience") || undefined,
   };
-  const callbackUrl = (formData.get("callbackUrl") as string) || "/";
+  const requestedUrl = (formData.get("callbackUrl") as string) || "/";
+  const callbackUrl = raw.accountType === "INSTRUCTOR" && ["/", "/app"].includes(requestedUrl)
+    ? "/instructor/gerenciar" : requestedUrl;
   if (!isSafeRedirect(callbackUrl)) {
     return { success: false, error: "URL de redirecionamento inválida." };
   }
@@ -116,6 +119,7 @@ export async function registerAction(
         email: parsed.data.email,
         password: parsed.data.password,
         username: parsed.data.username,
+        accountType: parsed.data.accountType,
         birthDate: parsed.data.birthDate,
         phone: parsed.data.phone,
         city: parsed.data.city,
@@ -141,6 +145,14 @@ export async function registerAction(
     }
 
     created = true;
+    const registration = await res.json() as { user?: { id: string } };
+    if (registration.user?.id) {
+      try {
+        await saveRegistrationProfile(registration.user.id, parsed.data);
+      } catch (error) {
+        console.error("[auth] Falha ao salvar preferências de cadastro", error);
+      }
+    }
 
     // After registration, login to get the session cookie
     const loginRes = await fetch(`${API_URL}/api/v1/auth/login`, {
@@ -192,17 +204,6 @@ export async function registerAction(
         console.error("[auth] addAccount falhou (não bloqueante):", e);
       }
 
-      if (loginData.user?.id) {
-        try {
-          await saveRegistrationProfile(loginData.user.id, parsed.data);
-        } catch (e) {
-          // A conta continua válida mesmo se a personalização falhar; evita
-          // registrar duas vezes quando o usuário tentar novamente.
-          console.error("[auth] não foi possível salvar escolhas do cadastro:", e);
-        }
-      } else {
-        console.warn("[auth] login sem user.id — escolhas do cadastro não foram salvas");
-      }
     } else {
       return resumeLogin;
     }
@@ -217,7 +218,8 @@ export async function registerAction(
 export async function loginAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const email = formData.get("email");
   const password = formData.get("password");
-  const callbackUrl = (formData.get("callbackUrl") as string) || "/";
+  const requestedUrl = (formData.get("callbackUrl") as string) || "/app";
+  const callbackUrl = requestedUrl === "/" ? "/app" : requestedUrl;
   const rememberMe = formData.get("rememberMe") === "on";
   if (!isSafeRedirect(callbackUrl)) {
     return { success: false, error: "URL de redirecionamento inválida." };
@@ -297,7 +299,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
       console.error("[auth] addAccount falhou (não bloqueante):", e);
     }
 
-    return { success: true, redirectTo: callbackUrl };
+    return { success: true, redirectTo: callbackUrl === "/app" && hasTeachingRole(data.user?.roles) ? "/instructor/gerenciar" : callbackUrl };
   } catch (error) {
     // fetch falhou = API fora do ar ou sem internet (não necessariamente credencial errada)
     const offline =

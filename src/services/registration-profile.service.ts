@@ -16,7 +16,8 @@ export async function saveRegistrationProfile(userId: string, input: RegisterInp
     });
 
     if (input.accountType !== "INSTRUCTOR") return;
-    const instructorRole = await tx.role.findUnique({ where: { name: "INSTRUCTOR" } });
+    const instructorRole = await tx.role.findUnique({ where: { name: "INSTRUCTOR" } })
+      ?? await tx.role.findUnique({ where: { name: "TEACHER" } });
     if (!instructorRole) throw new Error("Papel INSTRUCTOR não encontrado. Execute o seed do banco.");
     await tx.userRole.upsert({
       where: { userId_roleId: { userId, roleId: instructorRole.id } },

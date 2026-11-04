@@ -14,6 +14,7 @@ import { Alert } from "@/components/ui/alert";
 import { AppLink } from "@/components/ui/app-link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PasswordToggle } from "./password-toggle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/cn";
@@ -217,7 +218,7 @@ export function RegisterWizard({ action, callbackUrl, socialOptions }: Props) {
           {accountType === "INSTRUCTOR" && (
             <p className="rounded-xl border border-sky-400/20 bg-sky-400/5 p-4 text-sm leading-6 text-sky-100">
               Seu acesso de instrutor será liberado ao criar a conta. Você
-              poderá criar cursos, tutoriais e salas ao vivo.
+              poderá criar cursos, tutoriais e salas ao vivo e enviar seus simulados para revisão.
             </p>
           )}
         </div>
@@ -352,9 +353,12 @@ function Field({
   minLength?: number;
 }) {
   const [value, setValue] = useState("");
+  const [visible, setVisible] = useState(false);
+  const isPassword = type === "password";
   return (
     <div>
       <Label htmlFor={name}>{label}</Label>
+      <div className="relative mt-1">
       <Input
         id={name}
         name={name}
@@ -362,12 +366,15 @@ function Field({
         aria-describedby={name === "username" ? "username-help" : undefined}
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        type={type}
+        type={isPassword && visible ? "text" : type}
+        autoComplete={isPassword ? "new-password" : undefined}
         required={required}
         minLength={minLength}
         placeholder={placeholder}
-        className="mt-1 h-11"
+        className={cn("h-11", isPassword && "pr-12")}
       />
+      {isPassword && <PasswordToggle inputId={name} visible={visible} onToggle={() => setVisible(!visible)} />}
+      </div>
       {name === "username" && <p id="username-help" className="mt-1 text-xs text-slate-400">Use de 3 a 30 letras sem acento, números ou sublinhado (_).</p>}
     </div>
   );

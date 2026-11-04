@@ -28,3 +28,21 @@ it("novo dispositivo segue para a verificação antes do painel",async()=>{
   api.mockResolvedValue(Response.json({verificationId:"ver1",reason:"DEVICE"},{status:202}));
   expect((await loginAction(initial,fields())).redirectTo).toBe("/verificar-dispositivo?vid=ver1&callbackUrl=%2Fapp");
 });
+
+it("leva o instrutor para gerenciar após a verificação obrigatória", async()=>{
+  const form = fields();
+  form.set("accountType","INSTRUCTOR");
+  api.mockResolvedValueOnce(Response.json({user:{id:"autor"}},{status:201}))
+    .mockResolvedValueOnce(Response.json({verificationId:"v1",reason:"EMAIL_VERIFY"},{status:202}));
+  const result=await registerAction(initial,form);
+  expect(JSON.parse(api.mock.calls[0][1].body).accountType).toBe("INSTRUCTOR");
+  expect(result.redirectTo).toContain("callbackUrl=%2Finstructor%2Fgerenciar");
+});
+
+it.each(["TEACHER", "INSTRUCTOR"])("direciona a sessão %s para gerenciar e respeita destinos específicos", async role => {
+  const form = fields();
+  api.mockImplementation(async () => Response.json({ user: { id: "docente", roles: [role] }, session: { token: "teste" } }));
+  expect((await loginAction(initial, form)).redirectTo).toBe("/instructor/gerenciar");
+  form.set("callbackUrl", "/anotacoes");
+  expect((await loginAction(initial, form)).redirectTo).toBe("/anotacoes");
+});

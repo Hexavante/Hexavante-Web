@@ -16,6 +16,13 @@ it("preserva o cadastro e volta ao campo de perfil rejeitado", async () => {
   fireEvent.click(screen.getByRole("button", {name:/Continuar|Próxim/}));
   fill("Crie uma senha", "exemplo123");
   fill("Confirme sua senha", "exemplo123");
+  fireEvent.click(screen.getByRole("button", {name:"Mostrar senha"}));
+  expect(screen.getByLabelText("Crie uma senha")).toHaveAttribute("type","text");
+  expect(screen.getByLabelText("Confirme sua senha")).toHaveAttribute("type","password");
+  fireEvent.click(screen.getByRole("button", {name:"Ocultar senha"}));
+  fireEvent.click(screen.getByRole("button", {name:"Mostrar confirmação da senha"}));
+  expect(screen.getByLabelText("Confirme sua senha")).toHaveAttribute("type","text");
+  expect(action).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("checkbox"));
   fireEvent.submit(container.querySelector("form")!);
   await screen.findByText(/já utilizado/);
