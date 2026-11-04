@@ -1,5 +1,7 @@
 import { NavigationIcon } from "@/components/brand/navigation-icon";
 import styles from "@/components/home/dashboard-design.module.css";
+import { redirect } from "next/navigation";
+import { hasTeachingRole } from "@/lib/permissions";
 import { auth } from "@/auth";
 import {
   ArrowRight,
@@ -23,7 +25,6 @@ import { DailyStudyPlan } from "@/components/home/daily-study-plan";
 import { TutorialVideoModal } from "@/components/onboarding/tutorial-video-modal";
 import { AchievementGrid } from "@/components/achievements/achievement-grid";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { CertificateVortex } from "@/components/home/certificate-vortex";
 import { MarqueeShortcuts } from "@/components/home/marquee-shortcuts";
 import { getStudentHomeData } from "@/services/student.service";
 import { getLightningDailyStatus } from "@/services/lightning-challenge.service";
@@ -81,8 +82,11 @@ const shortcuts: {
   { href: "/live-rooms", label: "Aulas ao vivo", icon: "Radio" },
 ];
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ modo?: string }> }) {
   const session = await auth();
+  if (hasTeachingRole(session?.user?.roles) && (await searchParams).modo !== "estudo") {
+    redirect("/instructor/gerenciar");
+  }
   const userId = session?.user?.id;
 
   const [homeData, cosmetics, lightningStatus] = userId
@@ -197,7 +201,7 @@ export default async function HomePage() {
           </ScrollReveal>
 
           <div className="mt-6 grid w-full min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
-            <div className="min-w-0 space-y-6">
+            <div className="min-w-0 space-y-9">
               {homeData.dailyPlan && (
                 <ScrollReveal delay={120}>
                   <DailyStudyPlan dailyPlan={homeData.dailyPlan} />
@@ -424,6 +428,7 @@ export default async function HomePage() {
         <MarqueeShortcuts
           items={shortcuts.map((item) => ({
             ...item,
+            iconHref: item.href,
             href:
               item.requiresAuth && !session?.user
                 ? `/login?callbackUrl=${encodeURIComponent(item.href)}`
@@ -432,13 +437,6 @@ export default async function HomePage() {
         />
       </ScrollReveal>
 
-      {session?.user && (
-        <ScrollReveal delay={100}>
-          <CertificateVortex
-            hasCertificates={Boolean(homeData?.highlights?.lastCertificate)}
-          />
-        </ScrollReveal>
-      )}
     </PageShell>
   );
 }

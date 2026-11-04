@@ -9,7 +9,7 @@ import styles from "@/components/home/dashboard-design.module.css";
 import { ClientOnly } from "@/components/ui/client-only";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
-import { isInstructor } from "@/lib/permissions";
+import { hasTeachingRole, isInstructor } from "@/lib/permissions";
 import type { NavSession } from "@/lib/nav-session";
 import {
   Sidebar,
@@ -32,6 +32,7 @@ type NavItem = {
   href: string;
   requiresAuth?: boolean;
   requiresInstructor?: boolean;
+  iconHref?: string;
 };
 
 type NavSection = {
@@ -173,7 +174,7 @@ function NavSectionBlock({
         <SidebarMenu className="gap-0.5">
           {visible.map((item, itemIndex) => {
             const href = resolveNavHref(item, session);
-            const active = isActive(pathname, item.href);
+            const active = isActive(pathname, item.href.split("?")[0]);
 
             return (
               <SidebarMenuItem key={item.href} className="sidebar-item-animate" style={{ animationDelay: `${0.08 + sectionIndex * 0.12 + itemIndex * 0.05}s` }}>
@@ -185,7 +186,7 @@ function NavSectionBlock({
                 >
                   <Link href={href} title={item.label}>
                     <span className={cn("hx-sidebar-link-icon", active && "hx-sidebar-link-icon-active")}>
-                      <NavigationIcon href={item.href} />
+                      <NavigationIcon href={item.iconHref ?? item.href} />
                     </span>
                     <span className="truncate">{item.label}</span>
                   </Link>
@@ -217,6 +218,19 @@ function SidebarNavSkeleton() {
 }
 
 function SidebarNav({ session, pathname, accountItems }: { session: NavSession; pathname: string; accountItems: NavItem[] }) {
+  const teaching = hasTeachingRole(session?.user.roles);
+  const teachingSection: NavSection = {
+    id: "teaching", label: "Área do instrutor", items: [
+      { label: "Gerenciar conteúdo", href: "/instructor/gerenciar", iconHref: "/app" },
+      { label: "Meus cursos", href: "/instructor/courses", iconHref: "/courses" },
+      { label: "Meus tutoriais", href: "/instructor/tutorials", iconHref: "/tutorials" },
+      { label: "Meus simulados", href: "/instructor/simulados", iconHref: "/simulados" },
+      { label: "Minhas salas ao vivo", href: "/instructor/live-rooms", iconHref: "/live-rooms" },
+    ],
+  };
+  const sections = teaching ? [teachingSection, ...NAV_SECTIONS.filter(section => !pathname.startsWith("/instructor/") || section.id === "home").map(section =>
+    section.id === "home" ? { ...section, items: [{ label: "Painel de estudos", href: "/app?modo=estudo", iconHref: "/app" }] } : section
+  )] : NAV_SECTIONS;
   const accountSection: NavSection = {
     id: "account",
     label: "Conta",
@@ -225,10 +239,10 @@ function SidebarNav({ session, pathname, accountItems }: { session: NavSession; 
 
   return (
     <>
-      {NAV_SECTIONS.map((section, index) => (
+      {sections.map((section, index) => (
         <NavSectionBlock key={section.id} section={section} session={session} pathname={pathname} sectionIndex={index} />
       ))}
-      {accountItems.length > 0 ? (
+      {!teaching && accountItems.length > 0 ? (
         <>
           <SidebarSeparator className="mx-3 bg-sidebar-border/80" />
           <NavSectionBlock section={accountSection} session={session} pathname={pathname} sectionIndex={NAV_SECTIONS.length} />
@@ -287,7 +301,7 @@ export function AppSidebar({ session }: Props) {
   const roles = session?.user.roles;
 
   const accountItems = useMemo(() => {
-    return ACCOUNT_ITEMS.filter((item) => isItemVisible(item, session)).map((item) => {
+    return ACCOUNT_ITEMS.map((item) => {
       if (item.label === "Gerenciar" && (!session || !isInstructor(roles))) {
         return { ...item, label: "Instrutor", href: "/instructor/apply", requiresInstructor: false, requiresAuth: true };
       }

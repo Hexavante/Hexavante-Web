@@ -64,23 +64,22 @@ export function PublicProfileView({ profile, viewerId, viewerUsername }: Props) 
   const frameStyle = frame?.style ?? null;
   const backgroundStyle = background?.style ?? null;
   const cardStyle = frameStyle ?? {};
-  const bgAnimationClass = background?.animationClass ?? "";
   const frameAnimationClass = frame?.animationClass ?? "";
 
   return (
     <>
-      <section className={`hx-profile-card ${frameAnimationClass}`} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
+      <section className={`hx-profile-card relative isolate ${frameAnimationClass}`} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
+      {backgroundStyle && <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] opacity-35" style={backgroundStyle} />}
         <div className="relative">
           <div
-            className={`hx-profile-banner min-h-32 sm:min-h-44 ${user.bannerUrl ? "" : bgAnimationClass}`}
+            className="hx-profile-banner min-h-32 sm:min-h-44 bg-[var(--surface-strong)]"
             style={user.bannerUrl ? {
               backgroundImage: `url(${user.bannerUrl})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               minHeight: 180,
-            } : backgroundStyle ?? undefined}
+            } : undefined}
           />
-          {user.bannerUrl && backgroundStyle && <div aria-hidden className="h-3 rounded-b-xl" style={backgroundStyle} />}
           {isOwner && (
             <Link
               href="/configuracoes/perfil"

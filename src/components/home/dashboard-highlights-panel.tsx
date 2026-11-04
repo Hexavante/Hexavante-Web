@@ -57,7 +57,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
   if (!hasContent) return null;
 
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-tour="dashboard-highlights">
+    <section className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-5" data-tour="dashboard-highlights">
       {nextGoal && (
         <div
           className={cn(
@@ -117,7 +117,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
                 <div>
                   <div className="mb-2 flex justify-between text-xs text-slate-400">
                     <span>Progresso</span>
@@ -203,7 +203,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Emitido em {new Date(lastCertificate.issuedAt).toLocaleDateString("pt-BR")}</span>
@@ -286,7 +286,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                   className={cn(
                     "grid h-10 w-10 shrink-0 place-items-center rounded-lg border transition-all duration-300 group-hover:scale-110",
                     nextLiveEvent.status === "LIVE"
-                      ? "border-red-400/30 bg-red-400/10 text-red-300 animate-pulse-glow"
+                      ? "border-red-400/30 bg-red-400/10 text-red-300"
                       : "border-violet-400/25 bg-violet-400/10 text-violet-300",
                   )}
                 >
@@ -298,7 +298,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                       Próximo evento
                     </p>
                     {nextLiveEvent.status === "LIVE" && (
-                      <Badge variant="red" className="animate-pulse-glow">
+                      <Badge variant="red">
                         Ao vivo
                       </Badge>
                     )}
@@ -311,21 +311,13 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatEventDate(nextLiveEvent.scheduledAt)}</span>
                   <span className="px-1 text-slate-600">·</span>
                   <Clock className="h-3.5 w-3.5" />
                   <span>{formatRelativeTime(nextLiveEvent.scheduledAt)}</span>
-                </div>
-                <div className="ml-4 flex-shrink-0">
-                  {nextLiveEvent.status === "LIVE" && (
-                    <Badge variant="red" className="animate-pulse-glow text-[10px]">
-                      <Radio className="h-2.5 w-2.5" />
-                      Transmitindo
-                    </Badge>
-                  )}
                 </div>
               </div>
 

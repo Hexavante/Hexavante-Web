@@ -5,7 +5,8 @@ import { HeaderGamificationHud } from "@/components/gamification/header-gamifica
 import { HeaderGamificationHudSkeleton } from "@/components/gamification/header-gamification-hud-skeleton";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Avatar } from "@/components/ui/avatar";
-import { Award } from "lucide-react";
+import { hasTeachingRole } from "@/lib/permissions";
+import { Award, GraduationCap } from "lucide-react";
 import type { NavSession } from "@/lib/nav-session";
 import { HeaderAuthActions } from "./header-auth-actions";
 import { HeaderSignOut } from "./header-sign-out";
@@ -49,11 +50,15 @@ export function HeaderBar({ session }: Props) {
         <nav className="flex min-w-0 max-w-full items-center gap-1.5 text-sm sm:gap-2">
           {session?.user ? (
             <>
-              <Suspense fallback={<HeaderGamificationHudSkeleton />}>
+              {hasTeachingRole(session.user.roles) ? (
+                <Link href="/instructor/gerenciar" className="hx-btn-secondary inline-flex items-center gap-2 px-3 py-2" aria-label="Gerenciar conteúdo do professor">
+                  <GraduationCap size={18} aria-hidden /><span className="hidden sm:inline">Gerenciar</span>
+                </Link>
+              ) : <Suspense fallback={<HeaderGamificationHudSkeleton />}>
                 <div data-tour="header-gamification" className="flex min-w-0 max-w-full">
                   <HeaderGamificationHud userId={session.user.id} />
                 </div>
-              </Suspense>
+              </Suspense>}
               <Link
                 href="/anotacoes"
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400"

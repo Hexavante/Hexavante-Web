@@ -1,35 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Target,
-  BarChart3,
-  History,
-  NotebookPen,
-  Radio,
-  Award,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { NavigationIcon } from "@/components/brand/navigation-icon";
 import { cn } from "@/lib/cn";
 
 type ShortcutItem = {
   href: string;
   label: string;
-  icon: string;
-};
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  BookOpen,
-  Target,
-  History,
-  BarChart3,
-  NotebookPen,
-  Radio,
-  Award,
-  Zap,
+  iconHref?: string;
 };
 
 const QUICK_ACTION_META: Record<
@@ -77,7 +56,7 @@ const defaultMeta = {
 
 function ShortcutCard({ item }: { item: ShortcutItem }) {
   const meta = QUICK_ACTION_META[item.href] ?? defaultMeta;
-  const Icon = ICON_MAP[item.icon] ?? Zap;
+
 
   return (
     <Link
@@ -93,7 +72,7 @@ function ShortcutCard({ item }: { item: ShortcutItem }) {
           meta.iconTone,
         )}
       >
-        <Icon className="h-4 w-4" />
+        <NavigationIcon href={item.iconHref ?? item.href} className="h-5 w-5" />
       </span>
       <span className="whitespace-nowrap">{item.label}</span>
       <ArrowRight className="h-3.5 w-3.5 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-[hsl(var(--sidebar-highlight)/0.85)]" />

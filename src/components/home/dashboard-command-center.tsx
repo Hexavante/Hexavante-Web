@@ -4,20 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Award,
-  BarChart2,
-  BarChart3,
-  BookOpen,
-  History,
   Radio,
-  Target,
-  Users,
   Zap,
   Flame,
   Trophy,
   BookMarked,
   type LucideIcon,
 } from "lucide-react";
+import { NavigationIcon } from "@/components/brand/navigation-icon";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import {
@@ -39,47 +33,39 @@ const toneStyles: Record<DashboardPendingItem["tone"], string> = {
 
 const QUICK_ACTION_META: Record<
   string,
-  { icon: LucideIcon; tone: string; iconTone: string }
+  { tone: string; iconTone: string }
 > = {
   "/courses": {
-    icon: BookOpen,
     tone: "hover:border-[hsl(var(--sidebar-highlight))/0.35] hover:bg-[hsl(var(--sidebar-highlight))/0.1]",
     iconTone: "bg-[hsl(var(--sidebar-highlight))/0.15] hx-accent-text",
   },
   "/simulados": {
-    icon: Target,
     tone: "hover:border-teal-400/35 hover:bg-teal-400/10",
     iconTone: "bg-teal-400/15 text-teal-300",
   },
   "/historico": {
-    icon: History,
     tone: "hover:border-violet-400/35 hover:bg-violet-400/10",
     iconTone: "bg-violet-400/15 text-violet-300",
   },
   "/estatisticas": {
-    icon: BarChart3,
     tone: "hover:border-cyan-400/35 hover:bg-cyan-400/10",
     iconTone: "bg-cyan-400/15 text-cyan-300",
   },
   "/ranking": {
-    icon: BarChart2,
     tone: "hover:border-amber-400/35 hover:bg-amber-400/10",
     iconTone: "bg-amber-400/15 text-amber-300",
   },
   "/certificados": {
-    icon: Award,
     tone: "hover:border-yellow-400/35 hover:bg-yellow-400/10",
     iconTone: "bg-yellow-400/15 text-yellow-300",
   },
   "/live-rooms": {
-    icon: Radio,
     tone: "hover:border-rose-400/35 hover:bg-rose-400/10",
     iconTone: "bg-rose-400/15 text-rose-300",
   },
 };
 
 const defaultQuickMeta = {
-  icon: Zap,
   tone: "hover:border-[hsl(var(--sidebar-highlight))/0.35] hover:bg-[hsl(var(--sidebar-highlight))/0.1]",
   iconTone: "bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-foreground))/0.72]",
 };
@@ -196,15 +182,14 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
         </div>
       )}
 
-      <Card padding="md" className="mt-4 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+      <Card padding="md" className="mt-7 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold uppercase tracking-wide hx-text-subtle">Atalhos rápidos</p>
+          <p className="text-base font-bold hx-text-title">Atalhos rápidos</p>
           <span className="text-xs text-slate-500">{DASHBOARD_QUICK_ACTIONS.length} disponíveis</span>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-3">
           {DASHBOARD_QUICK_ACTIONS.map((action, i) => {
             const meta = QUICK_ACTION_META[action.href] ?? defaultQuickMeta;
-            const Icon = meta.icon;
             return (
               <Link
                 key={action.href}
@@ -222,7 +207,7 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
                     meta.iconTone,
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <NavigationIcon href={action.href} className="h-5 w-5" />
                 </span>
                 <span className="truncate">{action.label}</span>
               </Link>
