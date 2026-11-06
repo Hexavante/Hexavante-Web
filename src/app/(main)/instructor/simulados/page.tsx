@@ -18,6 +18,13 @@ export default async function Page({
     orderBy: { createdAt: "desc" },
     select: { id: true, title: true, isPublished: true, slug: true },
   });
+  const pendingEssays = await prisma.examAnswer.count({
+    where: {
+      essayStatus: "PENDING",
+      essayAnswer: { not: null },
+      attempt: { exam: { submission: { authorId: session.user.id } } },
+    },
+  });
   const query = await searchParams;
   return (
     <PageShell>
@@ -30,6 +37,21 @@ export default async function Page({
             : "Simulado enviado para revisão."}
         </p>
       )}
+      <div className="my-5 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl border border-violet-400/20 bg-violet-400/10 px-4 py-3">
+          <p className="text-2xl font-bold text-violet-100">{pendingEssays}</p>
+          <p className="text-sm text-violet-200/90">Dissertativas pendentes</p>
+        </div>
+        <Link
+          href="/instructor/simulados/correcoes"
+          className="rounded-xl border border-[hsl(var(--sidebar-highlight)/0.22)] bg-[hsl(var(--sidebar-highlight)/0.1)] px-4 py-3 transition hover:border-[hsl(var(--sidebar-highlight)/0.4)]"
+        >
+          <p className="text-sm font-semibold text-[hsl(var(--sidebar-foreground)/0.92)]">
+            Corrigir dissertativas →
+          </p>
+          <p className="mt-1 text-xs hx-accent-text-muted">Fila de correção manual</p>
+        </Link>
+      </div>
       <Link href="/instructor/simulados/new" className="hx-btn-primary">
         Novo simulado
       </Link>

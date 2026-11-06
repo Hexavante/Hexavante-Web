@@ -2,11 +2,14 @@ import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import type { EssayGradeInput } from "@/lib/validations/exam";
 
-export async function listPendingEssayAnswers() {
+export async function listPendingEssayAnswers(instructorId?: string) {
   return prisma.examAnswer.findMany({
     where: {
       essayStatus: "PENDING",
       essayAnswer: { not: null },
+      ...(instructorId
+        ? { attempt: { exam: { submission: { authorId: instructorId } } } }
+        : {}),
     },
     include: {
       attempt: {
@@ -32,14 +35,23 @@ export async function listPendingEssayAnswers() {
   });
 }
 
-export async function gradeEssayAnswer(data: EssayGradeInput, moderatorId: string) {
+export async function gradeEssayAnswer(
+  data: EssayGradeInput,
+  graderId: string,
+  scope?: { instructorId: string },
+) {
   const answer = await prisma.examAnswer.findUnique({
     where: { id: data.answerId },
     include: {
       attempt: {
         include: {
           answers: true,
-          exam: { include: { questions: true } },
+          exam: {
+            include: {
+              questions: true,
+              submission: { select: { authorId: true } },
+            },
+          },
         },
       },
     },
@@ -47,6 +59,9 @@ export async function gradeEssayAnswer(data: EssayGradeInput, moderatorId: strin
 
   if (!answer || answer.essayStatus !== "PENDING") {
     throw new Error("Resposta dissertativa não encontrada ou já corrigida.");
+  }
+  if (scope && answer.attempt.exam.submission?.authorId !== scope.instructorId) {
+    throw new Error("Sem permissão para corrigir respostas deste simulado.");
   }
 
   const isCorrect = data.status === "CORRECT";
@@ -95,7 +110,7 @@ export async function gradeEssayAnswer(data: EssayGradeInput, moderatorId: strin
 
   logger.info("Dissertativa corrigida", {
     answerId: data.answerId,
-    moderatorId,
+    graderId,
     status: data.status,
     attemptId: attempt.id,
   });
