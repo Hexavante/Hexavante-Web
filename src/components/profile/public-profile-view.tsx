@@ -96,7 +96,7 @@ export function PublicProfileView({ profile, viewerId, viewerUsername }: Props) 
               <Avatar
                 src={user.avatarUrl}
                 alt={user.username ?? ""}
-                size="lg"
+                size="xl"
                 borderClassName={cosmetics?.avatarBorderClassName}
               />
               <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--surface-strong)] p-0.5">
