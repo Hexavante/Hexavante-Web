@@ -1,8 +1,8 @@
+import { MaterialForm } from "@/components/courses/material-form";
 import { splitMindMap } from "@/lib/mind-map";
 import { auth } from "@/auth";
 import {
   addLessonAction,
-  addMaterialAction,
   addModuleAction,
   deleteLessonAction,
   deleteMaterialAction,
@@ -262,25 +262,7 @@ export default async function EditCoursePage({ params }: Props) {
                   },
                 ]}
               />
-              <InlineForm
-                title="Adicionar material PDF"
-                submitLabel="Adicionar material"
-                action={addMaterialAction.bind(null, id, mod.id)}
-                fields={[
-                  { name: "title", label: "Título do material" },
-                  {
-                    name: "fileUrl",
-                    label: "URL do PDF",
-                    placeholder: "https://...",
-                  },
-                  {
-                    name: "fileType",
-                    label: "Tipo",
-                    defaultValue: "pdf",
-                    required: false,
-                  },
-                ]}
-              />
+              <MaterialForm courseId={id} moduleId={mod.id} />
             </div>
           </div>
         ))}

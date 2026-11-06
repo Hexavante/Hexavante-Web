@@ -59,7 +59,7 @@ export const lessonSchema = z.object({
 // Define regras para campos do material
 export const materialSchema = z.object({
   title: z.string().min(2, "Título muito curto"),
-  fileUrl: z.url("URL do arquivo inválida"),
+  fileUrl: z.union([z.url("URL do arquivo inválida"), z.string().regex(/^\/uploads\/courses\/materials\/[a-f0-9-]{36}\.pdf$/, "Arquivo PDF inválido")]),
   fileType: z.string().default("pdf"),
 });
 
