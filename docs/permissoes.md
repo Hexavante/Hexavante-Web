@@ -73,3 +73,7 @@ Detalhes de papéis institucionais permanecem na visão de produto; não confund
 - Um aluno pode estar em **várias turmas/cursos** institucionais simultaneamente
 - Um professor pode atuar em **várias turmas**
 - Coordenador cria o curso institucional; professor produz as aulas
+
+### Edição de simulados pelo instrutor
+
+As contas INSTRUCTOR e TEACHER podem editar seus próprios simulados em `/instructor/simulados/[id]/edit`. A autoria é verificada pela submissão, no servidor, e toda gravação fica não publicada para revisão da moderação. Provas publicadas, com tentativas iniciadas ou questões favoritas geram uma cópia para revisão, preservando a versão anterior e seu histórico. Uma prova pendente sem uso é atualizada diretamente. Alterações concorrentes exigem recarregar a edição. Não é necessária migração adicional.

@@ -8,7 +8,7 @@ import { PageShell } from "@/components/ui/page-shell";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ enviado?: string }>;
+  searchParams: Promise<{ enviado?: string; novaVersao?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/instructor/simulados");
@@ -18,13 +18,16 @@ export default async function Page({
     orderBy: { createdAt: "desc" },
     select: { id: true, title: true, isPublished: true, slug: true },
   });
+  const query = await searchParams;
   return (
     <PageShell>
       <Link href="/instructor/gerenciar">← Gerenciar conteúdo</Link>
       <h1 className="my-4 text-3xl font-bold">Meus simulados</h1>
-      {(await searchParams).enviado === "1" && (
+      {query.enviado === "1" && (
         <p role="status" className="mb-4">
-          Simulado enviado para revisão.
+          {query.novaVersao === "1"
+            ? "Nova versão enviada para revisão. A prova anterior foi preservada."
+            : "Simulado enviado para revisão."}
         </p>
       )}
       <Link href="/instructor/simulados/new" className="hx-btn-primary">
@@ -37,6 +40,13 @@ export default async function Page({
             className="rounded-xl border border-[var(--border)] p-4"
           >
             <strong>{exam.title}</strong>
+            <Link
+              href={`/instructor/simulados/${exam.id}/edit`}
+              className="hx-btn-secondary ml-4 inline-flex"
+              aria-label={`Editar ${exam.title}`}
+            >
+              Editar simulado
+            </Link>
             <p>
               {exam.isPublished ? (
                 <Link href={"/simulados/" + exam.slug}>

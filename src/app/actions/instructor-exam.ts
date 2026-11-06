@@ -1,5 +1,7 @@
 "use server";
 
+import { instructorExamEditSchema } from "@/lib/instructor-exam-edit";
+import { saveInstructorExamEdit } from "@/services/instructor-exam-edit.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
@@ -84,4 +86,45 @@ export async function submitInstructorExam(
   revalidatePath("/instructor/simulados");
   revalidatePath("/instructor/gerenciar");
   return { success: true };
+}
+
+export async function updateInstructorExam(
+  id: string,
+  revision: string,
+  requestId: string,
+  input: unknown,
+) {
+  const session = await auth();
+  if (!session?.user?.id || !isInstructor(session.user.roles))
+    return { error: "Entre com uma conta de instrutor." };
+  if (!id || !z.uuid().safeParse(requestId).success)
+    return { error: "Reabra o formulário e tente novamente." };
+  const parsed = instructorExamEditSchema.safeParse(input);
+  if (!parsed.success)
+    return { error: "Confira os campos e preencha todas as questões." };
+  try {
+    const result = await saveInstructorExamEdit(
+      id,
+      session.user.id,
+      revision,
+      requestId,
+      parsed.data,
+    );
+    revalidatePath("/instructor/simulados");
+    revalidatePath("/instructor/gerenciar");
+    revalidatePath("/instructor/simulados/" + id + "/edit");
+    return { success: true, ...result };
+  } catch (error) {
+    if (error instanceof Error && "code" in error)
+      return {
+        error:
+          "Não foi possível salvar agora. Tente novamente; se a prova mudou, reabra a edição.",
+      };
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar o simulado.",
+    };
+  }
 }

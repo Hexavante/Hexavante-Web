@@ -72,7 +72,7 @@ export default async function GerenciarPage() {
     name: e.title,
     status: e.isPublished ? "Publicado" : moderator ? "Rascunho" : "Na moderação",
     statusColor: e.isPublished ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400",
-    href: moderator ? `/admin/simulados/${e.id}/edit` : "/instructor/simulados",
+    href: moderator ? `/admin/simulados/${e.id}/edit` : `/instructor/simulados/${e.id}/edit`,
     onDelete: moderator ? deleteExamByIdAction.bind(null, e.id) : undefined,
   }));
 
