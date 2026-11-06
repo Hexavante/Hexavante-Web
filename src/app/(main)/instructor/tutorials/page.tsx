@@ -52,6 +52,7 @@ export default async function InstructorTutorialsPage() {
             <Link
               key={t.id}
               href={`/instructor/tutorials/${t.id}/edit`}
+              aria-label={`Editar tutorial ${t.title}`}
               className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-cyan-400/30 hover:bg-white/[0.04]"
             >
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-cyan-500/10 text-cyan-400">
@@ -60,7 +61,7 @@ export default async function InstructorTutorialsPage() {
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-white truncate">{t.title}</h3>
                 <p className="text-xs text-slate-400">
-                  {t.category?.name ?? "Sem categoria"} · {t._count.tags} tags
+                  Editar tutorial · {t.category?.name ?? "Sem categoria"} · {t._count.tags} tags
                 </p>
               </div>
               <span

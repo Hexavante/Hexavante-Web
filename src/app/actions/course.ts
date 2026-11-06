@@ -148,6 +148,7 @@ export async function updateCourseAction(
     revalidatePath("/courses");
     revalidatePath("/instructor/courses");
     revalidatePath(`/instructor/courses/${courseId}/edit`);
+    revalidatePath("/instructor/gerenciar");
     return { success: true };
   } catch (error) {
     return {

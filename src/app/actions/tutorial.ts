@@ -144,6 +144,7 @@ export async function updateTutorialAction(
     revalidatePath("/tutorials");
     revalidatePath("/instructor/tutorials");
     revalidatePath(`/instructor/tutorials/${tutorialId}/edit`);
+    revalidatePath("/instructor/gerenciar");
     return { success: true };
   } catch (error) {
     return {
