@@ -26,7 +26,7 @@ export async function GET(
     return new Response("Não encontrado", { status: 404 });
   }
 
-  const allowedTop = new Set(["avatars", "banners", "courses", "tutorials", "exams", "questions"]);
+  const allowedTop = new Set(["avatars", "banners", "courses", "tutorials", "exams", "exam-questions", "questions"]);
   if (!allowedTop.has(segments[0]) || segments.length > 3) {
     return new Response("Não encontrado", { status: 404 });
   }
