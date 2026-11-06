@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -45,6 +45,11 @@ export const ExamCoverUpload = forwardRef<ExamCoverUploadHandle, Props>(function
   const inputRef = useRef<HTMLInputElement>(null);
 
   const displayUrl = removed ? null : previewUrl;
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+
+  useEffect(() => () => {
+    if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   useImperativeHandle(ref, () => ({
     isRemoved: () => removed,
@@ -86,7 +91,13 @@ export const ExamCoverUpload = forwardRef<ExamCoverUploadHandle, Props>(function
 
     if (!file) return;
 
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setError("Use uma imagem JPEG, PNG ou WebP de até 5 MB.");
+      event.target.value = "";
+      return;
+    }
     setError(null);
+    setFailedUrl(null);
 
     setRemoved(false);
 
@@ -124,20 +135,23 @@ export const ExamCoverUpload = forwardRef<ExamCoverUploadHandle, Props>(function
           displayUrl ? "aspect-video" : "flex h-40 items-center justify-center",
         )}
       >
-        {displayUrl ? (
+        {displayUrl && failedUrl !== displayUrl ? (
           <Image
             src={displayUrl}
             alt="Pré-visualização da capa do simulado"
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 640px"
-            unoptimized={displayUrl.startsWith("blob:")}
+            unoptimized
+            onError={() => setFailedUrl(displayUrl)}
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-slate-500">
             <ClipboardList className="h-10 w-10 text-teal-400/40" />
 
-            <span className="text-sm">Nenhuma capa selecionada</span>
+            <span className="text-sm" role={displayUrl ? "alert" : undefined}>
+              {displayUrl ? "Não foi possível carregar a capa. Tente trocar a imagem." : "Nenhuma capa selecionada"}
+            </span>
           </div>
         )}
       </div>

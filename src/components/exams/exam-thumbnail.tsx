@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { ClipboardList } from "lucide-react";
 
 import Image from "next/image";
@@ -15,7 +18,8 @@ type Props = {
 };
 
 export function ExamThumbnail({ url, title, className, priority }: Props) {
-  if (url) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  if (url && failedUrl !== url) {
     return (
       <div className={cn("relative overflow-hidden bg-slate-900", className)}>
         <Image
@@ -25,6 +29,8 @@ export function ExamThumbnail({ url, title, className, priority }: Props) {
           className="object-cover"
           sizes="(max-width: 640px) 100vw, 400px"
           priority={priority}
+          unoptimized
+          onError={() => setFailedUrl(url)}
         />
       </div>
     );
