@@ -39,6 +39,21 @@ export function applyXp(level: number, currentXp: number, totalXp: number, amoun
   return { level: newLevel, currentXp: newCurrentXp, totalXp: newTotalXp };
 }
 
+/**
+ * Nível e XP do nível atual a partir do XP total. Usado quando o XP pode
+ * diminuir (ajuste da moderação): `applyXp` só sabe subir de nível.
+ */
+export function levelFromTotalXp(totalXp: number): { level: number; currentXp: number; totalXp: number } {
+  const total = Math.max(0, Math.floor(totalXp));
+  let level = 1;
+  let spent = 0;
+  while (spent + xpRequiredForLevel(level) <= total && level < 999) {
+    spent += xpRequiredForLevel(level);
+    level += 1;
+  }
+  return { level, currentXp: total - spent, totalXp: total };
+}
+
 // Função para calcular porcentagem de progresso para próximo nível
 // Retorna porcentagem de XP atual em relação ao necessário
 export function xpProgressPercent(level: number, currentXp: number): number {

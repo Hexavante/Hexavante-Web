@@ -1,4 +1,4 @@
-import { applyXp, xpRequiredForLevel } from "@/lib/gamification";
+import { applyXp, levelFromTotalXp, xpRequiredForLevel } from "@/lib/gamification";
 import { allowedRoleChanges, requireModAction } from "@/lib/moderation/permissions";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/services/notification.service";
@@ -81,6 +81,7 @@ async function adminAdjustXp(
   permission: string,
 ) {
   requireModAction(permission, roles);
+  if (!Number.isFinite(delta)) throw new Error("Valor de XP inválido.");
 
   let userXp = await prisma.userXP.findUnique({ where: { userId } });
   if (!userXp) {
@@ -92,21 +93,16 @@ async function adminAdjustXp(
   let newCurrent = userXp.currentXp;
   let newTotal = userXp.totalXp;
 
-  if (action === "set") {
-    newTotal = Math.max(0, delta);
-    newLevel = 1;
-    newCurrent = 0;
-    while (newCurrent + xpRequiredForLevel(newLevel) <= newTotal && newLevel < 999) {
-      newCurrent += xpRequiredForLevel(newLevel);
-      newLevel += 1;
-    }
-    newCurrent = newTotal - newCurrent;
-  } else {
-    const amount = action === "remove" ? -Math.abs(delta) : Math.abs(delta);
-    const applied = applyXp(userXp.level, userXp.currentXp, userXp.totalXp, amount);
+  if (action === "add") {
+    const applied = applyXp(userXp.level, userXp.currentXp, userXp.totalXp, Math.abs(delta));
     newLevel = applied.level;
     newCurrent = applied.currentXp;
     newTotal = applied.totalXp;
+  } else {
+    // "set" e "remove" podem baixar o XP: recalcula o nível a partir do total
+    // (nunca abaixo de zero, e o nível cai junto se precisar).
+    const target = action === "set" ? delta : userXp.totalXp - Math.abs(delta);
+    ({ level: newLevel, currentXp: newCurrent, totalXp: newTotal } = levelFromTotalXp(target));
   }
 
   await prisma.$transaction(async (tx) => {
@@ -117,12 +113,8 @@ async function adminAdjustXp(
     await tx.xpTransaction.create({
       data: {
         userId,
-        amount:
-          action === "set"
-            ? newTotal - userXp!.totalXp
-            : action === "remove"
-              ? -Math.abs(delta)
-              : Math.abs(delta),
+        // O que mudou de fato (remover 500 de quem tem 200 registra -200).
+        amount: newTotal - userXp!.totalXp,
         source: "ADMIN",
         sourceId,
         description: `Ajuste admin (${action})`,
