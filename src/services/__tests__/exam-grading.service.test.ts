@@ -39,7 +39,7 @@ function answerFixture(overrides: Record<string, unknown> = {}) {
   };
 }
 
-const grade = { answerId: "answer-1", status: "CORRECT", comment: "Muito bem" };
+const grade = { answerId: "answer-1", status: "CORRECT" as const, comment: "Muito bem" };
 
 beforeEach(() => {
   vi.clearAllMocks();

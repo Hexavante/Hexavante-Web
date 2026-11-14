@@ -41,7 +41,7 @@ class FormDataComArquivo extends NativeFormData {
   set(name: string, value: string | Blob, fileName?: string): void {
     this.removidos.delete(name);
     if (fileName === undefined) super.set(name, value);
-    else super.set(name, value, fileName);
+    else super.set(name, value as Blob, fileName);
   }
 }
 
