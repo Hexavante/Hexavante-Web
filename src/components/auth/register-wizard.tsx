@@ -379,7 +379,7 @@ function Field({
     </div>
   );
 }
-function Choice({
+export function Choice({
   active,
   icon: Icon,
   title,
