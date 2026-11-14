@@ -8,7 +8,6 @@ const drawings: Record<string, string> = {
   "/tutorials": "M5 4h14l2 3v12H3V7Z M3 8h18 M9 11l6 3-6 3Z M7 4l2 4 M14 4l2 4",
   "/anotacoes": "M6 3h12v18H6Z M3 7h5 M3 12h5 M3 17h5 M11 8h4 M11 12h4 M11 16h2",
   "/simulados": "M12 3 20 7v10l-8 4-8-4V7Z M8 12l3 3 5-6",
-  "/desafio-relampago": "m13 2-8 12h6l-1 8 9-13h-6Z",
   "/estatisticas": "M3 19h18 M6 15v-4 M12 15V8 M18 15V4 M4 7l5-3 4 1",
   "/shop": "M5 8h14l2 13H3Z M8 8V6a4 4 0 0 1 8 0v2 M10 13l2-1 2 1v3l-2 1-2-1Z",
   "/inventario": "M12 3 21 8v9l-9 5-9-5V8Z M3 8l9 5 9-5 M12 13v9 M7 5l9 5v4",

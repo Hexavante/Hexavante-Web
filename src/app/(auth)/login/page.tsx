@@ -57,6 +57,9 @@ export default async function LoginPage({ searchParams }: Props) {
                 Cadastre-se
               </AppLink>
             </p>
+            <p className="mt-3 text-xs text-slate-500">
+              <AppLink href="/privacidade">Política de Privacidade</AppLink>
+            </p>
             </>
           }
         />

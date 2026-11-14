@@ -29,7 +29,7 @@ type Props = {
   activeBooster?: boolean;
 };
 
-const EQUIPPABLE: StoreItemCategory[] = ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "EMOJI_PACK", "PROFILE_BACKGROUND"];
+const EQUIPPABLE: StoreItemCategory[] = ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "PROFILE_BACKGROUND"];
 
 const initial: ShopActionResult = { success: false };
 

@@ -5,11 +5,7 @@ import {
   saveNotebookPage,
   NotebookError,
 } from "@/services/notebook.service";
-import type {
-  NotebookData,
-  NotebookPageData,
-  NotebookResult,
-} from "@/lib/notebook";
+import type { NotebookData, NotebookResult, NotebookSaveData } from "@/lib/notebook";
 
 export async function loadNotebookAction(): Promise<
   NotebookResult<NotebookData>
@@ -32,7 +28,7 @@ export async function loadNotebookAction(): Promise<
 }
 export async function saveNotebookPageAction(
   input: unknown,
-): Promise<NotebookResult<NotebookPageData>> {
+): Promise<NotebookResult<NotebookSaveData>> {
   const session = await auth();
   if (!session?.user?.id)
     return {

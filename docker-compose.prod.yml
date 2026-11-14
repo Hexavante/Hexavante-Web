@@ -33,9 +33,9 @@ services:
       INTERNAL_APP_URL: ${INTERNAL_APP_URL:-http://127.0.0.1:3000}
       AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
       AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
-      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
-      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
       NEXT_PUBLIC_GO_API_URL: ${NEXT_PUBLIC_GO_API_URL:-https://api.hexavante.com.br}
+      # XP/moedas via API (/internal/v1/*). Mesmo valor da API; obrigatório.
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?defina INTERNAL_API_TOKEN}
     ports:
       - "127.0.0.1:3000:3000"
     networks:

@@ -1,4 +1,20 @@
-# Caderno por curso
+# Caderno
+
+## Anotações livres e links (nov/2026)
+
+- **Anotações livres**: páginas sem curso (`course_id` nulo), sempre
+  disponíveis na divisória "Anotações livres", sem exigir matrícula.
+- **Links**: escreva `[[Título da nota]]`. Ao digitar `[[` o editor sugere
+  notas; no modo **Ler** o link abre a nota (ou cria uma nova com aquele
+  título). Cada página mostra **Mencionada em** (quem aponta para ela).
+  Renomear uma página atualiza os links nas outras, na mesma transação.
+  Títulos não podem conter `[[` ou `]]`.
+- **Curso apagado**: a FK passou de `ON DELETE CASCADE` para `SET NULL` —
+  as páginas viram anotações livres em vez de sumir.
+- Migração: `20261113000000_notebook_free_pages` (aplicar depois de
+  `20261028000000_course_notebook`). Não remove nem altera dados.
+
+## Histórico: caderno por curso
 
 A rota `/anotacoes` agora usa páginas pessoais na tabela `notebook_pages`.
 Cada curso em que o usuário está matriculado aparece como uma divisória;

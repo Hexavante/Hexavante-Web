@@ -6,71 +6,49 @@ vi.mock("@/lib/prisma", () => ({
   prisma: prismaMock,
 }));
 
-vi.mock("@/services/notification.service", () => ({
-  createNotification: vi.fn().mockResolvedValue({}),
+vi.mock("@/lib/internal-api", () => ({
+  internalApiPost: vi.fn(),
 }));
+
+import { internalApiPost } from "@/lib/internal-api";
 
 describe("xp.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("awardXp", () => {
-    it("deve conceder XP com sucesso", async () => {
-      const userId = "user-1";
-      const amount = 10;
-      const source = "LESSON" as const;
-      const sourceId = "lesson-1";
-
-      prismaMock.$transaction.mockImplementation(async (callback) => {
-        return callback({
-          xpTransaction: {
-            findUnique: vi.fn().mockResolvedValue(null),
-            create: vi.fn().mockResolvedValue({}),
-          },
-          userXP: {
-            findUnique: vi.fn().mockResolvedValue({
-              level: 1,
-              currentXp: 0,
-              totalXp: 0,
-            }),
-            create: vi.fn(),
-            update: vi.fn().mockResolvedValue({
-              level: 1,
-              currentXp: 10,
-              totalXp: 10,
-            }),
-          },
-        });
+  describe("awardXp (delegado ao motor da API)", () => {
+    it("envia o valor BASE para a API e devolve o award", async () => {
+      vi.mocked(internalApiPost).mockResolvedValue({
+        award: { amount: 20, description: "Test (booster pessoal x2)", leveledUp: false },
       });
 
-      const result = await awardXp(userId, amount, source, sourceId, "Test");
+      const result = await awardXp("user-1", 10, "LESSON", "lesson-1", "Test");
 
-      expect(result).toEqual({
+      expect(internalApiPost).toHaveBeenCalledWith("/internal/v1/gamification/xp", {
+        userId: "user-1",
         amount: 10,
+        source: "LESSON",
+        sourceId: "lesson-1",
         description: "Test",
-        leveledUp: false,
-        newLevel: undefined,
       });
+      expect(result).toEqual({ amount: 20, description: "Test (booster pessoal x2)", leveledUp: false });
+      expect(prismaMock.$transaction).not.toHaveBeenCalled();
     });
 
-    it("deve retornar null se XP já foi concedido", async () => {
-      const userId = "user-1";
-      const amount = 10;
-      const source = "LESSON" as const;
-      const sourceId = "lesson-1";
+    it("XP já concedido para a fonte → null", async () => {
+      vi.mocked(internalApiPost).mockResolvedValue({ award: null });
+      expect(await awardXp("user-1", 10, "LESSON", "lesson-1")).toBeNull();
+    });
 
-      prismaMock.$transaction.mockImplementation(async (callback) => {
-        return callback({
-          xpTransaction: {
-            findUnique: vi.fn().mockResolvedValue({}),
-          },
-        });
-      });
+    it("API indisponível → null (fluxo do usuário segue, erro registrado)", async () => {
+      vi.mocked(internalApiPost).mockRejectedValue(new Error("network"));
+      expect(await awardXp("user-1", 10, "LESSON", "lesson-1")).toBeNull();
+    });
 
-      const result = await awardXp(userId, amount, source, sourceId);
-
-      expect(result).toBeNull();
+    it("valor <= 0 → null sem chamar a API", async () => {
+      expect(await awardXp("user-1", 0, "LESSON", "lesson-1")).toBeNull();
+      expect(internalApiPost).not.toHaveBeenCalled();
     });
   });
 

@@ -102,7 +102,7 @@ export function ShopItemCard({
     ownershipStatus === "expired_temporary" ||
     (!item.isPermanent && ownershipStatus === "active_temporary");
 
-  const isEquippable = ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "EMOJI_PACK", "PROFILE_BACKGROUND"].includes(item.category);
+  const isEquippable = ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "PROFILE_BACKGROUND"].includes(item.category);
 
   const durationLabel = item.metadata?.durationDays
     ? `${item.metadata.durationDays} dias`

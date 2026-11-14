@@ -8,7 +8,6 @@ import {
   BookMarked,
   BookOpen,
   BookOpenCheck,
-  Bot,
   Boxes,
   Brain,
   BriefcaseBusiness,
@@ -70,7 +69,6 @@ import {
   MountainSnow,
   MousePointer2,
   Network,
-  NotebookPen,
   Orbit,
   Palette,
   PencilRuler,
@@ -105,7 +103,6 @@ import {
   Umbrella,
   UsersRound,
   Vegan,
-  Volleyball,
   WandSparkles,
   Waves,
   Waypoints,
@@ -158,8 +155,6 @@ export const SHOP_ITEM_ICONS: Record<string, LucideIcon> = {
   "frame-neon": Lightbulb,
   "frame-geometria": Shapes,
   "frame-madeira": Logs,
-  "emoji-pack-estudo": NotebookPen,
-  "emoji-pack-tech": Bot,
   "bg-galaxy": Sparkles,
   "bg-sunset-gradient": CloudSun,
   "bg-matrix": Binary,
@@ -230,7 +225,6 @@ export const SHOP_ITEM_ICONS: Record<string, LucideIcon> = {
   "badge-cientista": FlaskConical,
   "badge-artista": Palette,
   "badge-lider": UsersRound,
-  "emoji-pack-esportes": Volleyball,
 };
 
 export function shopItemIcon(item: {slug: string; category: StoreItemCategory}) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade – Hexavante",
@@ -8,8 +9,11 @@ export const metadata: Metadata = {
 export default function PrivacidadePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <Link href="/login" className="mb-6 inline-block text-sm text-zinc-400 hover:text-white">
+        ← Voltar
+      </Link>
       <h1 className="text-3xl font-bold text-white mb-2">Política de Privacidade</h1>
-      <p className="text-zinc-400 text-sm mb-10">Última atualização: junho de 2026</p>
+      <p className="text-zinc-400 text-sm mb-10">Última atualização: novembro de 2026</p>
 
       <div className="prose prose-invert prose-zinc max-w-none space-y-8 text-zinc-300">
         <section>
@@ -28,7 +32,7 @@ export default function PrivacidadePage() {
             <li>Dados de progresso: XP, moedas, tentativas em simulados, conclusão de cursos.</li>
             <li>Registros de login (IP, data/hora) para segurança.</li>
             <li>Cookies de sessão essenciais para manter você autenticado.</li>
-            <li>Dados de OAuth (Google/GitHub) quando você usa login social.</li>
+            <li>Dados do Google (nome, e-mail e foto) quando você entra com o Google.</li>
           </ul>
         </section>
 
@@ -66,7 +70,7 @@ export default function PrivacidadePage() {
           <p>
             Não vendemos seus dados. Eles podem ser acessados por provedores de infraestrutura
             (hospedagem, banco de dados) sob acordos de confidencialidade, e por provedores OAuth
-            (Google, GitHub) conforme suas próprias políticas.
+            (Google) conforme suas próprias políticas.
           </p>
         </section>
 

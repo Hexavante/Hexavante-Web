@@ -85,7 +85,7 @@ function EquipRow({ item }: { item: InventoryItem }) {
 export function CosmeticsInventoryPanel({ inventory }: Props) {
   const EQUIPPABLE: StoreItemCategory[] = [
     "TITLE", "AVATAR_BORDER", "THEME", "COSMETIC",
-    "BADGE", "FRAME", "EMOJI_PACK", "PROFILE_BACKGROUND",
+    "BADGE", "FRAME", "PROFILE_BACKGROUND",
   ];
   const equippable = inventory.filter((entry) =>
     EQUIPPABLE.includes(entry.storeItem.category),
@@ -96,7 +96,7 @@ export function CosmeticsInventoryPanel({ inventory }: Props) {
       <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-8 text-center">
         <p className="font-semibold text-slate-200">Nenhum cosmético no inventário</p>
         <p className="mt-2 text-sm text-slate-500">
-          Visite a loja para comprar títulos, molduras, temas, ícones, distintivos, emojis e fundos.
+          Visite a loja para comprar títulos, molduras, temas, ícones, distintivos e fundos.
         </p>
       </div>
     );
@@ -109,7 +109,6 @@ export function CosmeticsInventoryPanel({ inventory }: Props) {
     COSMETIC: equippable.filter((i) => i.storeItem.category === "COSMETIC"),
     BADGE: equippable.filter((i) => i.storeItem.category === "BADGE"),
     FRAME: equippable.filter((i) => i.storeItem.category === "FRAME"),
-    EMOJI_PACK: equippable.filter((i) => i.storeItem.category === "EMOJI_PACK"),
     PROFILE_BACKGROUND: equippable.filter((i) => i.storeItem.category === "PROFILE_BACKGROUND"),
   };
 
@@ -124,7 +123,6 @@ export function CosmeticsInventoryPanel({ inventory }: Props) {
           ["BADGE", "Distintivos"],
           ["FRAME", "Molduras decorativas"],
           ["PROFILE_BACKGROUND", "Fundos de perfil"],
-          ["EMOJI_PACK", "Pacotes de emoji"],
         ] as const
       ).map(([key, label]) =>
         grouped[key].length > 0 ? (

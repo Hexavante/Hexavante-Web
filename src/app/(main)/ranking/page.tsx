@@ -19,7 +19,6 @@ import {
   getPendingSeasonRewards,
   getUserSeasonHistory,
   getUserSeasonStanding,
-  processPreviousSeasonIfNeeded,
 } from "@/services/ranking-season.service";
 import { getRanking, type RankingPeriod } from "@/services/xp.service";
 import { prisma } from "@/lib/prisma";
@@ -43,8 +42,6 @@ export default async function RankingPage({ searchParams }: Props) {
   const session = await auth();
   const { period: periodParam, league: leagueParam } = await searchParams;
   const period = parsePeriod(periodParam);
-
-  await processPreviousSeasonIfNeeded();
 
   let leagueFilter = parseLeagueFilter(leagueParam);
   if (period === "month" && leagueFilter === "ALL" && session?.user?.id) {

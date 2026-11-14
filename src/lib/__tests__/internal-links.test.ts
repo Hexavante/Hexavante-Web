@@ -6,7 +6,7 @@ import { join } from "node:path";
 // - Monta a tabela de rotas a partir do glob real de page.tsx em src/app
 //   (estático, sem mocks de dados — inclui route.ts como endpoint válido).
 // - Extrai href / router.push / redirect literais das superfícies principais
-//   (painel, sidebar, histórico, simulados, relâmpago, plano diário, social).
+//   (painel, sidebar, histórico, simulados, plano diário, social).
 // - Falha se algum link apontar para rota inexistente (ex.: /history,
 //   /course-history, /exam-history, /comunidade, /courses/x/review).
 
@@ -21,7 +21,6 @@ const EXPECTED_ROUTES = [
   "/courses/history",
   "/simulados/historico",
   "/estatisticas",
-  "/desafio-relampago",
   "/plano-diario",
   "/social",
   "/courses",
@@ -40,7 +39,6 @@ const SCAN_FILES = [
   "app/(main)/historico/page.tsx",
   "app/(main)/simulados/page.tsx",
   "app/(main)/simulados/[slug]/resultado/[attemptId]/page.tsx",
-  "app/(main)/desafio-relampago/page.tsx",
   "app/(main)/plano-diario/page.tsx",
   "components/app-sidebar.tsx",
   "components/historico/atividades-tab.tsx",
@@ -50,7 +48,6 @@ const SCAN_FILES = [
   "components/home/dashboard-command-center.tsx",
   "components/home/marquee-shortcuts.tsx",
   "components/home/student-dashboard.tsx",
-  "components/lightning/lightning-game.tsx",
   "components/profile/my-journey.tsx",
   "components/social/social-feed.tsx",
   "services/daily-plan.service.ts",

@@ -156,6 +156,8 @@ export async function middleware(req: NextRequest) {
     "/cursos": siteUrl("/cursos"),
     "/ajuda": siteUrl("/ajuda"),
     "/hexa": "/shop",
+    // Desafio Relâmpago foi removido.
+    "/desafio-relampago": "/app",
   };
   const compatTarget = COMPAT_REDIRECTS[pathname];
   if (compatTarget) {
@@ -177,7 +179,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const publicPaths = ["/", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/certificados/c", "/admin-login", "/admin-verificar", "/pagamento"];
+  const publicPaths = ["/", "/login", "/register", "/recuperar-senha", "/redefinir-senha", "/verificar-dispositivo", "/manutencao", "/suspenso", "/tutorials", "/certificados/c", "/admin-login", "/admin-verificar", "/pagamento", "/privacidade"];
 
   // O painel admin usa sessão própria (cookie hx_admin_session). O layout
   // /admin valida de verdade; aqui só deixamos passar quem tem o cookie

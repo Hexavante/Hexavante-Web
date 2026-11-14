@@ -12,7 +12,6 @@ type PreviewCosmetics = {
   badgeLabel?: string | null;
   frameId?: string | null;
   profileBackgroundId?: string | null;
-  emojiPackEmojis?: string[] | null;
 };
 
 type Props = {
@@ -63,15 +62,6 @@ export function ShopProfilePreview({ fullName, username, avatarUrl, cosmetics }:
             <p className="mt-2 inline-flex rounded-full border border-[hsl(var(--sidebar-highlight)/0.28)] bg-[hsl(var(--sidebar-highlight)/0.1)] px-2.5 py-0.5 text-xs font-semibold hx-accent-text">
               {cosmetics.equippedTitle}
             </p>
-          )}
-          {cosmetics.emojiPackEmojis && cosmetics.emojiPackEmojis.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5 text-lg leading-none">
-              {cosmetics.emojiPackEmojis.map((emoji, index) => (
-                <span key={index} aria-hidden>
-                  {emoji}
-                </span>
-              ))}
-            </div>
           )}
         </div>
       </div>

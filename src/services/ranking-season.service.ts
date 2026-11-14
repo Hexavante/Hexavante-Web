@@ -4,17 +4,13 @@ import {
   formatSeasonLabel,
   getCurrentSeasonKey,
   getNextLeague,
-  getPreviousLeague,
-  getPreviousSeasonKey,
   getSeasonBounds,
   getSeasonDaysRemaining,
-  getSeasonRewardCoins,
   MIN_LEAGUE_SIZE_FOR_DEMOTION,
   PROMOTION_SLOTS,
 } from "@/lib/ranking-leagues";
 import { prisma } from "@/lib/prisma";
 import { awardCoins } from "@/services/wallet.service";
-import { createNotification } from "@/services/notification.service";
 import type { RankingEntry } from "@/services/xp.service";
 
 export type UserSeasonStanding = {
@@ -78,166 +74,10 @@ async function ensureCurrentSeasonRecord(seasonKey: string) {
   ensuredSeasonKeys.add(seasonKey);
 }
 
-/**
- * O fechamento da temporada é idempotente, mas roda consultas pesadas em toda
- * visita ao ranking. Guardamos a promise em voo e um TTL curto para que várias
- * navegações simultâneas não disparem o processamento em paralelo.
- */
-const SEASON_PROCESSING_TTL_MS = 5 * 60 * 1000;
-let seasonProcessingPromise: Promise<void> | null = null;
-let seasonProcessedAt = 0;
-
-export async function processPreviousSeasonIfNeeded(): Promise<void> {
-  if (Date.now() - seasonProcessedAt < SEASON_PROCESSING_TTL_MS) return;
-
-  if (!seasonProcessingPromise) {
-    seasonProcessingPromise = runPreviousSeasonProcessing()
-      .then(() => {
-        seasonProcessedAt = Date.now();
-      })
-      .catch((error) => {
-        // Nunca derruba o ranking por causa do fechamento da temporada.
-        console.error("[ranking] Falha ao processar temporada anterior:", error);
-      })
-      .finally(() => {
-        seasonProcessingPromise = null;
-      });
-  }
-
-  await seasonProcessingPromise;
-}
-
-async function runPreviousSeasonProcessing(): Promise<void> {
-  const previousKey = getPreviousSeasonKey();
-  const currentKey = getCurrentSeasonKey();
-  if (previousKey >= currentKey) return;
-
-  const season = await prisma.rankingSeason.findUnique({
-    where: { seasonKey: previousKey },
-  });
-  if (season?.processedAt) return;
-
-  const leagues: RankingLeague[] = ["BRONZE", "SILVER", "GOLD"];
-
-  await prisma.$transaction(async (tx) => {
-    const locked = await tx.rankingSeason.findUnique({ where: { seasonKey: previousKey } });
-    if (locked?.processedAt) return;
-
-    const bounds = getSeasonBounds(previousKey);
-    await tx.rankingSeason.upsert({
-      where: { seasonKey: previousKey },
-      create: {
-        seasonKey: previousKey,
-        startsAt: bounds.startsAt,
-        endsAt: bounds.endsAt,
-        processedAt: new Date(),
-      },
-      update: { processedAt: new Date() },
-    });
-
-    for (const league of leagues) {
-      const members = await tx.userXP.findMany({
-        where: { league },
-        select: { userId: true, league: true },
-      });
-      if (members.length === 0) continue;
-
-      const xpMap = await getSeasonXpByUser(
-        members.map((m) => m.userId),
-        previousKey,
-      );
-
-      const ranked = members
-        .map((member) => ({
-          userId: member.userId,
-          league: member.league,
-          seasonXp: xpMap.get(member.userId) ?? 0,
-        }))
-        .filter((entry) => entry.seasonXp > 0)
-        .sort((a, b) => b.seasonXp - a.seasonXp);
-
-      if (ranked.length === 0) continue;
-
-      const promoteIds = new Set(ranked.slice(0, PROMOTION_SLOTS).map((entry) => entry.userId));
-      const demoteIds =
-        ranked.length >= MIN_LEAGUE_SIZE_FOR_DEMOTION
-          ? new Set(ranked.slice(-DEMOTION_SLOTS).map((entry) => entry.userId))
-          : new Set<string>();
-
-      for (let index = 0; index < ranked.length; index++) {
-        const entry = ranked[index];
-        const finalRank = index + 1;
-        const promoted = promoteIds.has(entry.userId) && getNextLeague(league) !== null;
-        const demoted = demoteIds.has(entry.userId) && getPreviousLeague(league) !== null;
-        const rewardCoins = getSeasonRewardCoins(league, finalRank, entry.seasonXp);
-
-        await tx.rankingSeasonResult.upsert({
-          where: {
-            userId_seasonKey: { userId: entry.userId, seasonKey: previousKey },
-          },
-          create: {
-            userId: entry.userId,
-            seasonKey: previousKey,
-            league,
-            seasonXp: entry.seasonXp,
-            finalRank,
-            promoted,
-            demoted,
-            rewardCoins,
-          },
-          update: {
-            league,
-            seasonXp: entry.seasonXp,
-            finalRank,
-            promoted,
-            demoted,
-            rewardCoins,
-          },
-        });
-
-        if (promoted) {
-          const nextLeague = getNextLeague(league);
-          if (nextLeague) {
-            await tx.userXP.update({
-              where: { userId: entry.userId },
-              data: { league: nextLeague },
-            });
-          }
-        } else if (demoted) {
-          const prevLeague = getPreviousLeague(league);
-          if (prevLeague) {
-            await tx.userXP.update({
-              where: { userId: entry.userId },
-              data: { league: prevLeague },
-            });
-          }
-        }
-      }
-    }
-  });
-
-  const results = await prisma.rankingSeasonResult.findMany({
-    where: { seasonKey: previousKey, rewardCoins: { gt: 0 } },
-  });
-
-  for (const result of results) {
-    const label = formatSeasonLabel(previousKey);
-    let message = `Você ficou em ${result.finalRank}º na Liga ${result.league} de ${label}.`;
-    if (result.promoted) message += " Você foi promovido!";
-    if (result.demoted) message += " Você foi rebaixado nesta temporada.";
-    if (result.rewardCoins > 0) {
-      message += ` Resgate ${result.rewardCoins} moedas no ranking.`;
-    }
-
-    await createNotification({
-      userId: result.userId,
-      type: "XP_EARNED",
-      title: "Temporada encerrada",
-      message,
-      link: "/ranking",
-    });
-  }
-}
+// O fechamento mensal das ligas (promoção, rebaixamento, prêmios e
+// notificações) roda na API como job agendado (fila hx-maintenance, a cada
+// hora, idempotente). Antes rodava aqui, na primeira visita ao ranking.
+// Ver Hexavante-api: packages/core/src/modules/gamification/engine/season.ts
 
 export async function getUserSeasonStanding(userId: string): Promise<UserSeasonStanding | null> {
   const profile = await prisma.userXP.findUnique({ where: { userId } });

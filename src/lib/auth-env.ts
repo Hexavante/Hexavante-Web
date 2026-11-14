@@ -72,8 +72,6 @@ export function getOAuthCredentials() {
     googleId: process.env.AUTH_GOOGLE_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || "",
     googleSecret:
       process.env.AUTH_GOOGLE_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || "",
-    githubId: process.env.AUTH_GITHUB_ID?.trim() || process.env.GITHUB_ID?.trim() || "",
-    githubSecret: process.env.AUTH_GITHUB_SECRET?.trim() || process.env.GITHUB_SECRET?.trim() || "",
   };
 }
 

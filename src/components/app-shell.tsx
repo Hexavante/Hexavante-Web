@@ -18,6 +18,8 @@ const BARE_LAYOUT_PREFIXES = [
 
 const BARE_LAYOUT_EXACT = ["/"];
 
+const PUBLIC_BARE_FOR_VISITORS = ["/privacidade"];
+
 type Props = {
   session: NavSession;
   /** Server Component slot — must be passed from a Server Layout, not imported here. */
@@ -29,7 +31,9 @@ export function AppShell({ session, header, children }: Props) {
   const pathname = usePathname();
   const useBareLayout =
     BARE_LAYOUT_EXACT.includes(pathname) ||
-    BARE_LAYOUT_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    BARE_LAYOUT_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    // Páginas públicas abertas por visitantes: sem a barra lateral do app.
+    (!session && PUBLIC_BARE_FOR_VISITORS.includes(pathname));
 
   if (useBareLayout) {
     return <>{children}</>;

@@ -9,8 +9,6 @@ import {
   BookOpen,
   NotebookPen,
   Target,
-  Trophy,
-  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -27,7 +25,6 @@ import { AchievementGrid } from "@/components/achievements/achievement-grid";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { MarqueeShortcuts } from "@/components/home/marquee-shortcuts";
 import { getStudentHomeData } from "@/services/student.service";
-import { getLightningDailyStatus } from "@/services/lightning-challenge.service";
 import { getProfileCosmetics } from "@/services/shop.service";
 import Link from "next/link";
 
@@ -72,7 +69,6 @@ const shortcuts: {
     icon: "NotebookPen",
     requiresAuth: true,
   },
-  { href: "/desafio-relampago", label: "Desafio Relâmpago", icon: "Zap" },
   {
     href: "/estatisticas",
     label: "Estatísticas",
@@ -89,7 +85,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   }
   const userId = session?.user?.id;
 
-  const [homeData, cosmetics, lightningStatus] = userId
+  const [homeData, cosmetics] = userId
     ? await Promise.all([
         getStudentHomeData(userId).catch((error) => {
           console.error(
@@ -102,9 +98,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           console.error("[painel] Falha ao carregar cosméticos:", error);
           return null;
         }),
-        getLightningDailyStatus(userId).catch(() => null),
       ])
-    : [null, null, null];
+    : [null, null];
 
   const themeClass = cosmetics?.themeClassName ?? "theme-default";
   const hasHighlights = Boolean(
@@ -210,59 +205,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
               <ScrollReveal delay={180}>
                 <DashboardCommandCenter pendingItems={homeData.pendingItems} />
-              </ScrollReveal>
-
-              <ScrollReveal delay={200}>
-                <Card
-                  padding="md"
-                  className="flex min-w-0 flex-col gap-4 border-amber-400/25 bg-amber-400/[0.06] sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/10 text-amber-200">
-                      <Zap className="h-5 w-5" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-200">
-                        Desafio Relâmpago
-                        {lightningStatus?.played ? (
-                          <Badge variant="emerald">Concluído hoje</Badge>
-                        ) : (
-                          <Badge variant="amber">Disponível hoje</Badge>
-                        )}
-                      </p>
-                      <p className="mt-1 text-sm font-bold text-white">
-                        {lightningStatus?.played && lightningStatus.attempt
-                          ? `Hoje: ${lightningStatus.attempt.score}/${lightningStatus.attempt.totalQuestions} acertos · +${lightningStatus.attempt.xpAwarded} XP`
-                          : "5 questões em 60 segundos · 15 XP + 3 moedas por acerto"}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-400">
-                        1 tentativa por dia · reseta à meia-noite de Brasília.
-                      </p>
-                    </div>
-                  </div>
-                  <LinkButton
-                    href="/desafio-relampago"
-                    variant="outline"
-                    className="shrink-0"
-                    aria-label={
-                      lightningStatus?.played
-                        ? "Ver resultado do Desafio Relâmpago"
-                        : "Jogar o Desafio Relâmpago de hoje"
-                    }
-                  >
-                    {lightningStatus?.played ? (
-                      <>
-                        <Trophy className="h-4 w-4 text-amber-200" />
-                        Ver resultado
-                      </>
-                    ) : (
-                      <>
-                        Jogar agora
-                        <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </LinkButton>
-                </Card>
               </ScrollReveal>
 
               {hasHighlights && (

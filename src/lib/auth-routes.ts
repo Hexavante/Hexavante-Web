@@ -28,7 +28,7 @@ export function getSafeCallbackUrl(value: string | null | undefined, fallback = 
 
 /** Navegação GET — Auth.js v5 não suporta /api/auth/signin/[provider]; usa rota dedicada. */
 export function buildOAuthSignInHref(
-  provider: "google" | "github",
+  provider: "google",
   callbackUrl: string,
 ): string {
   const params = new URLSearchParams({

@@ -52,12 +52,6 @@ export const prismaMock = {
     findMany: vi.fn(),
     create: vi.fn(),
   },
-  lightningChallengeAttempt: {
-    findUnique: vi.fn(),
-    findMany: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-  },
   examQuestion: {
     count: vi.fn(),
     findMany: vi.fn(),

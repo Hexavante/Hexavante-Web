@@ -2,7 +2,6 @@ import { getApiUrl } from "@/lib/api-url";
 
 export type OAuthProviders = {
   google?: boolean;
-  github?: boolean;
   microsoft?: boolean;
   discord?: boolean;
 };
@@ -18,7 +17,7 @@ const EMPTY_PROVIDERS: OAuthProviders = {};
 
 export function hasOAuthProviders(providers: OAuthProviders = oauthProviders): boolean {
   return Boolean(
-    providers.google || providers.github || providers.microsoft || providers.discord,
+    providers.google || providers.microsoft || providers.discord,
   );
 }
 
@@ -45,7 +44,6 @@ export async function fetchOAuthProviders(): Promise<OAuthProviders> {
 
     return {
       google: raw.google === true,
-      github: raw.github === true,
       microsoft: raw.microsoft === true,
       discord: raw.discord === true,
     };

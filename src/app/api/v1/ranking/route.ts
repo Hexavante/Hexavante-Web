@@ -5,7 +5,6 @@ import { getCurrentSeasonKey, parseLeagueFilter } from "@/lib/ranking-leagues";
 import {
   getLeagueRanking,
   getUserSeasonStanding,
-  processPreviousSeasonIfNeeded,
 } from "@/services/ranking-season.service";
 import { getRanking, type RankingPeriod } from "@/services/xp.service";
 import { prisma } from "@/lib/prisma";
@@ -20,8 +19,6 @@ export const GET = withApiErrorHandling(async (req) => {
   const { searchParams } = new URL(req.url);
   const period = parsePeriod(searchParams.get("period"));
   const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? "50") || 50));
-
-  await processPreviousSeasonIfNeeded();
 
   let leagueFilter = parseLeagueFilter(searchParams.get("league") ?? undefined);
   if (period === "month" && leagueFilter === "ALL" && userId) {

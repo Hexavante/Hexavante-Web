@@ -362,22 +362,6 @@ export const SHOP_CATALOG: ShopCatalogItem[] = [
     metadata: { frameId: "frame-madeira", rarity: "common" },
   },
   {
-    slug: "emoji-pack-estudo",
-    name: "Pack Emojis Estudo",
-    description: "Conjunto de emojis exclusivos para comentários e mensagens.",
-    cost: 60,
-    category: "EMOJI_PACK",
-    metadata: { emojiPackId: "emoji-pack-estudo", emojis: ["📚", "✏️", "🎯", "🧠", "🔥"] },
-  },
-  {
-    slug: "emoji-pack-tech",
-    name: "Pack Emojis Tech",
-    description: "Emojis temáticos de tecnologia para sua comunicação.",
-    cost: 75,
-    category: "EMOJI_PACK",
-    metadata: { emojiPackId: "emoji-pack-tech", emojis: ["💻", "⚙️", "🚀", "🐛", "🛡️"] },
-  },
-  {
     slug: "bg-galaxy",
     name: "Fundo Galaxy",
     description: "Fundo de perfil com gradiente cósmico estático.",
@@ -481,11 +465,10 @@ export const SHOP_CATALOG: ShopCatalogItem[] = [
   { slug: "badge-artista", name: "Distintivo Artista", description: "Criatividade sem limites.", cost: 90, category: "BADGE", metadata: { badgeId: "badge-artista", rarity: "common" } },
   { slug: "badge-lider", name: "Distintivo Líder", description: "Inspira a equipe e lidera pelo exemplo.", cost: 140, category: "BADGE", metadata: { badgeId: "badge-lider", rarity: "rare" } },
 
-  // ── Pack de emojis extra ─────────────────────────────────────────────
-  { slug: "emoji-pack-esportes", name: "Pack Emojis Esportes", description: "Emojis de esportes e atividades físicas.", cost: 55, category: "EMOJI_PACK", metadata: { emojiPackId: "emoji-pack-esportes", emojis: ["⚽", "🏀", "🏈", "🎾", "🏊"] } },
 ];
 
-export const RETIRED_SHOP_CATEGORIES: StoreItemCategory[] = ["PET", "PET_COSMETIC"];
+// EMOJI_PACK: removidos da loja; compras reembolsadas em `retireEmojiPacks` (shop.service).
+export const RETIRED_SHOP_CATEGORIES: StoreItemCategory[] = ["PET", "PET_COSMETIC", "EMOJI_PACK"];
 
 export const STORE_CATEGORY_LABELS: Record<StoreItemCategory, string> = {
   TITLE: "Títulos",
@@ -518,7 +501,7 @@ export const SHOP_TAB_CATEGORIES: Record<
   "personalize" | "boosters" | "passes" | "review_packs" | "premium",
   StoreItemCategory[] | "premium"
 > = {
-  personalize: ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "EMOJI_PACK", "PROFILE_BACKGROUND"],
+  personalize: ["TITLE", "AVATAR_BORDER", "THEME", "COSMETIC", "BADGE", "FRAME", "PROFILE_BACKGROUND"],
   boosters: ["BOOSTER"],
   passes: ["PASS"],
   review_packs: ["REVIEW_PACK"],

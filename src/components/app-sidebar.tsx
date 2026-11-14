@@ -64,7 +64,6 @@ const NAV_SECTIONS: NavSection[] = [
         requiresAuth: true,
       },
       { label: "Simulados", href: "/simulados" },
-      { label: "Desafio Relâmpago", href: "/desafio-relampago" },
       {
         label: "Estatísticas",
         href: "/estatisticas",

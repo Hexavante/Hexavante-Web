@@ -2,7 +2,7 @@ import { SERVER_API_URL } from "@/lib/api-url";
 import { cn } from "@/lib/cn";
 
 type Props = {
-  provider: "google" | "github" | "microsoft" | "discord";
+  provider: "google" | "microsoft" | "discord";
   callbackUrl: string;
   children: React.ReactNode;
   className?: string;

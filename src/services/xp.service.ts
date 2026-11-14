@@ -1,16 +1,11 @@
-// Importações necessárias para o serviço de XP
 import {
-  applyXp,
   XP_REWARDS,
-  XP_SOURCE_LABELS,
   xpProgressPercent,
   xpRequiredForLevel,
-} from "@/lib/gamification"; // Funções de gamificação e constantes de XP
+} from "@/lib/gamification";
+import { internalApiPost } from "@/lib/internal-api";
 import { logger } from "@/lib/logger";
-import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
-import { prisma } from "@/lib/prisma"; // Cliente Prisma para banco de dados
-import { getTotalRewardMultiplier } from "@/services/booster.service";
-import { createNotification } from "@/services/notification.service";
+import { prisma } from "@/lib/prisma";
 import type { XpSource } from "@prisma/client";
 
 // Tipo para prêmio de XP
@@ -45,8 +40,16 @@ export async function getUserXpProfile(userId: string): Promise<UserXpProfile | 
   };
 }
 
-// Função para conceder XP ao usuário
-// Adiciona XP, verifica se subiu de nível e cria transação
+/**
+ * Concede XP ao usuário.
+ *
+ * A regra (booster pessoal × global, nível, idempotência por sourceId,
+ * notificação de nível e feed social) vive na API — motor único usado também
+ * pelo Desktop e pelo Mobile. `amount` é o valor BASE.
+ *
+ * Mesmo contrato de antes: `null` quando a recompensa daquela fonte já foi
+ * dada ou quando algo falha (o erro é registrado, o fluxo do usuário segue).
+ */
 export async function awardXp(
   userId: string,
   amount: number,
@@ -56,105 +59,13 @@ export async function awardXp(
 ): Promise<XpAward | null> {
   if (amount <= 0) return null;
 
-  const rewards = await getTotalRewardMultiplier(userId);
-  const boosterMultiplier = rewards.booster;
-  const finalAmount = Math.round(amount * boosterMultiplier);
-  const label = description ?? XP_SOURCE_LABELS[source] ?? "XP ganho";
-  const boosterParts: string[] = [];
-  if (rewards.global > 1) boosterParts.push(`global x${rewards.global}`);
-  if (rewards.booster / rewards.global > 1) {
-    boosterParts.push(
-      `pessoal x${(rewards.booster / rewards.global).toFixed(1).replace(/\.0$/, "")}`,
-    );
-  }
-  const awardLabel =
-    boosterMultiplier > 1
-      ? `${label} (booster ${boosterParts.join(" · ") || `x${boosterMultiplier}`})`
-      : label;
-
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Verifica se já existe transação para esta fonte (evita duplicação)
-      const existing = await tx.xpTransaction.findUnique({
-        where: {
-          userId_source_sourceId: { userId, source, sourceId },
-        },
-      });
-      if (existing) return null;
-
-      // Busca ou cria perfil de XP do usuário
-      let userXp = await tx.userXP.findUnique({ where: { userId } });
-      if (!userXp) {
-        userXp = await tx.userXP.create({
-          data: { userId },
-        });
-      }
-
-      // Aplica XP e verifica se subiu de nível
-      const updated = applyXp(userXp.level, userXp.currentXp, userXp.totalXp, finalAmount);
-      const leveledUp = updated.level > userXp.level;
-
-      // Cria registro de transação de XP
-      await tx.xpTransaction.create({
-        data: {
-          userId,
-          amount: finalAmount,
-          source,
-          sourceId,
-          description: awardLabel,
-        },
-      });
-
-      // Atualiza perfil de XP do usuário
-      await tx.userXP.update({
-        where: { userId },
-        data: updated,
-      });
-
-      return {
-        amount: finalAmount,
-        description: awardLabel,
-        leveledUp,
-        newLevel: leveledUp ? updated.level : undefined,
-      };
-    });
-
-    if (result?.leveledUp && result.newLevel) {
-      try {
-        const { recordSocialActivity } = await import("@/services/social.service");
-        await recordSocialActivity(
-          userId,
-          "LEVEL_UP",
-          { newLevel: result.newLevel },
-          `level:${result.newLevel}`,
-        );
-      } catch {
-        // feed opcional
-      }
-    }
-
-    if (result) {
-      try {
-        if (result.leveledUp) {
-          await createNotification({
-            userId,
-            type: "LEVEL_UP",
-            title: `Nível ${result.newLevel}!`,
-            message: `Parabéns! Você subiu para o nível ${result.newLevel}.`,
-            link: "/perfil",
-          });
-        }
-      } catch (notificationError) {
-        logger.warn("Falha ao criar notificação de XP", {
-          userId,
-          error: notificationError,
-        });
-      }
-    }
-
-    return result;
+    const { award } = await internalApiPost<{ award: XpAward | null }>(
+      "/internal/v1/gamification/xp",
+      { userId, amount, source, sourceId, description },
+    );
+    return award;
   } catch (error) {
-    if (isPrismaUniqueViolation(error)) return null;
     logger.error("Erro ao conceder XP", error instanceof Error ? error : undefined, {
       userId,
       source,

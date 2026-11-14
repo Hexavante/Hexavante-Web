@@ -130,15 +130,6 @@ export function PublicProfileView({ profile, viewerId, viewerUsername }: Props) 
                 {cosmetics?.equippedTitle && (
                   <p className="mt-2 text-sm font-semibold hx-accent-text">{cosmetics.equippedTitle}</p>
                 )}
-                {cosmetics?.emojiPackEmojis && cosmetics.emojiPackEmojis.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5 text-lg leading-none">
-                    {cosmetics.emojiPackEmojis.map((emoji, index) => (
-                      <span key={index} aria-hidden>
-                        {emoji}
-                      </span>
-                    ))}
-                  </div>
-                )}
                 {user.bio && (
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">{user.bio}</p>
                 )}

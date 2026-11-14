@@ -1,10 +1,9 @@
 import { COIN_SOURCE_LABELS } from "@/lib/gamification";
-import { logger } from "@/lib/logger";
+import { internalApiPost } from "@/lib/internal-api";
 import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import { getTotalRewardMultiplier } from "@/services/booster.service";
-import { createNotification } from "@/services/notification.service";
-import type { CoinSource, CoinTransactionType } from "@prisma/client";
+import type { CoinSource } from "@prisma/client";
 
 export type CoinAward = {
   amount: number;
@@ -81,6 +80,16 @@ export async function getCoinMultiplier(userId: string): Promise<number> {
   return rewards.total;
 }
 
+/**
+ * Concede moedas ao usuário.
+ *
+ * A regra (premium × booster pessoal × global, idempotência por sourceId,
+ * espelho em `user_wallets` e notificação) vive na API — motor único usado
+ * também pelo Desktop e pelo Mobile. `baseAmount` é o valor BASE.
+ *
+ * Mesmo contrato de antes: `null` se a recompensa daquela fonte já foi dada;
+ * outras falhas lançam (após as novas tentativas do cliente interno).
+ */
 export async function awardCoins(
   userId: string,
   baseAmount: number,
@@ -90,60 +99,11 @@ export async function awardCoins(
 ): Promise<CoinAward | null> {
   if (baseAmount <= 0) return null;
 
-  const rewards = await getTotalRewardMultiplier(userId);
-  const multiplier = rewards.total;
-  const amount = Math.round(baseAmount * multiplier);
-  const label = description ?? COIN_SOURCE_LABELS[source] ?? "Moedas ganhas";
-
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      const existing = await tx.coinTransaction.findUnique({
-        where: {
-          userId_source_sourceId: { userId, source, sourceId },
-        },
-      });
-      if (existing) return null;
-
-      const user = await tx.user.update({
-        where: { id: userId },
-        data: { coins: { increment: amount } },
-        select: { coins: true },
-      });
-
-      await tx.coinTransaction.create({
-        data: {
-          userId,
-          amount,
-          type: "EARN" satisfies CoinTransactionType,
-          source,
-          sourceId,
-          description: multiplier > 1 ? `${label} (x${multiplier})` : label,
-        },
-      });
-
-      return { amount, description: label, multiplier, balance: user.coins };
-    });
-
-    if (result) {
-      await syncWalletCoins(userId, result.balance);
-      try {
-        await createNotification({
-          userId,
-          type: "COIN_EARNED",
-          title: "Moedas ganhas",
-          message: `+${result.amount} moedas — ${result.description}`,
-          link: "/shop",
-        });
-      } catch (err) {
-        logger.warn("Falha ao notificar moedas", { userId, err });
-      }
-    }
-
-    return result;
-  } catch (err) {
-    if (isPrismaUniqueViolation(err)) return null;
-    throw err;
-  }
+  const { award } = await internalApiPost<{ award: CoinAward | null }>(
+    "/internal/v1/gamification/coins",
+    { userId, amount: baseAmount, source, sourceId, description },
+  );
+  return award;
 }
 
 export async function spendCoins(

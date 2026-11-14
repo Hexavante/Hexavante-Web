@@ -2,6 +2,8 @@ import { cache } from "react";
 import { getAvatarBorderClassName, resolveAppTheme, resolveProfileIcon } from "@/lib/cosmetics";
 import { buildPremiumStatus } from "@/lib/premium";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import { createNotification } from "@/services/notification.service";
 import { RETIRED_SHOP_CATEGORIES, SHOP_CATALOG } from "@/lib/shop-catalog";
 import {
   computeTemporaryExpiry,
@@ -30,7 +32,106 @@ type TemporaryMetadata = {
   durationDays?: number;
 };
 
+function isKnownRaceError(error: unknown): boolean {
+  const code = (error as { code?: string } | null)?.code;
+  // P2002: outro processo já criou o reembolso; P2025: já removeu o item.
+  return code === "P2002" || code === "P2025";
+}
+
+/**
+ * Pacotes de emoji saíram da plataforma. Cada compra é reembolsada UMA vez,
+ * com o valor exato pago (transação SHOP_PURCHASE), e o item sai do
+ * inventário — tudo na mesma transação.
+ *
+ * Roda junto com a sincronização do catálogo. Idempotente: o reembolso tem
+ * sourceId fixo (unique) e, depois da primeira execução, não sobra inventário
+ * de EMOJI_PACK — vira uma consulta vazia.
+ */
+export async function retireEmojiPacks(): Promise<{ refunded: number; removed: number }> {
+  const owned = await prisma.userInventory.findMany({
+    where: { storeItem: { category: "EMOJI_PACK" } },
+    select: { id: true, userId: true, storeItemId: true, storeItem: { select: { name: true } } },
+  });
+
+  let refunded = 0;
+  let removed = 0;
+
+  for (const entry of owned) {
+    try {
+      const amount = await prisma.$transaction(async (tx) => {
+        const purchase = await tx.coinTransaction.findUnique({
+          where: {
+            userId_source_sourceId: {
+              userId: entry.userId,
+              source: "SHOP_PURCHASE",
+              sourceId: entry.storeItemId,
+            },
+          },
+          select: { amount: true },
+        });
+        const paid = purchase ? Math.abs(purchase.amount) : 0;
+
+        if (paid > 0) {
+          await tx.coinTransaction.create({
+            data: {
+              userId: entry.userId,
+              amount: paid,
+              type: "EARN",
+              source: "ADMIN",
+              sourceId: `refund-emoji-pack:${entry.storeItemId}`,
+              description: `Reembolso: ${entry.storeItem.name} (removido da loja)`,
+            },
+          });
+          const user = await tx.user.update({
+            where: { id: entry.userId },
+            data: { coins: { increment: paid } },
+            select: { coins: true },
+          });
+          await tx.userWallet.upsert({
+            where: { userId: entry.userId },
+            create: { userId: entry.userId, coins: user.coins },
+            update: { coins: user.coins },
+          });
+        }
+
+        await tx.userInventory.delete({ where: { id: entry.id } });
+        return paid;
+      });
+
+      removed += 1;
+      if (amount > 0) {
+        refunded += 1;
+        await createNotification({
+          userId: entry.userId,
+          type: "COIN_EARNED",
+          title: "Moedas devolvidas",
+          message: `Os pacotes de emoji saíram da loja. Devolvemos ${amount} moedas pelo ${entry.storeItem.name}.`,
+          link: "/shop",
+          skipDedupe: true,
+        }).catch((error) => logger.warn("Falha ao notificar reembolso de emoji", { error }));
+      }
+    } catch (error) {
+      if (isKnownRaceError(error)) continue;
+      logger.error("Falha ao reembolsar pacote de emoji", error instanceof Error ? error : undefined, {
+        inventoryId: entry.id,
+      });
+    }
+  }
+
+  await prisma.storeItem.updateMany({
+    where: { category: "EMOJI_PACK", isActive: true },
+    data: { isActive: false },
+  });
+
+  return { refunded, removed };
+}
+
 async function syncShopCatalog(): Promise<void> {
+  // Nunca bloqueia a loja/cadastro: se falhar, tenta de novo na próxima sync.
+  await retireEmojiPacks().catch((error) =>
+    logger.error("Falha ao aposentar pacotes de emoji", error instanceof Error ? error : undefined),
+  );
+
   if (DEPRECATED_SHOP_SLUGS.length > 0) {
     await prisma.storeItem.updateMany({
       where: { slug: { in: DEPRECATED_SHOP_SLUGS } },
@@ -304,7 +405,6 @@ const EQUIPPABLE_CATEGORIES: StoreItemCategory[] = [
   "COSMETIC",
   "BADGE",
   "FRAME",
-  "EMOJI_PACK",
   "PROFILE_BACKGROUND",
 ];
 
@@ -374,8 +474,6 @@ function validateEquipMetadata(category: StoreItemCategory, metadata: unknown): 
       return typeof meta.badgeId === "string";
     case "FRAME":
       return typeof meta.frameId === "string";
-    case "EMOJI_PACK":
-      return typeof meta.emojiPackId === "string" && Array.isArray(meta.emojis);
     case "PROFILE_BACKGROUND":
       return typeof meta.backgroundId === "string";
     default:
@@ -432,7 +530,6 @@ export const getProfileCosmetics = cache(async (userId: string) => {
   const badge = equipped.find((e) => e.storeItem.category === "BADGE");
   const frame = equipped.find((e) => e.storeItem.category === "FRAME");
   const background = equipped.find((e) => e.storeItem.category === "PROFILE_BACKGROUND");
-  const emojiPack = equipped.find((e) => e.storeItem.category === "EMOJI_PACK");
 
   const titleMeta = title?.storeItem.metadata as { titleText?: string } | null;
   const borderMeta = border?.storeItem.metadata as { borderId?: string; rarity?: string } | null;
@@ -447,10 +544,6 @@ export const getProfileCosmetics = cache(async (userId: string) => {
     backgroundId?: string;
     rarity?: string;
   } | null;
-  const emojiMeta = emojiPack?.storeItem.metadata as {
-    emojiPackId?: string;
-    emojis?: unknown;
-  } | null;
 
   const themeId = themeMeta?.themeId ?? null;
   const resolvedThemeId = themeId === "default" ? null : themeId;
@@ -458,10 +551,6 @@ export const getProfileCosmetics = cache(async (userId: string) => {
   const profileIconId =
     cosmeticMeta?.cosmeticType === "profile_icon" ? (cosmeticMeta.iconId ?? null) : null;
   const appTheme = resolveAppTheme(resolvedThemeId);
-
-  const emojiList = Array.isArray(emojiMeta?.emojis)
-    ? (emojiMeta!.emojis as unknown[]).filter((e) => typeof e === "string").map(String)
-    : null;
 
   return {
     equippedTitle: titleMeta?.titleText ?? title?.storeItem.name ?? null,
@@ -483,7 +572,5 @@ export const getProfileCosmetics = cache(async (userId: string) => {
     frameRarity: frameMeta?.rarity ?? null,
     profileBackgroundId: backgroundMeta?.backgroundId ?? null,
     profileBackgroundRarity: backgroundMeta?.rarity ?? null,
-    emojiPackId: emojiMeta?.emojiPackId ?? null,
-    emojiPackEmojis: emojiList,
   };
 });
