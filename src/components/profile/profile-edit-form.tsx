@@ -113,7 +113,7 @@ const fieldConfigs: FieldConfig[] = [
   ];
 
   return (
-    <Card padding="lg" className={cn(themeUi.cardEntrance, themeUi.hoverLift)}>
+    <Card padding="lg" className={themeUi.hoverLift}>
       <h2 className="text-lg font-bold text-white">Dados pessoais</h2>
       <p className="mt-1 text-sm text-slate-400">
         Atualize suas informações públicas e de contato.
