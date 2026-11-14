@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -69,16 +69,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
     new Set(dailyPlan.tasks.filter((t) => t.completed).map((t) => t.id))
   );
   const [animatingTask, setAnimatingTask] = useState<string | null>(null);
-  const [visibleTasks, setVisibleTasks] = useState<Set<number>>(new Set());
   const [showConfetti, setShowConfetti] = useState(false);
-
-  useEffect(() => {
-    dailyPlan.tasks.forEach((_, i) => {
-      setTimeout(() => {
-        setVisibleTasks((prev) => new Set(prev).add(i));
-      }, 100 + i * 80);
-    });
-  }, [dailyPlan.tasks.length]);
 
   const handleCompleteTask = async (task: DailyPlanTask) => {
     if (completedTasks.has(task.id)) return;
@@ -117,7 +108,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
   return (
     <section data-tour="daily-study-plan">
       {/* Header */}
-      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-slide-in-left">
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ">
         <div className="flex items-center gap-3">
           <span className="hx-icon-box bg-gradient-to-br from-amber-400 to-orange-400 text-white animate-pulse-subtle">
             <BookOpen className="h-5 w-5" />
@@ -145,7 +136,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
         </div>
 
         {/* Progress Ring */}
-        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center ">
           <svg className="h-full w-full transform -rotate-90" viewBox="0 0 100 100">
             <circle
               cx="50"
@@ -186,7 +177,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
       </div>
 
       {/* Rewards Preview */}
-      <div className="mb-5 grid gap-3 sm:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+      <div className="mb-5 grid gap-3 sm:grid-cols-3 ">
         <div className="rounded-lg border border-white/10 bg-[var(--surface)] p-3 text-center group/hx-lift">
           <div className="flex items-center justify-center gap-1.5 text-sky-300">
             <Zap className="h-4 w-4" />
@@ -214,10 +205,9 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
 
       {/* Tasks Grid */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {dailyPlan.tasks.map((task, i) => {
+        {dailyPlan.tasks.map((task) => {
           const isCompleted = completedTasks.has(task.id);
           const isAnimating = animatingTask === task.id;
-          const isVisible = visibleTasks.has(i);
           const Icon = TASK_ICONS[task.type];
 
           return (
@@ -225,14 +215,8 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
               key={task.id}
               className={cn(
                 "relative group hx-lift overflow-hidden",
-                !isVisible && "opacity-0 translate-y-4 scale-95",
-                isVisible && "animate-slide-in-up",
                 isAnimating && "animate-bounce-in ring-2 ring-emerald-400/50",
               )}
-              style={{
-                animationDelay: `${0.2 + i * 0.08}s`,
-                transitionDelay: `${0.2 + i * 0.08}s`,
-              }}
             >
               <Card
                 padding="md"
@@ -245,7 +229,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                 )}
               >
                 {/* Task type badge */}
-                <div className="absolute top-3 right-3 z-10 animate-fade-in-down" style={{ animationDelay: "0.05s" }}>
+                <div className="absolute top-3 right-3 z-10 ">
                   <Badge
                     variant={isCompleted ? "emerald" : "sky"}
                     className={cn(
@@ -260,7 +244,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                 {/* Completion checkmark overlay */}
                 {isCompleted && (
                   <div
-                    className="absolute inset-0 flex items-center justify-center z-10 animate-scale-in bg-emerald-400/10"
+                    className="absolute inset-0 flex items-center justify-center z-10 bg-emerald-400/10"
                     aria-hidden="true"
                   >
                     <CheckCircle className="h-12 w-12 text-emerald-400" />
@@ -269,7 +253,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
 
                 <div className={cn("relative flex flex-col h-full", isCompleted && "pointer-events-none")}>
                   {/* Icon & Title */}
-                  <div className="flex items-start gap-3 mb-3 animate-fade-in-left">
+                  <div className="flex items-start gap-3 mb-3 ">
                     <span
                       className={cn(
                         "hx-icon-box flex-shrink-0 transition-all duration-300 group-hover:scale-110",
@@ -297,7 +281,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                   </div>
 
                   {/* Meta info */}
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mb-3 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mb-3 ">
                     <span className="inline-flex items-center gap-1">
                       <Clock className="h-2.5 w-2.5" />
                       {formatMinutes(task.estimatedMinutes)}
@@ -313,7 +297,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                   </div>
 
                   {/* Priority indicator */}
-                  <div className="mb-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+                  <div className="mb-3 ">
                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className={cn(
@@ -377,7 +361,7 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
       </div>
 
       {/* CTA to full plan page */}
-      <div className="mt-6 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
+      <div className="mt-6 ">
         <Link
           href="/plano-diario"
           className="w-full hx-lift flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-3 text-sm font-semibold hx-text-body hover:border-[hsl(var(--sidebar-highlight))/0.3] hover:bg-[hsl(var(--sidebar-highlight))/0.06] transition-all"

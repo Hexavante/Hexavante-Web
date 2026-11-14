@@ -42,7 +42,7 @@ export function DeviceRow({ device, isCurrent }: { device: DeviceInfo; isCurrent
   };
 
   return (
-    <div className="anim-enter-fade flex flex-wrap items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+    <div className=" flex flex-wrap items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300">
         <MonitorSmartphone className="h-5 w-5" />
       </span>

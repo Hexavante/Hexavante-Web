@@ -119,7 +119,7 @@ const fieldConfigs: FieldConfig[] = [
         Atualize suas informações públicas e de contato.
       </p>
 
-      <form action={formAction} className={cn("mt-5 space-y-5", themeUi.stagger)} noValidate>
+      <form action={formAction} className="mt-5 space-y-5" noValidate>
         {fieldConfigs.map((field) => {
           const fieldName = field.name as keyof ProfileData;
           const error = state.fieldErrors?.[fieldName];
@@ -195,7 +195,7 @@ const fieldConfigs: FieldConfig[] = [
               {hasError && (
                 <p
                   id={`${fieldId}-error`}
-                  className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 animate-fade-in"
+                  className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 "
                   role="alert"
                 >
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />

@@ -178,26 +178,6 @@
 }
 
 /* Animation Utilities */
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.3s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .animate-bounce-in {
   animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -242,37 +222,6 @@
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Staggered Animation Container */
-.stagger-children > * {
-  opacity: 0;
-  animation: fade-in-up 0.3s ease-out forwards;
-}
-
-.stagger-children > *:nth-child(1) {
-  animation-delay: 0ms;
-}
-.stagger-children > *:nth-child(2) {
-  animation-delay: 50ms;
-}
-.stagger-children > *:nth-child(3) {
-  animation-delay: 100ms;
-}
-.stagger-children > *:nth-child(4) {
-  animation-delay: 150ms;
-}
-.stagger-children > *:nth-child(5) {
-  animation-delay: 200ms;
-}
-.stagger-children > *:nth-child(6) {
-  animation-delay: 250ms;
-}
-.stagger-children > *:nth-child(7) {
-  animation-delay: 300ms;
-}
-.stagger-children > *:nth-child(8) {
-  animation-delay: 350ms;
-}
-
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -303,12 +252,6 @@
   animation: pulse-glow 1.5s infinite;
 }
 
-/* Card Entrance */
-.card-entrance {
-  animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  opacity: 0;
-}
-
 /* Button Press */
 .btn-press:active {
   transform: scale(0.98);
@@ -330,15 +273,6 @@
     rgba(255, 255, 255, 0) 100%
   );
   background-size: 200% 100%;
-}
-
-/* Page Transition */
-.page-enter {
-  animation: fade-in 0.3s ease-out;
-}
-
-.page-exit {
-  animation: fade-in 0.2s ease-in reverse;
 }
 
 /* Modal/Dialog Animations */
@@ -621,53 +555,7 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-.anim-enter {
-  opacity: 0;
-  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.anim-enter-fade {
-  opacity: 0;
-  animation: fade-in 0.5s ease forwards;
-}
-
-.anim-enter-scale {
-  opacity: 0;
-  animation: scale-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.anim-d1 { animation-delay: 0.05s; }
-.anim-d2 { animation-delay: 0.12s; }
-.anim-d3 { animation-delay: 0.2s; }
-.anim-d4 { animation-delay: 0.28s; }
-.anim-d5 { animation-delay: 0.36s; }
-.anim-d6 { animation-delay: 0.44s; }
-.anim-d7 { animation-delay: 0.52s; }
-.anim-d8 { animation-delay: 0.6s; }
-
 /* ═══ Sidebar Nav Animations ════════════════════════════════════════════ */
-
-@keyframes sidebar-section-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes sidebar-item-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-8px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
 
 @keyframes sidebar-icon-pulse {
   0%, 100% {
@@ -678,35 +566,9 @@
   }
 }
 
-.sidebar-section-animate {
-  opacity: 0;
-  animation: sidebar-section-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.sidebar-item-animate {
-  opacity: 0;
-  animation: sidebar-item-enter 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.sidebar-item-animate:hover .hx-sidebar-link-icon {
+.hx-sidebar-link:hover .hx-sidebar-link-icon {
   animation: sidebar-icon-pulse 0.4s ease;
 }
-
-/* Section stagger delays */
-.sidebar-section-animate:nth-child(1) { animation-delay: 0.05s; }
-.sidebar-section-animate:nth-child(2) { animation-delay: 0.15s; }
-.sidebar-section-animate:nth-child(3) { animation-delay: 0.25s; }
-.sidebar-section-animate:nth-child(4) { animation-delay: 0.35s; }
-.sidebar-section-animate:nth-child(5) { animation-delay: 0.45s; }
-
-/* Item stagger delays within a section */
-.sidebar-item-animate:nth-child(1) { animation-delay: 0.08s; }
-.sidebar-item-animate:nth-child(2) { animation-delay: 0.13s; }
-.sidebar-item-animate:nth-child(3) { animation-delay: 0.18s; }
-.sidebar-item-animate:nth-child(4) { animation-delay: 0.23s; }
-.sidebar-item-animate:nth-child(5) { animation-delay: 0.28s; }
-.sidebar-item-animate:nth-child(6) { animation-delay: 0.33s; }
-.sidebar-item-animate:nth-child(7) { animation-delay: 0.38s; }
 
 /* ═══ Coin Explosion (Canvas-based, see coin-explosion.tsx) ═════════════ */
 
@@ -1156,25 +1018,6 @@ html[data-theme-mode="light"] .hx-conclusao-logo {
   }
 }
 
-@keyframes slide-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-in-up {
-  animation: slide-in-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.animate-fade-in-down {
-  animation: fade-in 0.3s ease-out;
-}
-
 @keyframes pulse-subtle {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -1191,46 +1034,6 @@ html[data-theme-mode="light"] .hx-conclusao-logo {
 
 .animate-spin-reverse {
   animation: spin-reverse 20s linear infinite;
-}
-
-/* Intro chip animation */
-@keyframes intro-chip-pop {
-  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
-  60% { opacity: 1; transform: translateY(-2px) scale(1.02); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.hx-intro-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.03);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: hsl(var(--sidebar-foreground));
-  transition: all 0.2s ease;
-  opacity: 0;
-  animation: intro-chip-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.hx-intro-chip:hover {
-  border-color: hsl(var(--sidebar-highlight)/0.5);
-  background: hsl(var(--sidebar-highlight)/0.1);
-  color: hsl(var(--sidebar-highlight));
-}
-
-.hx-intro-chip:nth-child(1) { animation-delay: 0.1s; }
-.hx-intro-chip:nth-child(2) { animation-delay: 0.18s; }
-.hx-intro-chip:nth-child(3) { animation-delay: 0.26s; }
-
-@media (prefers-reduced-motion: reduce) {
-  .hx-intro-chip {
-    animation: none;
-    opacity: 1;
-  }
 }
 
 /* Progress track utilities */

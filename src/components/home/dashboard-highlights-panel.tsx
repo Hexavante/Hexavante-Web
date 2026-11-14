@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Calendar, Radio, Target, Award, ExternalLink, Clock, CheckCircle, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -34,23 +34,7 @@ function formatRelativeTime(date: Date): string {
 
 export function DashboardHighlightsPanel({ highlights }: Props) {
   const { nextGoal, lastCertificate, nextLiveEvent } = highlights;
-  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-
-  useEffect(() => {
-    const cards = ["goal", "certificate", "live"].filter((c) => {
-      if (c === "goal") return nextGoal;
-      if (c === "certificate") return lastCertificate;
-      if (c === "live") return nextLiveEvent;
-      return false;
-    });
-
-    cards.forEach((card, i) => {
-      setTimeout(() => {
-        setVisibleCards((prev) => new Set(prev).add(card));
-      }, 100 + i * 120);
-    });
-  }, [nextGoal, lastCertificate, nextLiveEvent]);
 
   const hasContent = nextGoal || lastCertificate || nextLiveEvent;
 
@@ -60,15 +44,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
     <section className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-5" data-tour="dashboard-highlights">
       {nextGoal && (
         <div
-          className={cn(
-            "relative group hx-lift overflow-hidden",
-            !visibleCards.has("goal") && "opacity-0 translate-y-6",
-            visibleCards.has("goal") && "animate-slide-in-up",
-          )}
-          style={{
-            animationDelay: "0.1s",
-            transitionDelay: "0.1s",
-          }}
+          className="relative group hx-lift overflow-hidden"
           onMouseEnter={() => setHoveredCard("goal")}
           onMouseLeave={() => setHoveredCard(null)}
         >
@@ -93,7 +69,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
             </div>
 
             <div className="relative flex flex-col h-full z-10">
-              <div className="flex items-start gap-3 animate-fade-in-left">
+              <div className="flex items-start gap-3 ">
                 <span className={cn(
                   "hx-icon-box flex-shrink-0 transition-all duration-300 group-hover:scale-110",
                   "bg-[hsl(var(--sidebar-highlight))/0.15] hx-accent-text",
@@ -117,7 +93,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between ">
                 <div>
                   <div className="mb-2 flex justify-between text-xs text-slate-400">
                     <span>Progresso</span>
@@ -144,8 +120,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
 
               <Link
                 href={`/courses/${nextGoal.courseSlug}/learn`}
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold hx-accent-link group-hover:gap-2 transition-all animate-fade-in-up"
-                style={{ animationDelay: "0.15s" }}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold hx-accent-link group-hover:gap-2 transition-all "
               >
                 Ir para o curso
                 <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -157,15 +132,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
 
       {lastCertificate && (
         <div
-          className={cn(
-            "relative group hx-lift overflow-hidden",
-            !visibleCards.has("certificate") && "opacity-0 translate-y-6",
-            visibleCards.has("certificate") && "animate-slide-in-up",
-          )}
-          style={{
-            animationDelay: "0.2s",
-            transitionDelay: "0.2s",
-          }}
+          className="relative group hx-lift overflow-hidden"
           onMouseEnter={() => setHoveredCard("certificate")}
           onMouseLeave={() => setHoveredCard(null)}
         >
@@ -189,7 +156,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
             </div>
 
             <div className="relative flex flex-col h-full z-10">
-              <div className="flex items-start gap-3 animate-fade-in-left">
+              <div className="flex items-start gap-3 ">
                 <span className={cn(
                   "hx-icon-box flex-shrink-0 transition-all duration-300 group-hover:scale-110 animate-bounce-subtle",
                   "bg-amber-400/15 text-amber-300",
@@ -203,7 +170,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between ">
                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Emitido em {new Date(lastCertificate.issuedAt).toLocaleDateString("pt-BR")}</span>
@@ -218,8 +185,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
 
               <Link
                 href={`/certificados/${lastCertificate.id}`}
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-300 hover:text-amber-200 transition-colors animate-fade-in-up"
-                style={{ animationDelay: "0.15s" }}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-300 hover:text-amber-200 transition-colors "
               >
                 Ver certificado
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -231,15 +197,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
 
       {nextLiveEvent && (
         <div
-          className={cn(
-            "relative group hx-lift overflow-hidden",
-            !visibleCards.has("live") && "opacity-0 translate-y-6",
-            visibleCards.has("live") && "animate-slide-in-up",
-          )}
-          style={{
-            animationDelay: "0.3s",
-            transitionDelay: "0.3s",
-          }}
+          className="relative group hx-lift overflow-hidden"
           onMouseEnter={() => setHoveredCard("live")}
           onMouseLeave={() => setHoveredCard(null)}
         >
@@ -281,7 +239,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
             </div>
 
             <div className="relative flex flex-col h-full z-10">
-              <div className="flex items-start gap-3 animate-fade-in-left">
+              <div className="flex items-start gap-3 ">
                 <span
                   className={cn(
                     "grid h-10 w-10 shrink-0 place-items-center rounded-lg border transition-all duration-300 group-hover:scale-110",
@@ -311,7 +269,7 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="mt-4 flex-1 flex flex-wrap gap-x-3 gap-y-2 items-end justify-between ">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatEventDate(nextLiveEvent.scheduledAt)}</span>
@@ -324,12 +282,11 @@ export function DashboardHighlightsPanel({ highlights }: Props) {
               <Link
                 href={nextLiveEvent.href}
                 className={cn(
-                  "mt-4 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors animate-fade-in-up",
+                  "mt-4 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ",
                   nextLiveEvent.status === "LIVE"
                     ? "text-red-300 hover:text-red-200"
                     : "text-violet-300 hover:text-violet-200",
                 )}
-                style={{ animationDelay: "0.15s" }}
               >
                 {nextLiveEvent.status === "LIVE" ? "Entrar agora" : "Ver sala"}
                 <ExternalLink className="h-3.5 w-3.5" />

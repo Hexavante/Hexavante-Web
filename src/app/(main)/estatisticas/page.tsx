@@ -29,7 +29,7 @@ export default async function StatisticsPage() {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Progresso"
           icon={BarChart3}
@@ -39,7 +39,7 @@ export default async function StatisticsPage() {
       </div>
 
       {loadError ? (
-        <div className="anim-enter anim-d2 mt-8 flex flex-col items-center gap-4 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-12 text-center">
+        <div className=" mt-8 flex flex-col items-center gap-4 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-12 text-center">
           <BarChart3 className="h-10 w-10 text-red-400" aria-hidden />
           <p className="text-lg font-semibold text-white">Não foi possível carregar as estatísticas</p>
           <p className="max-w-md text-sm text-slate-400">
@@ -52,12 +52,12 @@ export default async function StatisticsPage() {
         </div>
       ) : stats && charts ? (
         /* Usuário com dados */
-        <div className="anim-enter anim-d2">
+        <div className=" ">
           <PersonalStatsView stats={stats} charts={charts} variant="full" showHeader={false} />
         </div>
       ) : (
         /* Usuário novo sem histórico — estado vazio útil */
-        <div className="anim-enter anim-d2 mt-8 flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
+        <div className=" mt-8 flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
           <BarChart3 className="h-12 w-12 text-slate-500" aria-hidden />
           <div>
             <p className="text-xl font-bold text-white">Nada por aqui ainda</p>

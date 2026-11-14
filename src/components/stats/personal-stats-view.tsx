@@ -71,7 +71,7 @@ export function PersonalStatsView({
   return (
     <section data-tour={tourId} className="space-y-6">
       {showHeader ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+        <div className="flex flex-wrap items-center justify-between gap-3 ">
           <div>
             <div className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 hx-accent-text" />
@@ -91,7 +91,7 @@ export function PersonalStatsView({
       ) : null}
 
       {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-1 bg-[var(--surface)] rounded-xl p-1 border border-white/5 animate-slide-in-up">
+      <div className="flex flex-wrap gap-1 bg-[var(--surface)] rounded-xl p-1 border border-white/5 ">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -110,7 +110,7 @@ export function PersonalStatsView({
       </div>
 
       {/* Tab Content */}
-      <div className="animate-fade-in-up">
+      <div className=" ">
         {activeTab === "overview" && mounted && charts && renderOverviewTab(stats, charts)}
         {activeTab === "progress" && mounted && charts && renderProgressTab(stats, charts)}
         {activeTab === "skills" && mounted && charts && renderSkillsTab(stats, charts)}

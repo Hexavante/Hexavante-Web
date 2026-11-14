@@ -80,11 +80,11 @@ export default async function RankingPage({ searchParams }: Props) {
 
   return (
     <PageShell size="md">
-      <AppLink href="/perfil" muted className="mb-4 inline-flex items-center gap-1 anim-enter-fade anim-d1">
+      <AppLink href="/perfil" muted className="mb-4 inline-flex items-center gap-1 ">
         ← Meu perfil
       </AppLink>
 
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Ligas"
           icon={Trophy}
@@ -94,19 +94,19 @@ export default async function RankingPage({ searchParams }: Props) {
       </div>
 
       {session?.user && standing && (
-        <div className="mt-4 anim-enter anim-d2">
+        <div className="mt-4 ">
           <RankingSeasonPanel standing={standing} pendingRewards={pendingRewards} />
         </div>
       )}
 
-      <div className="mt-6 space-y-3 anim-enter-fade anim-d2">
+      <div className="mt-6 space-y-3 ">
         <RankingFilters current={period} />
         {period === "month" && (
           <RankingLeagueFilters current={leagueFilter} period={period} />
         )}
       </div>
 
-      <div className="anim-enter anim-d3">
+      <div className=" ">
         {error ? (
           <Alert variant="danger" className="mt-6 p-6 text-center">
             Erro ao carregar ranking. Tente novamente mais tarde.

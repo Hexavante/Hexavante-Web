@@ -85,7 +85,7 @@ export const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttribut
     <div
       ref={ref}
       className={cn(
-        "relative z-50 min-w-[8rem] overflow-hidden rounded-lg border border-white/10 bg-slate-950 p-1 text-white shadow-md animate-fade-in-up",
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-lg border border-white/10 bg-slate-950 p-1 text-white shadow-md dropdown-enter",
         className,
       )}
       {...props}

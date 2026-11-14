@@ -15,7 +15,7 @@ export default async function DispositivosPage() {
 
   return (
     <PageShell size="md">
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Segurança"
           icon={MonitorSmartphone}
@@ -30,7 +30,7 @@ export default async function DispositivosPage() {
           <a href="/configuracoes/dispositivos" className="mt-3 inline-block underline">Tentar novamente</a>
         </div>
       ) : devices.length === 0 ? (
-        <div className="anim-enter-fade anim-d2">
+        <div className=" ">
           <EmptyState
             icon={MonitorSmartphone}
             title="Nenhum dispositivo registrado."
@@ -40,11 +40,11 @@ export default async function DispositivosPage() {
       ) : (
         <div className="space-y-3">
           {devices.map((device, i) => (
-            <div key={device.id} className="anim-enter-fade" style={{ animationDelay: `${0.05 + i * 0.06}s` }}>
+            <div key={device.id} className=" ">
               <DeviceRow device={device} isCurrent={false} />
             </div>
           ))}
-          <p className="anim-enter-fade pt-2 text-xs text-slate-500">
+          <p className=" pt-2 text-xs text-slate-500">
             Os dispositivos estão ordenados pelo último acesso. Ao desconectar um dispositivo, as
             sessões dele são encerradas.
           </p>

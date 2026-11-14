@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -79,36 +78,23 @@ const PENDING_ICONS: Record<DashboardPendingItem["tone"], LucideIcon> = {
 };
 
 export function DashboardCommandCenter({ pendingItems }: Props) {
-  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      pendingItems.forEach((_, i) => {
-        setTimeout(() => {
-          setVisibleItems((prev) => new Set(prev).add(i));
-        }, 50 + i * 80);
-      });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [pendingItems.length]);
-
   return (
     <section data-tour="dashboard-command">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3 animate-slide-in-left">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3 ">
         <div>
-          <div className="flex items-center gap-2 hx-accent-text animate-fade-in">
+          <div className="flex items-center gap-2 hx-accent-text ">
             <Zap className="h-4 w-4 animate-pulse-subtle" />
             <p className="text-xs font-bold uppercase tracking-wide">Central de estudos</p>
           </div>
-          <h2 className="mt-1 text-lg font-bold hx-text-title animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+          <h2 className="mt-1 text-lg font-bold hx-text-title ">
             Sua rotina de hoje
           </h2>
-          <p className="mt-1 text-sm hx-text-muted animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <p className="mt-1 text-sm hx-text-muted ">
             Um clique para a próxima ação importante.
           </p>
         </div>
         {pendingItems.length > 0 && (
-          <span className="animate-fade-in shrink-0" style={{ animationDelay: "0.15s" }}>
+          <span className=" shrink-0">
             <Badge variant="outline" className="text-xs">
               {pendingItems.filter((i) => !i.id.includes("streak")).length} ações pendentes
             </Badge>
@@ -117,22 +103,13 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
       </div>
 
       {pendingItems.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          {pendingItems.map((item, i) => {
+        <div className="grid gap-3 sm:grid-cols-2 ">
+          {pendingItems.map((item) => {
             const Icon = PENDING_ICONS[item.tone];
-            const isVisible = visibleItems.has(i);
             return (
               <div
                 key={item.id}
-                className={cn(
-                  "hx-lift group relative overflow-hidden",
-                  !isVisible && "opacity-0 translate-y-4",
-                  isVisible && "animate-slide-in-up",
-                )}
-                style={{
-                  animationDelay: `${0.15 + i * 0.08}s`,
-                  transitionDelay: `${0.15 + i * 0.08}s`,
-                }}
+                className="hx-lift group relative overflow-hidden"
               >
                 <Link
                   href={item.href}
@@ -182,13 +159,13 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
         </div>
       )}
 
-      <Card padding="md" className="mt-7 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+      <Card padding="md" className="mt-7 ">
         <div className="flex items-center justify-between mb-3">
           <p className="text-base font-bold hx-text-title">Atalhos rápidos</p>
           <span className="text-xs text-slate-500">{DASHBOARD_QUICK_ACTIONS.length} disponíveis</span>
         </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-3">
-          {DASHBOARD_QUICK_ACTIONS.map((action, i) => {
+          {DASHBOARD_QUICK_ACTIONS.map((action) => {
             const meta = QUICK_ACTION_META[action.href] ?? defaultQuickMeta;
             return (
               <Link
@@ -199,7 +176,6 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
                   meta.tone,
                   "hover:shadow-md hover:shadow-[hsl(var(--sidebar-highlight))/0.05]",
                 )}
-                style={{ animationDelay: `${0.35 + i * 0.05}s` }}
               >
                 <span
                   className={cn(

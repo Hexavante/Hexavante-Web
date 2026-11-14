@@ -63,7 +63,7 @@ export function CourseRecommendations({ courses }: Props) {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {courses.map((course, i) => (
-          <div key={course.id} className="anim-enter-scale" style={{ animationDelay: `${0.05 + i * 0.07}s` }}>
+          <div key={course.id} className=" ">
           <Link href={`/courses/${course.slug}`}>
             <Card
               padding="md"

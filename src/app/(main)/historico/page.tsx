@@ -137,7 +137,7 @@ export default async function HistoricoPage({ searchParams }: Props) {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Minha jornada"
           icon={History}
@@ -156,13 +156,13 @@ export default async function HistoricoPage({ searchParams }: Props) {
         />
       </div>
 
-      <div className="mb-6 anim-enter anim-d2">
+      <div className="mb-6 ">
         <Suspense>
           <HistoricoTabs activeTab={aba} />
         </Suspense>
       </div>
 
-      <div className="anim-enter anim-d3">{content}</div>
+      <div className=" ">{content}</div>
     </PageShell>
   );
 }

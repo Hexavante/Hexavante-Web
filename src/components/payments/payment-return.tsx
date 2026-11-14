@@ -298,7 +298,7 @@ export function PaymentReturn({ externalReference }: Props) {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-16">
       <div
-        className="hx-card anim-enter w-full max-w-lg p-8 text-center"
+        className="hx-card w-full max-w-lg p-8 text-center"
         aria-live="polite"
       >
         {content}

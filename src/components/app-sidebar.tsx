@@ -167,7 +167,7 @@ function NavSectionBlock({
   if (!visible.length) return null;
 
   return (
-    <SidebarGroup className="px-2 py-1 sidebar-section-animate" style={{ animationDelay: `${0.05 + sectionIndex * 0.12}s` }}>
+    <SidebarGroup className="px-2 py-1 ">
       <SidebarGroupLabel className="hx-sidebar-group-label">{section.label}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-0.5">
@@ -176,7 +176,7 @@ function NavSectionBlock({
             const active = isActive(pathname, item.href.split("?")[0]);
 
             return (
-              <SidebarMenuItem key={item.href} className="sidebar-item-animate" style={{ animationDelay: `${0.08 + sectionIndex * 0.12 + itemIndex * 0.05}s` }}>
+              <SidebarMenuItem key={item.href} className=" ">
                 <SidebarMenuButton
                   asChild
                   isActive={active}

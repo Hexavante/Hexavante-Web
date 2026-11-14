@@ -64,7 +64,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
   if (state?.ok) {
     return (
       <AuthPageShell>
-        <p className="anim-enter-fade text-center text-sm text-slate-400">
+        <p className=" text-center text-sm text-slate-400">
           Verificado! Redirecionando...
         </p>
       </AuthPageShell>
@@ -73,8 +73,8 @@ function VerificarDispositivoForm({ searchParams }: Props) {
 
   return (
     <AuthPageShell>
-      <div className="anim-enter-fade mb-6 text-center">
-        <div className="anim-enter-scale mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-cyan-400/25 bg-cyan-400/10">
+      <div className=" mb-6 text-center">
+        <div className=" mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-cyan-400/25 bg-cyan-400/10">
           <MonitorSmartphone className="h-7 w-7 text-cyan-300" />
         </div>
         <p className="text-xs font-semibold uppercase tracking-wide text-sky-300">
@@ -92,7 +92,7 @@ function VerificarDispositivoForm({ searchParams }: Props) {
         </p>
       </div>
 
-      <form action={action} className="anim-enter-fade space-y-4" style={{ animationDelay: "0.1s" }}>
+      <form action={action} className=" space-y-4">
         <div>
           <Label htmlFor="code">Código de verificação</Label>
           <Input

@@ -56,12 +56,12 @@ export function ThemeEquipOverlay() {
   return (
     <div
       className={`fixed inset-0 z-[9998] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
-        leaving ? "opacity-0" : "animate-fade-in opacity-100"
+        leaving ? "opacity-0" : "modal-overlay-enter opacity-100"
       }`}
       aria-live="polite"
     >
       <div
-        className="hx-dark-surface animate-scale-in relative overflow-hidden rounded-2xl border border-white/15 bg-[#0b0e1a] px-10 py-8 text-center shadow-2xl"
+        className="hx-dark-surface modal-content-enter relative overflow-hidden rounded-2xl border border-white/15 bg-[#0b0e1a] px-10 py-8 text-center shadow-2xl"
         style={{ boxShadow: `0 0 80px ${c1}55, 0 25px 60px rgb(0 0 0 / 0.6)` }}
       >
         <div

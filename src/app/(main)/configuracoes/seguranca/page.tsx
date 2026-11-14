@@ -15,7 +15,7 @@ export default async function SegurancaPage() {
 
   return (
     <PageShell size="md">
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Conta"
           icon={ShieldCheck}
@@ -24,7 +24,7 @@ export default async function SegurancaPage() {
         />
       </div>
 
-      <div className="anim-enter anim-d2 space-y-4">
+      <div className=" space-y-4">
         <TwoFactorManager initialEnabled={profile.twoFactorEnabled} />
 
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">

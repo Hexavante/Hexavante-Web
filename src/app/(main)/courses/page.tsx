@@ -36,7 +36,7 @@ export default async function CoursesPage({ searchParams }: Props) {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Catálogo"
           icon={BookOpen}
@@ -50,7 +50,7 @@ export default async function CoursesPage({ searchParams }: Props) {
         />
       </div>
 
-      <div className="anim-enter anim-d2">
+      <div className=" ">
         <CourseFilters
           categories={categories}
           current={{
@@ -63,7 +63,7 @@ export default async function CoursesPage({ searchParams }: Props) {
       </div>
 
       {courses.length === 0 ? (
-        <div className="anim-enter-fade anim-d3">
+        <div className=" ">
           <EmptyState
             icon={Search}
             title="Nenhum curso encontrado."
@@ -73,7 +73,7 @@ export default async function CoursesPage({ searchParams }: Props) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map((course, i) => (
-            <div key={course.id} className="anim-enter-scale" style={{ animationDelay: `${0.1 + i * 0.06}s` }}>
+            <div key={course.id} className=" ">
               <CourseCard
                 slug={course.slug}
                 title={course.title}

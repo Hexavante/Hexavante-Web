@@ -36,7 +36,7 @@ export default async function SimuladosPage({ searchParams }: Props) {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Prática"
           icon={Target}
@@ -55,7 +55,7 @@ export default async function SimuladosPage({ searchParams }: Props) {
         />
       </div>
 
-      <div className="anim-enter anim-d2">
+      <div className=" ">
         <ExamFilters
           current={{
             tipo: params.tipo,
@@ -66,7 +66,7 @@ export default async function SimuladosPage({ searchParams }: Props) {
       </div>
 
       {longExam && !params.q && !params.tipo && (
-        <div className="anim-enter anim-d2 mb-6">
+        <div className=" mb-6">
           <Card padding="md" className="flex flex-col gap-4 border-amber-400/25 bg-amber-400/[0.06] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/10 text-amber-200">
@@ -85,14 +85,14 @@ export default async function SimuladosPage({ searchParams }: Props) {
         </div>
       )}
 
-      <div className="anim-enter-fade anim-d3">
+      <div className=" ">
         <Card padding="sm" className="mb-6 text-sm text-slate-300">
           <span className="font-semibold text-white">{exams.length}</span> simulados encontrados
         </Card>
       </div>
 
       {exams.length === 0 ? (
-        <div className="anim-enter-fade anim-d4">
+        <div className=" ">
           <EmptyState
             icon={Search}
             title="Nenhum simulado encontrado."
@@ -102,7 +102,7 @@ export default async function SimuladosPage({ searchParams }: Props) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {exams.map((exam, i) => (
-            <div key={exam.id} className="anim-enter-scale" style={{ animationDelay: `${0.15 + i * 0.06}s` }}>
+            <div key={exam.id} className=" ">
               <ExamCard
                 slug={exam.slug}
                 title={exam.title}

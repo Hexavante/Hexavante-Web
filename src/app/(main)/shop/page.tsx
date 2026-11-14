@@ -19,7 +19,7 @@ export default async function ShopPage() {
 
   return (
     <PageShell size="lg">
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Personalização"
           icon={Store}
@@ -28,11 +28,11 @@ export default async function ShopPage() {
         />
       </div>
 
-      <div className="mt-4 anim-enter-fade anim-d2">
+      <div className="mt-4 ">
         <ShopFairPlayNotice />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] anim-enter anim-d3">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] ">
         <ShopTabs
           items={state.items}
           inventory={state.inventory}
@@ -54,7 +54,7 @@ export default async function ShopPage() {
         </aside>
       </div>
 
-      <div className="mt-6 anim-enter anim-d4">
+      <div className="mt-6 ">
         <ShopBuyCoinsPanel />
       </div>
     </PageShell>

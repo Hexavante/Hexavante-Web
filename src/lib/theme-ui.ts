@@ -22,8 +22,6 @@ export const themeUi = {
   filterActive: "hx-filter-pill-active",
   filterInactive: "hx-filter-pill-inactive",
   // Animation classes
-  stagger: "stagger-children",
-  cardEntrance: "card-entrance",
   hoverLift: "hover-lift",
   btnPress: "btn-press",
   inputFocus: "input-focus",
@@ -36,8 +34,6 @@ export const themeUi = {
   modalContentExit: "modal-content-exit",
   dropdownEnter: "dropdown-enter",
   dropdownExit: "dropdown-exit",
-  pageEnter: "page-enter",
-  pageExit: "page-exit",
   avatarHover: "avatar-hover",
   badgePulse: "badge-pulse",
   notificationDot: "notification-dot",

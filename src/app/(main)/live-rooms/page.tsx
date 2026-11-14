@@ -39,7 +39,7 @@ export default async function LiveRoomsPage({ searchParams }: Props) {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Ao vivo"
           icon={Radio}
@@ -56,12 +56,12 @@ export default async function LiveRoomsPage({ searchParams }: Props) {
         />
       </div>
 
-      <div className="anim-enter-fade anim-d2">
+      <div className=" ">
         {!error && rooms.length > 0 && <LiveRoomsStats rooms={rooms} />}
         <LiveRoomFilters current={filter} />
       </div>
 
-      <div className="anim-enter anim-d3">
+      <div className=" ">
         {error ? (
           <Alert variant="danger" className="p-10 text-center">
             <p className="font-semibold">Erro ao carregar salas ao vivo.</p>

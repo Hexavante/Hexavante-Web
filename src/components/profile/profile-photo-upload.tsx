@@ -110,7 +110,7 @@ export function ProfilePhotoUpload({ currentAvatar, borderClassName }: Props) {
   }, [router]);
 
   return (
-    <div className={cn("flex flex-col items-center gap-4", themeUi.cardEntrance)}>
+    <div className="flex flex-col items-center gap-4">
       <div className="group relative">
         <Avatar
           src={preview}
@@ -179,7 +179,7 @@ export function ProfilePhotoUpload({ currentAvatar, borderClassName }: Props) {
         </Button>
 
         {success && (
-          <span className="inline-flex items-center gap-1.5 text-xs text-green-400 animate-fade-in">
+          <span className="inline-flex items-center gap-1.5 text-xs text-green-400 ">
             <Check className="h-3.5 w-3.5" aria-hidden="true" />
             Foto atualizada
           </span>
@@ -190,10 +190,7 @@ export function ProfilePhotoUpload({ currentAvatar, borderClassName }: Props) {
 
       {error && (
         <p
-          className={cn(
-            "max-w-56 rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-center text-xs text-red-200 animate-shake",
-            themeUi.cardEntrance,
-          )}
+          className="max-w-56 rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-center text-xs text-red-200 animate-shake"
         >
           {error}
         </p>

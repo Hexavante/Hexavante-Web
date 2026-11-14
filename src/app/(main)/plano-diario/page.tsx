@@ -32,7 +32,7 @@ export default async function DailyPlanPage() {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Hoje"
           icon={BookOpen}
@@ -42,7 +42,7 @@ export default async function DailyPlanPage() {
       </div>
 
       {migrationPending ? (
-        <div className="anim-enter anim-d2 mt-8 flex flex-col items-center gap-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-6 py-12 text-center">
+        <div className=" mt-8 flex flex-col items-center gap-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-6 py-12 text-center">
           <BookOpen className="h-10 w-10 text-amber-400" aria-hidden />
           <p className="text-lg font-semibold text-white">Funcionalidade em implantação</p>
           <p className="max-w-md text-sm text-slate-400">
@@ -54,7 +54,7 @@ export default async function DailyPlanPage() {
           </LinkButton>
         </div>
       ) : loadError ? (
-        <div className="anim-enter anim-d2 mt-8 flex flex-col items-center gap-4 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-12 text-center">
+        <div className=" mt-8 flex flex-col items-center gap-4 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-12 text-center">
           <BookOpen className="h-10 w-10 text-red-400" aria-hidden />
           <p className="text-lg font-semibold text-white">Não foi possível carregar o plano</p>
           <p className="max-w-md text-sm text-slate-400">
@@ -65,7 +65,7 @@ export default async function DailyPlanPage() {
           </LinkButton>
         </div>
       ) : dailyPlan ? (
-        <div className="anim-enter anim-d2 mt-6">
+        <div className=" mt-6">
           <DailyStudyPlan
             dailyPlan={dailyPlan}
             onCompleteTask={async (taskId) => {
@@ -76,7 +76,7 @@ export default async function DailyPlanPage() {
         </div>
       ) : (
         /* Sem plano ainda - usuário novo */
-        <div className="anim-enter anim-d2 mt-8 flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
+        <div className=" mt-8 flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
           <BookOpen className="h-12 w-12 text-slate-500" aria-hidden />
           <div>
             <p className="text-xl font-bold text-white">Comece a estudar para gerar seu plano</p>

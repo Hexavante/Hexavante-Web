@@ -16,7 +16,7 @@ export default async function CertificatesPage() {
 
   return (
     <PageShell>
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Conquistas"
           icon={Award}
@@ -28,7 +28,7 @@ export default async function CertificatesPage() {
         </AppLink>
       </div>
 
-      <div className="anim-enter anim-d2">
+      <div className=" ">
         {certificates.length === 0 ? (
           <EmptyState
             icon={FileBadge}

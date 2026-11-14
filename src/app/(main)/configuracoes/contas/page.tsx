@@ -18,7 +18,7 @@ export default async function ContasPage() {
 
   return (
     <PageShell size="md">
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Conta"
           icon={UsersRound}
@@ -36,7 +36,7 @@ export default async function ContasPage() {
         />
       </div>
 
-      <div className="anim-enter anim-d2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+      <div className=" rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Conta em uso</p>
         <div className="mt-3 flex items-center gap-3">
           <Avatar src={session.user.image} alt={session.user.username ?? ""} size="sm" />
@@ -52,11 +52,11 @@ export default async function ContasPage() {
         </div>
       </div>
 
-      <h2 className="anim-enter mt-8 text-lg font-bold text-white" style={{ animationDelay: "0.1s" }}>
+      <h2 className=" mt-8 text-lg font-bold text-white">
         Outras contas
       </h2>
       {others.length === 0 ? (
-        <div className="anim-enter-fade anim-d3">
+        <div className=" ">
           <EmptyState
             icon={UsersRound}
             title="Nenhuma outra conta vinculada."
@@ -68,8 +68,7 @@ export default async function ContasPage() {
           {others.map((account, i) => (
             <div
               key={account.userId}
-              className="anim-enter-fade flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-              style={{ animationDelay: `${0.05 + i * 0.06}s` }}
+              className=" flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
             >
               <Avatar src={account.avatarUrl} alt={account.username ?? ""} size="sm" />
               <div className="min-w-0 flex-1">

@@ -143,7 +143,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
           </div>
         </div>
         {xpProfile && (
-          <Badge variant="sky" className="shrink-0 animate-slide-in-right">
+          <Badge variant="sky" className="shrink-0 ">
             <Sparkles className="h-3.5 w-3.5" />
             Nível {xpProfile.level}
           </Badge>
@@ -151,7 +151,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
       </div>
 
       {xpProfile && (
-        <div className="mt-4 animate-fade-in-up">
+        <div className="mt-4 ">
           <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
             <span>{xpProfile.totalXp.toLocaleString("pt-BR")} XP total</span>
             <span>{xpProfile.progressPercent}% do nível {xpProfile.level + 1}</span>
@@ -162,7 +162,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
 
       {/* Daily Plan Preview - compact */}
       {dailyPlan && dailyPlan.tasks.length > 0 && (
-        <div className="mt-5 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <div className="mt-5 ">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="hx-icon-box text-amber-400">
@@ -229,7 +229,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
         </div>
       )}
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3 ">
         <div className={cn(
           "relative rounded-lg border p-3 transition overflow-hidden",
           "border-[hsl(var(--sidebar-border))] bg-[var(--surface)]",
@@ -266,7 +266,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
       </div>
 
       {inProgress.length > 0 ? (
-        <div className="mt-5 space-y-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="mt-5 space-y-2 ">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Continue estudando
           </p>
@@ -279,7 +279,6 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
                 "border-[hsl(var(--sidebar-border))] bg-[var(--surface)]",
                 "hover:border-[hsl(var(--sidebar-highlight))/0.3] hover:bg-[hsl(var(--sidebar-highlight))/0.06]",
               )}
-              style={{ animationDelay: `${0.22 + i * 0.05}s` }}
             >
               <div className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-white">
@@ -300,7 +299,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
           ))}
         </div>
       ) : (
-        <div className="mt-5 rounded-lg border border-dashed border-white/15 bg-white/[0.02] p-6 text-center animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="mt-5 rounded-lg border border-dashed border-white/15 bg-white/[0.02] p-6 text-center ">
           <BookOpen className="mx-auto h-8 w-8 text-slate-500" />
           <p className="mt-3 text-sm text-slate-300">Nenhum curso em andamento.</p>
           <p className="mt-1 text-xs text-slate-500">
@@ -317,7 +316,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
         </div>
       )}
 
-      <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
+      <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4 ">
         <LinkButton href="/simulados" variant="outline" size="sm" className="group">
           <Target className="h-4 w-4 group-hover:text-sky-300 transition-colors" />
           Simulados
@@ -336,7 +335,7 @@ export function StudentDashboard({ data, userName, userAvatar }: Props) {
       </div>
 
       {(recentXp[0] || lastExam) && (
-        <div className="mt-4 rounded-lg border border-white/8 bg-slate-950/30 p-3 text-xs text-slate-400 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+        <div className="mt-4 rounded-lg border border-white/8 bg-slate-950/30 p-3 text-xs text-slate-400 ">
           <p className="font-semibold text-slate-300">Última atividade</p>
           {recentXp[0] && (
             <p className="mt-1 flex items-center gap-2">

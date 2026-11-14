@@ -102,7 +102,7 @@ export function TwoFactorManager({ initialEnabled }: { initialEnabled: boolean }
       )}
 
       {!enabled && vid && (
-        <div className="anim-enter-fade mt-4 space-y-3 rounded-lg border border-cyan-400/20 bg-cyan-400/5 p-4">
+        <div className=" mt-4 space-y-3 rounded-lg border border-cyan-400/20 bg-cyan-400/5 p-4">
           <p className="text-xs text-slate-300">
             Enviamos um código ao seu e-mail. Digite para confirmar a ativação:
           </p>

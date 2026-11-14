@@ -30,7 +30,7 @@ export default async function TutorialsPage({ searchParams }: Props) {
 
   return (
     <PageShell>
-      <section className={`${styles.hero} anim-enter anim-d1`}>
+      <section className={`${styles.hero} `}>
         <div>
           <span className={styles.eyebrow}>
             <Video size={13} aria-hidden /> Catálogo de vídeos
@@ -49,7 +49,7 @@ export default async function TutorialsPage({ searchParams }: Props) {
         </div>
       </section>
 
-      <div className="anim-enter anim-d2">
+      <div className=" ">
         <TutorialFilters
           categories={categories}
           current={{
@@ -61,7 +61,7 @@ export default async function TutorialsPage({ searchParams }: Props) {
       </div>
 
       {tutorials.length === 0 ? (
-        <div className="anim-enter-fade anim-d3">
+        <div className=" ">
           <EmptyState
             icon={Search}
             title="Nenhum tutorial encontrado."

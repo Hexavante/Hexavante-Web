@@ -15,7 +15,7 @@ export default async function InventarioPage() {
 
   return (
     <PageShell size="lg">
-      <div className="anim-enter anim-d1">
+      <div className=" ">
         <PageHeader
           badge="Conta"
           icon={Package}
@@ -24,11 +24,11 @@ export default async function InventarioPage() {
         />
       </div>
 
-      <div className="mt-6 anim-enter anim-d2">
+      <div className="mt-6 ">
         <InventoryPanel inventory={inventory} activeBooster={activeBooster} />
       </div>
 
-      <p className="mt-8 text-center text-sm text-slate-500 anim-enter-fade anim-d3">
+      <p className="mt-8 text-center text-sm text-slate-500 ">
         Equipe temas e cosméticos aqui — as mudanças aparecem em todo o app.{" "}
         <Link href="/configuracoes/perfil" className="hx-accent-link hover:underline">
           Editar perfil

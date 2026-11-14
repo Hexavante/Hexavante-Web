@@ -30,7 +30,7 @@ export function StudyContinueHero({ continuation }: Props) {
         data-tour="study-continue"
         className={cn(
           "relative overflow-hidden border-dashed border-[hsl(var(--sidebar-highlight))/0.25]",
-          "bg-[hsl(var(--sidebar-highlight))/0.06] hx-hero-card animate-fade-in-up",
+          "bg-[hsl(var(--sidebar-highlight))/0.06] hx-hero-card ",
         )}
       >
         <div className="absolute inset-0 -z-10 opacity-5" aria-hidden="true">
@@ -38,18 +38,18 @@ export function StudyContinueHero({ continuation }: Props) {
         </div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between relative">
           <div className="relative z-10">
-            <Badge variant="sky" className="animate-slide-in-left">
+            <Badge variant="sky" className=" ">
               <TrendingUp className="h-3.5 w-3.5" />
               Comece sua jornada
             </Badge>
-            <h2 className="mt-3 text-xl font-bold hx-text-title animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+            <h2 className="mt-3 text-xl font-bold hx-text-title ">
               Nenhum estudo em andamento
             </h2>
-            <p className="mt-2 text-sm hx-text-muted animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+            <p className="mt-2 text-sm hx-text-muted ">
               Matricule-se em um curso ou faça um simulado para retomar daqui.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 relative z-10 animate-slide-in-right" style={{ animationDelay: "0.2s" }}>
+          <div className="flex flex-wrap gap-2 relative z-10 ">
             <LinkButton href="/courses" className="min-h-11 group">
               <BookOpen className="h-4 w-4 group-hover:rotate-6 transition-transform" />
               Explorar cursos
@@ -73,7 +73,7 @@ export function StudyContinueHero({ continuation }: Props) {
       padding="md"
       data-tour="study-continue"
       className={cn(
-        "relative overflow-hidden hx-hero-card animate-fade-in-up",
+        "relative overflow-hidden hx-hero-card ",
         isExam ? "border-amber-400/20 bg-amber-400/5" : "border-[hsl(var(--sidebar-highlight))/0.22] bg-[hsl(var(--sidebar-highlight))/0.06]",
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -113,7 +113,7 @@ export function StudyContinueHero({ continuation }: Props) {
 
       <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 flex-1 relative z-10">
-          <div className="flex flex-wrap items-center gap-2 animate-slide-in-left">
+          <div className="flex flex-wrap items-center gap-2 ">
             <Badge
               variant={isExam ? "amber" : "sky"}
               className={cn("group", isHovered && "animate-pulse-glow")}
@@ -125,23 +125,23 @@ export function StudyContinueHero({ continuation }: Props) {
               )}
               Continue estudando
             </Badge>
-            <span className="inline-flex items-center gap-1 text-xs text-slate-400 animate-fade-in" style={{ animationDelay: "0.05s" }}>
+            <span className="inline-flex items-center gap-1 text-xs text-slate-400 ">
               <Clock className="h-3.5 w-3.5" />
               <ClientRelativeTime date={continuation.lastStudyAt} />
             </span>
           </div>
 
-          <h2 className="mt-3 truncate text-xl font-black hx-text-title animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <h2 className="mt-3 truncate text-xl font-black hx-text-title ">
             {isExam ? continuation.examTitle : continuation.courseTitle}
           </h2>
-          <p className="mt-1 text-sm hx-text-muted animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+          <p className="mt-1 text-sm hx-text-muted ">
             {isExam
               ? `Última nota: ${Math.round(continuation.examScore ?? continuation.progress)}% — tente melhorar`
               : `Próxima aula: ${continuation.lessonTitle}`}
           </p>
 
           {!isExam && (
-            <div className="mt-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <div className="mt-4 ">
               <div className="mb-1 flex justify-between text-xs text-slate-400">
                 <span>Progresso do curso</span>
                 <span>{displayProgress}%</span>
@@ -153,14 +153,13 @@ export function StudyContinueHero({ continuation }: Props) {
                 />
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
-                  style={{ animationDelay: "0.5s" }}
                 />
               </div>
             </div>
           )}
 
           {isExam && (
-            <div className="mt-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <div className="mt-4 ">
               <div className="flex items-center gap-3 text-sm">
                 <div className="hx-icon-box text-amber-400 animate-bounce-subtle">
                   <Zap className="h-4 w-4" />
