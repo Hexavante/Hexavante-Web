@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
 import { LinkButton } from "@/components/ui/button";
 import { DailyStudyPlan } from "@/components/home/daily-study-plan";
-import { completeDailyTaskAction } from "@/app/actions/daily-plan";
 import { logger } from "@/lib/logger";
 import { Prisma } from "@prisma/client";
 import { getOrCreateDailyPlan } from "@/services/daily-plan.service";
@@ -66,13 +65,7 @@ export default async function DailyPlanPage() {
         </div>
       ) : dailyPlan ? (
         <div className=" mt-6">
-          <DailyStudyPlan
-            dailyPlan={dailyPlan}
-            onCompleteTask={async (taskId) => {
-              "use server";
-              await completeDailyTaskAction(taskId);
-            }}
-          />
+          <DailyStudyPlan dailyPlan={dailyPlan} />
         </div>
       ) : (
         /* Sem plano ainda - usuário novo */

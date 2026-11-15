@@ -119,13 +119,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <div className="mx-auto w-full min-w-0 max-w-6xl">
           <ScrollReveal>
             <section className={styles.welcome}>
-              <p className={styles.eyebrow}>Seu espaço de evolução</p>
               <h1 className="font-black hx-text-title">
                 Olá, {session.user.name?.split(" ")[0] ?? session.user.username}
                 !
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-6 hx-text-muted">
-                Um novo passo, uma nova conquista. O que você vai aprender hoje?
+                Veja o que tem para hoje e continue de onde parou.
               </p>
               <div
                 className={styles.overview}
@@ -158,17 +157,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   {
                     href: "/plano-diario",
                     title: "Meu plano do dia",
-                    detail: "Organize seu próximo passo",
+                    detail: "Tarefas de hoje",
                   },
                   {
                     href: "/estatisticas",
                     title: "Minha evolução",
-                    detail: "Veja o quanto já avançou",
+                    detail: "XP, cursos e simulados",
                   },
                   {
                     href: "/anotacoes",
                     title: "Meu caderno",
-                    detail: "Suas ideias, sempre por perto",
+                    detail: "Suas anotações",
                   },
                 ].map((item) => (
                   <Link
@@ -189,7 +188,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
           <ScrollReveal delay={80}>
             <div className={styles.sectionHeading}>
-              <span>01 / CONTINUAR APRENDENDO</span>
               <p>Retome de onde parou</p>
             </div>
             <StudyContinueHero continuation={homeData.continuation} />
@@ -214,9 +212,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               )}
 
               <ScrollReveal delay={100}>
-                <div className={styles.sectionHeading}>
-                  <span>02 / EXPLORE NOVOS CAMINHOS</span>
-                </div>
                 <CourseRecommendations courses={homeData.recommendations} />
               </ScrollReveal>
 

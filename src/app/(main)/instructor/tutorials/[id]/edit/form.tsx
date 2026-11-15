@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
 import { Button } from "@/components/ui/button";
+import { DurationField } from "@/components/tutorials/duration-field";
 import {
   updateTutorialAction,
   deleteTutorialAction,
@@ -121,8 +122,8 @@ export default function EditTutorialForm({
 
       <form ref={formRef} onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-5">
         <div>
-          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Título *
+          <label htmlFor="title" className="hx-label">
+            Título
           </label>
           <input
             id="title"
@@ -130,19 +131,19 @@ export default function EditTutorialForm({
             required
             minLength={3}
             defaultValue={tutorial.title}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/30"
+            className="hx-input"
           />
         </div>
 
         <div>
-          <label htmlFor="categoryId" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="categoryId" className="hx-label">
             Categoria
           </label>
           <select
             id="categoryId"
             name="categoryId"
             defaultValue={tutorial.categoryId ?? ""}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-400/50"
+            className="hx-select"
           >
             <option value="">Nenhuma</option>
             {categories.map((cat) => (
@@ -154,7 +155,7 @@ export default function EditTutorialForm({
         </div>
 
         <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="description" className="hx-label">
             Descrição
           </label>
           <textarea
@@ -162,7 +163,7 @@ export default function EditTutorialForm({
             name="description"
             rows={3}
             defaultValue={splitMindMap(tutorial.description).description}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/30"
+            className="hx-input"
           />
         </div>
 
@@ -171,29 +172,17 @@ export default function EditTutorialForm({
 
         <TutorialThumbnailUpload ref={thumbRef} initialUrl={tutorial.thumbnailUrl ?? null} />
 
-        <div>
-          <label htmlFor="duration" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Duração (segundos)
-          </label>
-          <input
-            id="duration"
-            name="duration"
-            type="number"
-            min={1}
-            defaultValue={tutorial.duration ?? ""}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50"
-          />
-        </div>
+        <DurationField initialSeconds={tutorial.duration} />
 
         <div>
-          <label htmlFor="tags" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="tags" className="hx-label">
             Tags (separadas por vírgula)
           </label>
           <input
             id="tags"
             name="tags"
             defaultValue={tutorial.tags.join(", ")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50"
+            className="hx-input"
           />
         </div>
 

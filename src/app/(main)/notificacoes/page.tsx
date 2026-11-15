@@ -35,7 +35,7 @@ export default async function NotificacoesPage() {
   ]);
 
   return (
-    <PageShell size="md">
+    <PageShell>
       <PageHeader
         badge="Conta"
         icon={Bell}

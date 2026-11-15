@@ -39,13 +39,15 @@ export function ExamThumbnail({ url, title, className, priority }: Props) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-gradient-to-br from-teal-900/50 to-slate-900",
+        "relative flex flex-col justify-end overflow-hidden bg-[hsl(var(--sidebar-highlight)/0.1)] p-4",
 
         className,
       )}
       aria-hidden
     >
-      <ClipboardList className="h-10 w-10 text-teal-400/50" />
+      {/* Sem capa: o próprio título vira a capa, com o ícone grande ao fundo. */}
+      <ClipboardList className="absolute -right-4 -top-4 h-28 w-28 rotate-12 text-[hsl(var(--sidebar-highlight)/0.14)]" />
+      <p className="relative line-clamp-2 text-lg font-black leading-tight tracking-tight text-white/90">{title}</p>
     </div>
   );
 }

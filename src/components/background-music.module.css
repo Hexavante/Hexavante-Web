@@ -221,3 +221,9 @@
   }
 }
 .video { pointer-events:none; }
+/* Telas estreitas: só os ícones, para o botão flutuante cobrir menos conteúdo. */
+@media (max-width: 1100px) {
+  .expand > span {
+    display: none;
+  }
+}

@@ -35,6 +35,15 @@ export default async function EditCoursePage({ params }: Props) {
   const { course } = result;
   const categories = await listCategories();
   const nextModuleOrder = course.modules.length + 1;
+  const lessonCount = course.modules.reduce((total, mod) => total + mod.lessons.length, 0);
+  // O que falta para o curso ficar apresentável ao moderador e ao aluno.
+  const checklist = [
+    { done: Boolean(course.shortDescription?.trim()), label: "Descrição curta" },
+    { done: Boolean(course.coverImage || course.thumbnailUrl), label: "Imagem de capa" },
+    { done: course.modules.length > 0, label: "Pelo menos um módulo" },
+    { done: lessonCount > 0, label: "Pelo menos uma aula" },
+  ];
+  const missing = checklist.filter((item) => !item.done).length;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -88,25 +97,22 @@ export default async function EditCoursePage({ params }: Props) {
         </p>
       )}
 
-      <section className="mt-8 rounded-xl border border-white/10 bg-white/[0.04] p-6">
-        <h2 className="mb-4 font-semibold text-white">Informações do curso</h2>
-        <EditCourseForm
-          courseId={id}
-          categories={categories}
-          course={{
-            title: course.title,
-            categoryId: course.categoryId,
-            shortDescription: course.shortDescription,
-            description: course.description,
-            tags: course.courseTags.map((ct) => ct.tag.name).join(", "),
-            coverImage: course.coverImage,
-            thumbnailUrl: course.thumbnailUrl,
-            level: course.level,
-            estimatedHours: course.estimatedHours,
-            progressionType: course.progressionType,
-            isPublished: course.isPublished,
-          }}
-        />
+      <section className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] p-5" aria-label="O que falta no curso">
+        <h2 className="font-semibold text-white">
+          {missing === 0 ? "Curso completo" : `Falta${missing > 1 ? "m" : ""} ${missing} ${missing > 1 ? "itens" : "item"} para o curso ficar completo`}
+        </h2>
+        <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+          {checklist.map((item) => (
+            <li key={item.label} className={item.done ? "text-emerald-400" : "text-slate-400"}>
+              {item.done ? "✓" : "○"} {item.label}
+            </li>
+          ))}
+        </ul>
+        {lessonCount === 0 && course.status === "PENDING_REVIEW" && (
+          <p className="mt-3 text-sm text-slate-400">
+            O moderador só consegue avaliar o curso depois que ele tiver pelo menos uma aula.
+          </p>
+        )}
       </section>
 
       <section className="mt-8">
@@ -119,6 +125,10 @@ export default async function EditCoursePage({ params }: Props) {
                 <h3 className="font-semibold text-white">
                   Módulo {mod.orderNumber}: {mod.title}
                 </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
+                  {mod.materials.length > 0 && ` · ${mod.materials.length} PDF`}
+                </p>
                 {mod.description && (
                   <p className="mt-1 text-sm text-slate-400">{mod.description}</p>
                 )}
@@ -130,7 +140,11 @@ export default async function EditCoursePage({ params }: Props) {
               />
             </div>
 
-            <div className="mt-4">
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-medium text-sky-300 hover:underline">
+                Editar título, ordem e descrição do módulo
+              </summary>
+              <div className="mt-3">
               <InlineForm
                 title="Editar módulo"
                 submitLabel="Salvar módulo"
@@ -152,15 +166,18 @@ export default async function EditCoursePage({ params }: Props) {
                   },
                 ]}
               />
-            </div>
+              </div>
+            </details>
 
-            <ul className="mt-4 space-y-4">
+            <ul className="mt-4 space-y-3">
               {mod.lessons.map((lesson) => (
                 <li key={lesson.id} className="rounded-lg border border-white/5 bg-black/20 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <p className="text-sm font-medium text-slate-200">
                       Aula {lesson.orderNumber}: {lesson.title}
-                      {lesson.videoUrl && <span className="text-slate-500"> (vídeo)</span>}
+                      <span className={lesson.videoUrl ? "text-slate-500" : "text-amber-400"}>
+                        {lesson.videoUrl ? " · com vídeo" : " · sem vídeo"}
+                      </span>
                     </p>
                     <DeleteContentButton
                       action={deleteLessonAction.bind(null, id, lesson.id)}
@@ -168,7 +185,11 @@ export default async function EditCoursePage({ params }: Props) {
                       confirmMessage="Excluir esta aula?"
                     />
                   </div>
-                  <div className="mt-3">
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-sm font-medium text-sky-300 hover:underline">
+                      Editar aula
+                    </summary>
+                    <div className="mt-3">
                     <InlineForm
                       initialMindMap={splitMindMap(lesson.description).topics.join("\n")}
                       title="Editar aula"
@@ -207,7 +228,8 @@ export default async function EditCoursePage({ params }: Props) {
                         },
                       ]}
                     />
-                  </div>
+                    </div>
+                  </details>
                 </li>
               ))}
               {mod.materials.map((material) => (
@@ -286,6 +308,27 @@ export default async function EditCoursePage({ params }: Props) {
               required: false,
             },
           ]}
+        />
+      </section>
+
+      <section className="mt-10 rounded-xl border border-white/10 bg-white/[0.04] p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Informações do curso</h2>
+        <EditCourseForm
+          courseId={id}
+          categories={categories}
+          course={{
+            title: course.title,
+            categoryId: course.categoryId,
+            shortDescription: course.shortDescription,
+            description: course.description,
+            tags: course.courseTags.map((ct) => ct.tag.name).join(", "),
+            coverImage: course.coverImage,
+            thumbnailUrl: course.thumbnailUrl,
+            level: course.level,
+            estimatedHours: course.estimatedHours,
+            progressionType: course.progressionType,
+            isPublished: course.isPublished,
+          }}
         />
       </section>
     </div>

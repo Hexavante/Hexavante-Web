@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { CalendarClock, Link2, Radio, Users } from "lucide-react";
 import { createLiveRoomAction, type ActionResult } from "@/app/actions/live-room";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLink } from "@/components/ui/app-link";
+import { LocalDateTimeField } from "@/components/ui/local-datetime-field";
 
 type Props = {
   courses: { id: string; title: string }[];
@@ -18,9 +19,6 @@ const initialState: ActionResult = { success: false };
 
 export function CreateLiveRoomForm({ courses }: Props) {
   const [state, formAction, pending] = useActionState(createLiveRoomAction, initialState);
-  const [defaultScheduled] = useState(() =>
-    new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
-  );
 
   return (
     <form action={formAction} className="space-y-6">
@@ -79,6 +77,9 @@ export function CreateLiveRoomForm({ courses }: Props) {
             <div>
               <Label htmlFor="videoUrl">URL do vídeo</Label>
               <Input id="videoUrl" name="videoUrl" placeholder="https://youtube.com/watch?v=..." />
+              <p className="mt-1 text-xs text-slate-500">
+                Pode deixar em branco agora e colar o link da transmissão quando ela começar.
+              </p>
             </div>
 
             <div>
@@ -101,13 +102,8 @@ export function CreateLiveRoomForm({ courses }: Props) {
           <div className="space-y-5">
             <div>
               <Label htmlFor="scheduledAt">Data e hora da transmissão</Label>
-              <Input
-                id="scheduledAt"
-                name="scheduledAt"
-                type="datetime-local"
-                defaultValue={defaultScheduled}
-                required
-              />
+              <LocalDateTimeField id="scheduledAt" name="scheduledAt" required />
+              <p className="mt-1 text-xs text-slate-500">No seu horário local.</p>
             </div>
 
             <div>

@@ -6,6 +6,7 @@ import type { InstructorExamEditInput } from "@/lib/instructor-exam-edit";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useLeaveWarning } from "@/hooks/use-leave-warning";
 
 type Initial = Omit<InstructorExamEditInput, "questions"> & {
   questions: (InstructorExamEditInput["questions"][number] & {
@@ -28,6 +29,8 @@ export function InstructorExamEditForm({
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [error, setError] = useState("");
+  // Avisa antes de fechar a aba com alterações não salvas.
+  useLeaveWarning(data !== initial && !busy);
   const changeQuestion = (
     index: number,
     values: Partial<Initial["questions"][number]>,
@@ -76,7 +79,7 @@ export function InstructorExamEditForm({
       <fieldset disabled={busy} className="space-y-6">
         <section className="hx-card space-y-4 p-5">
           <h2 className="font-semibold">Apresentação da prova</h2>
-          <label className="block">
+          <label className="block text-sm font-medium">
             Título
             <Input
               required
@@ -86,7 +89,7 @@ export function InstructorExamEditForm({
               onChange={(e) => setData({ ...data, title: e.target.value })}
             />
           </label>
-          <label className="block">
+          <label className="block text-sm font-medium">
             Tipo de prova
             <NativeSelect
               value={data.examType}
@@ -102,7 +105,7 @@ export function InstructorExamEditForm({
               <option>TECNOLOGIA</option>
             </NativeSelect>
           </label>
-          <label className="block">
+          <label className="block text-sm font-medium">
             Descrição
             <textarea
               className="hx-input min-h-24 w-full"
@@ -113,7 +116,7 @@ export function InstructorExamEditForm({
               }
             />
           </label>
-          <label className="block">
+          <label className="block text-sm font-medium">
             Tempo em minutos (opcional)
             <Input
               type="number"
@@ -132,7 +135,7 @@ export function InstructorExamEditForm({
         {data.questions.map((q, index) => (
           <fieldset key={q.id ?? index} className="hx-card space-y-4 p-5">
             <legend className="px-2 font-semibold">Questão {index + 1}</legend>
-            <label className="block">
+            <label className="block text-sm font-medium">
               Enunciado
               <textarea
                 className="hx-input min-h-28 w-full"
@@ -146,7 +149,7 @@ export function InstructorExamEditForm({
               />
             </label>
             {q.essay ? (
-              <label className="block">
+              <label className="block text-sm font-medium">
                 Resposta esperada
                 <textarea
                   className="hx-input min-h-24 w-full"
@@ -178,7 +181,7 @@ export function InstructorExamEditForm({
                     </label>
                   ))}
                 </div>
-                <label className="block">
+                <label className="block text-sm font-medium">
                   Resposta correta
                   <NativeSelect
                     required

@@ -15,6 +15,7 @@ import {
   type TutorialThumbnailUploadHandle,
 } from "@/components/tutorials/tutorial-thumbnail-upload";
 import { SuccessPopup } from "@/components/ui/success-popup";
+import { DurationField } from "@/components/tutorials/duration-field";
 
 const initialState: ActionResult = { success: false };
 
@@ -70,36 +71,36 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
       </Link>
 
       <PageHeader
-        badge="Novo tutorial"
+        badge="Instrutor"
         icon={Video}
-        title="Criar Tutorial"
-        description="Adicione um vídeo tutorial para a comunidade."
+        title="Novo tutorial"
+        description="Um vídeo curto que ensina uma coisa só. Você pode salvar como rascunho e publicar depois."
       />
 
       <form ref={formRef} onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-5">
         <CreationSection number="01" title="Sobre o tutorial" hint="Apresente a técnica que o aluno vai aprender.">
         <div>
-          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Título *
+          <label htmlFor="title" className="hx-label">
+            Título
           </label>
           <input
             id="title"
             name="title"
             required
             minLength={3}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/30"
+            className="hx-input"
             placeholder="Ex: Como usar Promise.all"
           />
         </div>
 
         <div>
-          <label htmlFor="categoryId" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="categoryId" className="hx-label">
             Categoria
           </label>
           <select
             id="categoryId"
             name="categoryId"
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-400/50"
+            className="hx-select"
           >
             <option value="">Nenhuma</option>
             {categories.map((cat) => (
@@ -111,15 +112,15 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
         </div>
 
         <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="description" className="hx-label">
             Descrição
           </label>
           <textarea
             id="description"
             name="description"
             rows={3}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/30"
-            placeholder="Descreva o conteúdo do tutorial..."
+            className="hx-input"
+            placeholder="O que a pessoa vai conseguir fazer depois de assistir"
           />
         </div>
 
@@ -130,30 +131,18 @@ export default function NewTutorialForm({ categories }: { categories: Category[]
 
         <TutorialThumbnailUpload ref={thumbRef} />
 
-        <div>
-          <label htmlFor="duration" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Duração (segundos)
-          </label>
-          <input
-            id="duration"
-            name="duration"
-            type="number"
-            min={1}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50"
-            placeholder="Ex: 300"
-          />
-        </div>
+        <DurationField />
 
         </CreationSection>
         <CreationSection number="03" title="Publicação" hint="Deixe a publicação desmarcada para guardar como rascunho.">
         <div>
-          <label htmlFor="tags" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="tags" className="hx-label">
             Tags (separadas por vírgula)
           </label>
           <input
             id="tags"
             name="tags"
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50"
+            className="hx-input"
             placeholder="javascript, promise, async"
           />
         </div>

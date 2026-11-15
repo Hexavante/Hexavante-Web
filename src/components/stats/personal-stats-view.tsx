@@ -185,7 +185,7 @@ function renderCompactView(stats: PersonalStats) {
             icon={Coins}
             label="Moedas"
             value={stats.coins.toLocaleString("pt-BR")}
-            sub={`${stats.certificatesCount} certificados`}
+            sub="Saldo para usar na loja"
             tone="text-yellow-300"
           />
         </div>
@@ -248,7 +248,7 @@ function renderOverviewTab(stats: PersonalStats, charts: PersonalStatsCharts) {
           icon={Coins}
           label="Moedas"
           value={stats.coins.toLocaleString("pt-BR")}
-          sub={`${stats.certificatesCount} certificados`}
+          sub="Saldo para usar na loja"
           tone="text-yellow-300"
         />
       </div>

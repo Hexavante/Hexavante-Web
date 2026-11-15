@@ -82,15 +82,11 @@ export function DashboardCommandCenter({ pendingItems }: Props) {
     <section data-tour="dashboard-command">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3 ">
         <div>
-          <div className="flex items-center gap-2 hx-accent-text ">
-            <Zap className="h-4 w-4 animate-pulse-subtle" />
-            <p className="text-xs font-bold uppercase tracking-wide">Central de estudos</p>
-          </div>
-          <h2 className="mt-1 text-lg font-bold hx-text-title ">
+          <h2 className="text-lg font-bold hx-text-title ">
             Sua rotina de hoje
           </h2>
           <p className="mt-1 text-sm hx-text-muted ">
-            Um clique para a próxima ação importante.
+            O que está esperando por você.
           </p>
         </div>
         {pendingItems.length > 0 && (

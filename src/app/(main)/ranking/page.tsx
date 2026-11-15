@@ -79,7 +79,7 @@ export default async function RankingPage({ searchParams }: Props) {
   const rest = ranking.slice(listStartIndex);
 
   return (
-    <PageShell size="md">
+    <PageShell>
       <AppLink href="/perfil" muted className="mb-4 inline-flex items-center gap-1 ">
         ← Meu perfil
       </AppLink>

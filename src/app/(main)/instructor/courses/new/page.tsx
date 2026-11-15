@@ -24,7 +24,7 @@ export default async function NewCoursePage() {
         badge="Instrutor"
         icon={BookPlus}
         title="Novo curso"
-        description="Preencha as informações básicas. O curso ficará pendente até aprovação."
+        description="Comece pelo básico. Depois de criar, você monta os módulos e as aulas; o curso só aparece no catálogo quando um moderador aprovar."
       />
       <NewCourseForm categories={categories} />
     </PageShell>

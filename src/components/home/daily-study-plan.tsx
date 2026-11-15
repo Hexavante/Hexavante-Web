@@ -10,7 +10,6 @@ import {
   Radio,
   Flame,
   Users,
-  Sparkles,
   Trophy,
   CheckCircle,
   Clock,
@@ -20,12 +19,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ConfettiBurst } from "@/components/ui/lottie-animation";
+import { completeDailyTaskAction } from "@/app/actions/daily-plan";
 import { cn } from "@/lib/cn";
 import type { DailyPlan, DailyPlanTask } from "@/services/daily-plan.service";
 
 type Props = {
   dailyPlan: DailyPlan;
-  onCompleteTask?: (taskId: string) => Promise<void>;
 };
 
 const TASK_ICONS: Record<DailyPlanTask["type"], LucideIcon> = {
@@ -37,13 +37,14 @@ const TASK_ICONS: Record<DailyPlanTask["type"], LucideIcon> = {
   social: Users,
 };
 
-const TASK_COLORS: Record<DailyPlanTask["type"], string> = {
-  lesson: "sky",
-  exam: "amber",
-  review: "violet",
-  live: "rose",
-  streak: "orange",
-  social: "emerald",
+// Classes escritas por extenso: o Tailwind não gera classes montadas com `${cor}`.
+const TASK_STYLES: Record<DailyPlanTask["type"], { icon: string; hover: string }> = {
+  lesson: { icon: "bg-sky-400/15 text-sky-300", hover: "hover:border-sky-400/50 hover:bg-sky-400/10" },
+  exam: { icon: "bg-amber-400/15 text-amber-300", hover: "hover:border-amber-400/50 hover:bg-amber-400/10" },
+  review: { icon: "bg-violet-400/15 text-violet-300", hover: "hover:border-violet-400/50 hover:bg-violet-400/10" },
+  live: { icon: "bg-rose-400/15 text-rose-300", hover: "hover:border-rose-400/50 hover:bg-rose-400/10" },
+  streak: { icon: "bg-orange-400/15 text-orange-300", hover: "hover:border-orange-400/50 hover:bg-orange-400/10" },
+  social: { icon: "bg-emerald-400/15 text-emerald-300", hover: "hover:border-emerald-400/50 hover:bg-emerald-400/10" },
 };
 
 const TASK_LABELS: Record<DailyPlanTask["type"], string> = {
@@ -64,12 +65,13 @@ function formatMinutes(minutes: number): string {
   return `${minutes}min`;
 }
 
-export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
+export function DailyStudyPlan({ dailyPlan }: Props) {
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(
     new Set(dailyPlan.tasks.filter((t) => t.completed).map((t) => t.id))
   );
   const [animatingTask, setAnimatingTask] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [celebrateAll, setCelebrateAll] = useState(false);
 
   const handleCompleteTask = async (task: DailyPlanTask) => {
     if (completedTasks.has(task.id)) return;
@@ -81,9 +83,10 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
     setCompletedTasks((prev) => new Set(prev).add(task.id));
 
     try {
-      if (onCompleteTask) {
-        await onCompleteTask(task.id);
-      }
+      // Salva no servidor (antes, no Painel, a tarefa só era marcada na tela).
+      const result = await completeDailyTaskAction(task.id);
+      if (!result.success) throw new Error(result.error);
+      if (completedTasks.size + 1 === dailyPlan.tasks.length) setCelebrateAll(true);
     } catch {
       // Revert on error
       setCompletedTasks((prev) => {
@@ -106,11 +109,12 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
   const isComplete = dailyPlan.completedCount === dailyPlan.totalCount && dailyPlan.totalCount > 0;
 
   return (
-    <section data-tour="daily-study-plan">
+    <section data-tour="daily-study-plan" className="relative">
+      {celebrateAll && <ConfettiBurst />}
       {/* Header */}
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ">
         <div className="flex items-center gap-3">
-          <span className="hx-icon-box bg-gradient-to-br from-amber-400 to-orange-400 text-white animate-pulse-subtle">
+          <span className="hx-icon-box bg-amber-400/15 text-amber-300">
             <BookOpen className="h-5 w-5" />
           </span>
           <div>
@@ -256,10 +260,10 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                   <div className="flex items-start gap-3 mb-3 ">
                     <span
                       className={cn(
-                        "hx-icon-box flex-shrink-0 transition-all duration-300 group-hover:scale-110",
+                        "hx-icon-box flex-shrink-0",
                         isCompleted
                           ? "bg-emerald-400/20 text-emerald-300"
-                          : `bg-${TASK_COLORS[task.type]}-400/15 text-${TASK_COLORS[task.type]}-300`,
+                          : TASK_STYLES[task.type].icon,
                       )}
                     >
                       <Icon className="h-5 w-5" />
@@ -328,8 +332,8 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-between group",
-                          `hover:border-${TASK_COLORS[task.type]}-400/50 hover:bg-${TASK_COLORS[task.type]}-400/10`,
+                          "group inline-flex w-full items-center justify-between gap-2",
+                          TASK_STYLES[task.type].hover,
                         )}
                         onClick={() => handleCompleteTask(task)}
                         disabled={isAnimating}
@@ -366,9 +370,6 @@ export function DailyStudyPlan({ dailyPlan, onCompleteTask }: Props) {
           href="/plano-diario"
           className="w-full hx-lift flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-3 text-sm font-semibold hx-text-body hover:border-[hsl(var(--sidebar-highlight))/0.3] hover:bg-[hsl(var(--sidebar-highlight))/0.06] transition-all"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-slate-400 group-hover:text-white transition">
-            <Sparkles className="h-4 w-4" />
-          </span>
           Ver plano completo e histórico
           <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Link>

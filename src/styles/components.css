@@ -3,11 +3,11 @@
 @layer components {
   /* Page Layout */
   .hx-page {
-    @apply mx-auto w-full max-w-6xl px-3 py-6 sm:px-4 sm:py-10 md:py-14;
+    @apply mx-auto w-full max-w-6xl px-3 pb-24 pt-6 sm:px-4 sm:pt-10 md:pt-14;
   }
 
   .hx-page-md {
-    @apply mx-auto w-full max-w-4xl px-3 py-6 sm:px-4 sm:py-10;
+    @apply mx-auto w-full max-w-4xl px-3 pb-24 pt-6 sm:px-4 sm:pt-10;
   }
 
   .hx-page-title {

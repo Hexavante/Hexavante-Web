@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { LocalDateTimeField } from "@/components/ui/local-datetime-field";
 
 type Room = {
   id: string;
@@ -83,11 +84,10 @@ export function EditLiveRoomForm({ room, courses }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="scheduledAt">Data e hora</Label>
-          <Input
+          <LocalDateTimeField
             id="scheduledAt"
             name="scheduledAt"
-            type="datetime-local"
-            defaultValue={new Date(room.scheduledAt).toISOString().slice(0, 16)}
+            initialIso={new Date(room.scheduledAt).toISOString()}
             required
           />
         </div>

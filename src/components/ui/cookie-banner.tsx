@@ -91,7 +91,7 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={handleAccept}
-            className="min-h-10 flex-1 rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 sm:min-h-11 sm:flex-none sm:px-4 sm:text-sm"
+            className="min-h-10 flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-11 sm:flex-none sm:px-4 sm:text-sm"
           >
             Aceitar todos
           </button>

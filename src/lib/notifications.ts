@@ -168,5 +168,7 @@ export function formatNotificationRelativeTime(date: Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "short",
+    // Fuso fixo: sem ele o servidor (UTC) e o navegador podiam mostrar dias diferentes.
+    timeZone: "America/Sao_Paulo",
   }).format(date);
 }

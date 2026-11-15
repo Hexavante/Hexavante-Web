@@ -5,6 +5,7 @@ import { GraduationCap, Loader2, UserRound } from "lucide-react";
 import { chooseAccountTypeAction, type AccountType, type AccountTypeResult } from "@/app/actions/account-type";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ConfettiBurst } from "@/components/ui/lottie-animation";
 import { Choice } from "./register-wizard";
 
 const initialState: AccountTypeResult = { success: false };
@@ -18,7 +19,8 @@ export function AccountTypeChoice({ firstName, next }: { firstName: string; next
   }, [state.success, state.redirectTo]);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="relative space-y-6">
+      <ConfettiBurst />
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300">Conta criada</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-white">Bem-vindo, {firstName}!</h1>

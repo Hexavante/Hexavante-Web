@@ -52,7 +52,7 @@ export function NotificationItem({ notification, compact = false, onRead, onNavi
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold text-white">{notification.title}</p>
-          <span className="shrink-0 text-[11px] text-slate-500">
+          <span className="shrink-0 text-[11px] text-slate-500" suppressHydrationWarning>
             {formatNotificationRelativeTime(createdAt)}
           </span>
         </div>

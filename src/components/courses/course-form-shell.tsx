@@ -79,7 +79,7 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
 
   return (
     <>
-      <SuccessPopup show={success} message="Curso criado com sucesso!" />
+      <SuccessPopup show={success} message={initial ? "Alterações salvas!" : "Curso criado com sucesso!"} />
       <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl space-y-4">
         <CreationSection number="01" title="Apresentação do curso" hint="Conte o que o aluno vai aprender e escolha a categoria.">
 
@@ -123,6 +123,8 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
           <Input
             id="shortDescription"
             name="shortDescription"
+            maxLength={255}
+            placeholder="Uma frase: é o texto que aparece no cartão do curso"
             defaultValue={initial?.shortDescription ?? ""}
           />
         </div>
@@ -132,6 +134,7 @@ export function CourseFormShell({ categories, action, initial, submitLabel, canc
               id="description"
               name="description"
               rows={4}
+              placeholder="O que o aluno vai aprender, para quem é o curso e o que precisa saber antes"
               defaultValue={initial?.description ?? ""}
             />
           </div>
